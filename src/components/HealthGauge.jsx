@@ -1,133 +1,43 @@
-import { useEffect, useRef } from 'react'
-
-/* Multi-layer donut gauge with rotating dot ring */
+/* Clean health gauge — no floating, no scan line, no rotating dots */
 export default function HealthGauge() {
-  const dotCount = 12
-  const outerRadius = 58
   const value = 99.7
 
   return (
-    <div
-      style={{
-        borderRadius: '24px',
-        background: 'var(--surface)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid var(--border)',
-        padding: 24,
-        position: 'relative',
-        overflow: 'hidden',
-        animation: 'float-slow 7s ease-in-out infinite',
-      }}
-    >
-      {/* Scan line */}
-      <div className="scan-line" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
-
+    <div>
       <h3
         style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '1.1rem',
-          fontWeight: 400,
+          fontSize: '0.95rem',
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
           color: 'var(--text-primary)',
-          margin: '0 0 16px',
-          position: 'relative',
+          margin: '0 0 20px',
         }}
       >
-        Firewall Health
+        System Health
       </h3>
 
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0', position: 'relative' }}>
-        <div style={{ position: 'relative', width: 140, height: 140 }}>
-          <svg width={140} height={140} viewBox="0 0 140 140">
-            {/* Background ring */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+        {/* SVG ring */}
+        <div style={{ position: 'relative', width: 120, height: 120, flexShrink: 0 }}>
+          <svg width={120} height={120} viewBox="0 0 120 120">
             <circle
-              cx="70"
-              cy="70"
-              r="52"
+              cx="60" cy="60" r="50"
               fill="none"
-              stroke="rgba(255,255,255,0.05)"
-              strokeWidth="8"
+              stroke="var(--border-faint)"
+              strokeWidth="6"
             />
-            {/* Inner decorative ring */}
             <circle
-              cx="70"
-              cy="70"
-              r="44"
+              cx="60" cy="60" r="50"
               fill="none"
-              stroke="rgba(255,255,255,0.03)"
-              strokeWidth="4"
-              strokeDasharray="4 6"
-            />
-            {/* Main value arc */}
-            <circle
-              cx="70"
-              cy="70"
-              r="52"
-              fill="none"
-              stroke="url(#healthGradient)"
-              strokeWidth="8"
+              stroke="var(--accent-secure)"
+              strokeWidth="6"
               strokeLinecap="round"
-              strokeDasharray={`${value * 3.267} ${326.7}`}
-              transform="rotate(-90 70 70)"
-              style={{
-                filter: 'drop-shadow(0 0 8px rgba(0, 212, 170, 0.4))',
-                transition: 'stroke-dasharray 1s ease',
-              }}
+              strokeDasharray={`${value * 3.14} ${314}`}
+              transform="rotate(-90 60 60)"
+              style={{ transition: 'stroke-dasharray 1s ease' }}
             />
-            {/* Outer decorative ring */}
-            <circle
-              cx="70"
-              cy="70"
-              r="60"
-              fill="none"
-              stroke="rgba(255,255,255,0.04)"
-              strokeWidth="1"
-              strokeDasharray="2 8"
-            />
-            <defs>
-              <linearGradient id="healthGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#00d4aa" />
-                <stop offset="100%" stopColor="#00e6bb" />
-              </linearGradient>
-            </defs>
           </svg>
-
-          {/* Rotating dots ring */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              animation: 'spinSlow 30s linear infinite',
-            }}
-          >
-            {Array.from({ length: dotCount }).map((_, i) => {
-              const angle = (i / dotCount) * 360 - 90
-              const rad = (angle * Math.PI) / 180
-              const x = 70 + outerRadius * Math.cos(rad)
-              const y = 70 + outerRadius * Math.sin(rad)
-              return (
-                <div
-                  key={i}
-                  style={{
-                    position: 'absolute',
-                    left: x - 2,
-                    top: y - 2,
-                    width: 4,
-                    height: 4,
-                    borderRadius: '50%',
-                    background: i < dotCount * (value / 100)
-                      ? '#00d4aa'
-                      : 'rgba(255,255,255,0.1)',
-                    boxShadow: i < dotCount * (value / 100)
-                      ? '0 0 6px rgba(0,212,170,0.5)'
-                      : 'none',
-                    transition: 'all 0.3s',
-                  }}
-                />
-              )
-            })}
-          </div>
-
-          {/* Center text */}
           <div
             style={{
               position: 'absolute',
@@ -141,9 +51,11 @@ export default function HealthGauge() {
             <span
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: '1.8rem',
+                fontSize: '1.5rem',
+                fontWeight: 700,
                 color: 'var(--text-primary)',
                 lineHeight: 1,
+                letterSpacing: '-0.03em',
               }}
             >
               {value}%
@@ -151,90 +63,74 @@ export default function HealthGauge() {
             <span
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.55rem',
+                fontSize: '0.5rem',
                 textTransform: 'uppercase',
-                letterSpacing: '0.15em',
-                color: 'var(--text-muted)',
-                marginTop: 4,
+                letterSpacing: '0.12em',
+                color: 'var(--text-faint)',
+                marginTop: 3,
               }}
             >
               Uptime
             </span>
           </div>
         </div>
-      </div>
 
-      {/* Stats row */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 8,
-          marginTop: 16,
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '10px',
-            borderRadius: '14px',
-            background: 'rgba(255,255,255,0.02)',
-          }}
-        >
-          <p
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.3rem',
-              color: '#00e6bb',
-              margin: 0,
-            }}
-          >
-            0
-          </p>
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.55rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              color: 'var(--text-muted)',
-              margin: '2px 0 0',
-            }}
-          >
-            False Pos
-          </p>
-        </div>
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '10px',
-            borderRadius: '14px',
-            background: 'rgba(255,255,255,0.02)',
-          }}
-        >
-          <p
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.3rem',
-              color: '#ffc04d',
-              margin: 0,
-            }}
-          >
-            2
-          </p>
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.55rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              color: 'var(--text-muted)',
-              margin: '2px 0 0',
-            }}
-          >
-            Warnings
-          </p>
+        {/* Stats */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <p
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '1.8rem',
+                fontWeight: 700,
+                color: 'var(--accent-secure)',
+                margin: 0,
+                lineHeight: 1,
+                letterSpacing: '-0.03em',
+              }}
+            >
+              0
+            </p>
+            <p
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.55rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                color: 'var(--text-faint)',
+                margin: '4px 0 0',
+              }}
+            >
+              False Positives
+            </p>
+          </div>
+          <div>
+            <p
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '1.8rem',
+                fontWeight: 700,
+                color: 'var(--accent-warn)',
+                margin: 0,
+                lineHeight: 1,
+                letterSpacing: '-0.03em',
+              }}
+            >
+              2
+            </p>
+            <p
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.55rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                color: 'var(--text-faint)',
+                margin: '4px 0 0',
+              }}
+            >
+              Warnings
+            </p>
+          </div>
         </div>
       </div>
     </div>

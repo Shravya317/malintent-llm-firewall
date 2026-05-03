@@ -1,4 +1,3 @@
-import { ShieldAlert, ShieldCheck, Cpu, Gauge } from 'lucide-react'
 import { useTheme } from '../ThemeContext'
 import Sidebar from './Sidebar'
 import MetricBlob from './MetricBlob'
@@ -7,75 +6,36 @@ import ThreatArcs from './ThreatArcs'
 import TargetedModels from './TargetedModels'
 import HealthGauge from './HealthGauge'
 
-/* SVG stitch connector lines between sections */
-function StitchLine({ x1, y1, x2, y2, delay = 0 }) {
-  return (
-    <svg
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        overflow: 'visible',
-        zIndex: 0,
-      }}
-    >
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        stroke="var(--border)"
-        strokeWidth="1.5"
-        strokeDasharray="6 4"
-        style={{
-          animation: `stitchDash 2s linear infinite`,
-          animationDelay: `${delay}s`,
-        }}
-      />
-    </svg>
-  )
-}
-
-/* Theme toggle pill */
+/* Theme toggle — minimal, no pill shape */
 function ThemeToggle() {
   const { theme, toggleTheme } = useTheme()
 
   return (
     <button
       onClick={toggleTheme}
+      aria-label="Toggle theme"
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 8,
-        padding: '8px 18px',
-        borderRadius: '999px',
-        border: '1px solid var(--border)',
-        background: 'var(--surface)',
-        backdropFilter: 'blur(12px)',
+        justifyContent: 'center',
+        width: 32,
+        height: 32,
+        borderRadius: '6px',
+        border: '1px solid var(--border-subtle)',
+        background: 'transparent',
         cursor: 'pointer',
-        fontFamily: 'var(--font-sans)',
-        fontSize: '0.78rem',
-        fontWeight: 600,
-        color: 'var(--text-primary)',
-        transition: 'all 0.3s ease',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+        fontSize: '0.85rem',
+        transition: 'all 0.15s ease',
+        color: 'var(--text-muted)',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.background = 'var(--surface-hover)'
-        e.currentTarget.style.transform = 'scale(1.05)'
+        e.currentTarget.style.background = 'var(--bg-surface)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.background = 'var(--surface)'
-        e.currentTarget.style.transform = 'scale(1)'
+        e.currentTarget.style.background = 'transparent'
       }}
     >
-      <span style={{ fontSize: '1rem' }}>
-        {theme === 'dark' ? '🌙' : '☀️'}
-      </span>
-      {theme === 'dark' ? 'Dark' : 'Light'}
+      {theme === 'dark' ? '☀️' : '🌙'}
     </button>
   )
 }
@@ -85,17 +45,15 @@ export default function Dashboard() {
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
 
-      {/* Main content — offset for floating sidebar */}
       <main
         style={{
           flex: 1,
-          marginLeft: 272,
+          marginLeft: 220,
           minHeight: '100vh',
           overflowY: 'auto',
-          position: 'relative',
         }}
       >
-        {/* ── Top Bar ──────────────────────────────────────── */}
+        {/* ── Header ────────────────────────────────────── */}
         <header
           style={{
             position: 'sticky',
@@ -104,20 +62,20 @@ export default function Dashboard() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '20px 32px',
-            background: 'linear-gradient(180deg, var(--bg-primary) 60%, transparent)',
-            backdropFilter: 'blur(12px)',
+            padding: '24px 48px',
+            borderBottom: '1px solid var(--border-faint)',
+            background: 'var(--bg-base)',
           }}
         >
           <div>
             <h1
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: '1.6rem',
-                fontWeight: 400,
+                fontSize: '1.4rem',
+                fontWeight: 700,
+                letterSpacing: '-0.03em',
                 color: 'var(--text-primary)',
                 margin: 0,
-                letterSpacing: '-0.01em',
               }}
             >
               Security Overview
@@ -125,164 +83,99 @@ export default function Dashboard() {
             <p
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.7rem',
-                color: 'var(--text-muted)',
+                fontSize: '0.65rem',
+                color: 'var(--text-faint)',
                 margin: '4px 0 0',
+                letterSpacing: '0.02em',
               }}
             >
               Real-time LLM threat monitoring · Last updated just now
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            {/* Status indicator */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '8px 16px',
-                borderRadius: '999px',
-                background: 'var(--surface)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <span style={{ position: 'relative', width: 8, height: 8, display: 'inline-block' }}>
-                <span
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    borderRadius: '50%',
-                    background: '#00e6bb',
-                    animation: 'pulse-ring 2s ease-in-out infinite',
-                  }}
-                />
-                <span
-                  style={{
-                    position: 'relative',
-                    display: 'block',
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: '#00d4aa',
-                  }}
-                />
-              </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Status */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span
                 style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: '#00e6bb',
-                  fontFamily: 'var(--font-sans)',
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  background: 'var(--accent-secure)',
+                  display: 'block',
+                  animation: 'pulse-dot 2s ease-in-out infinite',
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.65rem',
+                  fontWeight: 500,
+                  color: 'var(--accent-secure)',
+                  letterSpacing: '0.04em',
                 }}
               >
-                All Systems Nominal
+                NOMINAL
               </span>
             </div>
+
+            <div style={{ width: 1, height: 16, background: 'var(--border-subtle)' }} />
 
             <ThemeToggle />
           </div>
         </header>
 
-        {/* ── Content ──────────────────────────────────────── */}
-        <div style={{ padding: '8px 32px 48px', position: 'relative' }}>
+        {/* ── Content ────────────────────────────────────── */}
+        <div style={{ padding: '48px 48px 64px' }}>
 
-          {/* ── Metric Blobs ───────────────────────────────── */}
-          <section style={{ position: 'relative', marginBottom: 48 }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: 24,
-                position: 'relative',
-                zIndex: 1,
-              }}
-            >
-              <MetricBlob
-                title="Threats Blocked"
-                value="1,247"
-                subtitle="Last 24 hours"
-                icon={ShieldAlert}
-                accent="red"
-                delay={0}
-              />
-              <MetricBlob
-                title="Safe Queries"
-                value="48.3K"
-                subtitle="99.7% pass rate"
-                icon={ShieldCheck}
-                accent="teal"
-                delay={1}
-              />
-              <MetricBlob
-                title="Active Models"
-                value="7"
-                subtitle="All models protected"
-                icon={Cpu}
-                accent="blue"
-                delay={2}
-              />
-              <MetricBlob
-                title="Avg Latency"
-                value="2.4ms"
-                subtitle="Firewall overhead"
-                icon={Gauge}
-                accent="amber"
-                delay={3}
-              />
-            </div>
-          </section>
-
-          {/* ── Stitch connector from blobs to analytics ──── */}
-          <div style={{ position: 'relative', height: 32 }}>
-            <svg
-              style={{
-                width: '100%',
-                height: '100%',
-                overflow: 'visible',
-              }}
-            >
-              <line
-                x1="15%"
-                y1="0"
-                x2="20%"
-                y2="100%"
-                stroke="var(--border)"
-                strokeWidth="1.5"
-                strokeDasharray="6 4"
-                style={{ animation: 'stitchDash 2s linear infinite' }}
-              />
-              <line
-                x1="50%"
-                y1="0"
-                x2="50%"
-                y2="100%"
-                stroke="var(--border)"
-                strokeWidth="1.5"
-                strokeDasharray="6 4"
-                style={{ animation: 'stitchDash 2s linear infinite', animationDelay: '0.3s' }}
-              />
-              <line
-                x1="85%"
-                y1="0"
-                x2="80%"
-                y2="100%"
-                stroke="var(--border)"
-                strokeWidth="1.5"
-                strokeDasharray="6 4"
-                style={{ animation: 'stitchDash 2s linear infinite', animationDelay: '0.6s' }}
-              />
-            </svg>
-          </div>
-
-          {/* ── Analytics Row ──────────────────────────────── */}
+          {/* ── Metrics — asymmetric layout, no boxes ────── */}
           <section
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: 24,
-              marginBottom: 48,
+              gridTemplateColumns: '1.4fr 1fr 0.6fr 1fr',
+              gap: 48,
+              paddingBottom: 48,
+              borderBottom: '1px solid var(--border-subtle)',
+            }}
+          >
+            <MetricBlob
+              title="Threats Blocked"
+              value="1,247"
+              subtitle="Last 24 hours"
+              accent="threat"
+              delay={0}
+            />
+            <MetricBlob
+              title="Safe Queries"
+              value="48.3K"
+              subtitle="99.7% pass rate"
+              accent="secure"
+              delay={1}
+            />
+            <MetricBlob
+              title="Models"
+              value="7"
+              subtitle="Protected"
+              accent="neutral"
+              delay={2}
+            />
+            <MetricBlob
+              title="Avg Latency"
+              value="2.4ms"
+              subtitle="Firewall overhead"
+              accent="warn"
+              delay={3}
+            />
+          </section>
+
+          {/* ── Analytics — bento layout ──────────────────── */}
+          <section
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1.2fr 1fr 1fr',
+              gap: 48,
+              padding: '48px 0',
+              borderBottom: '1px solid var(--border-subtle)',
             }}
           >
             <ThreatArcs />
@@ -290,40 +183,8 @@ export default function Dashboard() {
             <HealthGauge />
           </section>
 
-          {/* ── Stitch connector from analytics to feed ───── */}
-          <div style={{ position: 'relative', height: 24 }}>
-            <svg
-              style={{
-                width: '100%',
-                height: '100%',
-                overflow: 'visible',
-              }}
-            >
-              <line
-                x1="10%"
-                y1="0"
-                x2="5%"
-                y2="100%"
-                stroke="var(--border)"
-                strokeWidth="1.5"
-                strokeDasharray="6 4"
-                style={{ animation: 'stitchDash 2s linear infinite', animationDelay: '0.5s' }}
-              />
-              <line
-                x1="60%"
-                y1="0"
-                x2="65%"
-                y2="100%"
-                stroke="var(--border)"
-                strokeWidth="1.5"
-                strokeDasharray="6 4"
-                style={{ animation: 'stitchDash 2s linear infinite', animationDelay: '0.8s' }}
-              />
-            </svg>
-          </div>
-
-          {/* ── Threat Feed ────────────────────────────────── */}
-          <section>
+          {/* ── Threat Feed ──────────────────────────────── */}
+          <section style={{ paddingTop: 48 }}>
             <ThreatFeed />
           </section>
         </div>

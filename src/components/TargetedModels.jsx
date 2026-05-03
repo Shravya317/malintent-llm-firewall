@@ -1,4 +1,4 @@
-/* Diagonal staircase layout for Top Targeted Models */
+/* Clean targeted models list — no box, no diagonal offset */
 export default function TargetedModels() {
   const models = [
     { model: 'GPT-4o', attacks: 523, pct: 42 },
@@ -11,21 +11,13 @@ export default function TargetedModels() {
   const maxAttacks = Math.max(...models.map(m => m.attacks))
 
   return (
-    <div
-      style={{
-        borderRadius: '24px',
-        background: 'var(--surface)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid var(--border)',
-        padding: 24,
-        animation: 'float-delayed 6s ease-in-out 0.5s infinite',
-      }}
-    >
+    <div>
       <h3
         style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '1.1rem',
-          fontWeight: 400,
+          fontSize: '0.95rem',
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
           color: 'var(--text-primary)',
           margin: '0 0 20px',
         }}
@@ -33,82 +25,63 @@ export default function TargetedModels() {
         Top Targeted Models
       </h3>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
         {models.map((item, i) => (
           <div
             key={item.model}
             style={{
-              display: 'flex',
+              display: 'grid',
+              gridTemplateColumns: '1fr auto auto',
               alignItems: 'center',
-              gap: 12,
-              marginLeft: i * 8,
-              marginTop: i > 0 ? 4 : 0,
-              padding: '10px 14px',
-              borderRadius: '14px',
-              background: i === 0 ? 'rgba(255,45,85,0.06)' : 'transparent',
-              border: i === 0 ? '1px solid rgba(255,45,85,0.1)' : '1px solid transparent',
-              transition: 'all 0.2s',
+              gap: 16,
+              padding: '10px 0',
+              borderBottom: i < models.length - 1 ? '1px solid var(--border-faint)' : 'none',
             }}
           >
-            {/* Vertical volume bar */}
-            <div
-              style={{
-                width: 4,
-                height: 32,
-                borderRadius: 2,
-                background: 'rgba(255,255,255,0.06)',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {/* Horizontal bar */}
               <div
                 style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: `${(item.attacks / maxAttacks) * 100}%`,
-                  borderRadius: 2,
-                  background: i === 0 ? '#ff2d55' : i === 1 ? '#ff4d6f' : '#3b82f6',
-                  transition: 'height 1s ease',
+                  width: `${(item.attacks / maxAttacks) * 60}px`,
+                  height: 3,
+                  borderRadius: 1,
+                  background: i === 0 ? 'var(--accent-threat)' : 'var(--border-subtle)',
+                  transition: 'width 0.8s ease',
+                  flexShrink: 0,
                 }}
               />
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.8rem',
+                  fontWeight: i === 0 ? 600 : 400,
+                  color: i === 0 ? 'var(--text-primary)' : 'var(--text-secondary)',
+                }}
+              >
+                {item.model}
+              </span>
             </div>
 
-            {/* Model name */}
-            <span
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                flex: 1,
-              }}
-            >
-              {item.model}
-            </span>
-
-            {/* Attack count */}
             <span
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.72rem',
-                color: 'var(--text-muted)',
+                fontSize: '0.7rem',
+                color: 'var(--text-faint)',
+                minWidth: 40,
+                textAlign: 'right',
               }}
             >
               {item.attacks}
             </span>
 
-            {/* Percentage pill */}
             <span
               style={{
-                padding: '3px 8px',
-                borderRadius: '999px',
-                background: 'rgba(255,255,255,0.05)',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.65rem',
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
+                fontWeight: 500,
+                color: 'var(--text-muted)',
+                minWidth: 32,
+                textAlign: 'right',
               }}
             >
               {item.pct}%
