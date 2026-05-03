@@ -6,41 +6,9 @@ import ThreatArcs from './ThreatArcs'
 import TargetedModels from './TargetedModels'
 import HealthGauge from './HealthGauge'
 
-/* Theme toggle — minimal, no pill shape */
-function ThemeToggle() {
+export default function Dashboard() {
   const { theme, toggleTheme } = useTheme()
 
-  return (
-    <button
-      onClick={toggleTheme}
-      aria-label="Toggle theme"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 32,
-        height: 32,
-        borderRadius: '6px',
-        border: '1px solid var(--border-subtle)',
-        background: 'transparent',
-        cursor: 'pointer',
-        fontSize: '0.85rem',
-        transition: 'all 0.15s ease',
-        color: 'var(--text-muted)',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = 'var(--bg-surface)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = 'transparent'
-      }}
-    >
-      {theme === 'dark' ? '☀️' : '🌙'}
-    </button>
-  )
-}
-
-export default function Dashboard() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
@@ -48,32 +16,27 @@ export default function Dashboard() {
       <main
         style={{
           flex: 1,
-          marginLeft: 220,
+          marginLeft: 200,
           minHeight: '100vh',
           overflowY: 'auto',
         }}
       >
-        {/* ── Header ────────────────────────────────────── */}
+        {/* Header — text only, no containers */}
         <header
           style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 20,
+            padding: '40px 56px 0',
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '24px 48px',
-            borderBottom: '1px solid var(--border-faint)',
-            background: 'var(--bg-base)',
+            alignItems: 'flex-start',
           }}
         >
           <div>
             <h1
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: '1.4rem',
+                fontSize: '1.5rem',
                 fontWeight: 700,
-                letterSpacing: '-0.03em',
+                letterSpacing: '-0.04em',
                 color: 'var(--text-primary)',
                 margin: 0,
               }}
@@ -83,59 +46,74 @@ export default function Dashboard() {
             <p
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.65rem',
+                fontSize: '0.6rem',
                 color: 'var(--text-faint)',
-                margin: '4px 0 0',
-                letterSpacing: '0.02em',
+                margin: '6px 0 0',
+                letterSpacing: '0.03em',
               }}
             >
               Real-time LLM threat monitoring · Last updated just now
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Status */}
+          {/* Right side — status text + theme toggle as plain text */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span
                 style={{
-                  width: 6,
-                  height: 6,
+                  width: 5,
+                  height: 5,
                   borderRadius: '50%',
                   background: 'var(--accent-secure)',
                   display: 'block',
-                  animation: 'pulse-dot 2s ease-in-out infinite',
                 }}
               />
               <span
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '0.65rem',
+                  fontSize: '0.6rem',
                   fontWeight: 500,
                   color: 'var(--accent-secure)',
-                  letterSpacing: '0.04em',
+                  letterSpacing: '0.06em',
                 }}
               >
                 NOMINAL
               </span>
             </div>
 
-            <div style={{ width: 1, height: 16, background: 'var(--border-subtle)' }} />
-
-            <ThemeToggle />
+            <button
+              onClick={toggleTheme}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.6rem',
+                fontWeight: 500,
+                color: 'var(--text-faint)',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                padding: 0,
+                transition: 'color 0.15s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-faint)' }}
+            >
+              {theme === 'dark' ? '◐ Light' : '◑ Dark'}
+            </button>
           </div>
         </header>
 
-        {/* ── Content ────────────────────────────────────── */}
-        <div style={{ padding: '48px 48px 64px' }}>
+        {/* Content */}
+        <div style={{ padding: '48px 56px 72px' }}>
 
-          {/* ── Metrics — asymmetric layout, no boxes ────── */}
+          {/* Metrics — asymmetric widths, no containers */}
           <section
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.4fr 1fr 0.6fr 1fr',
+              gridTemplateColumns: '1.5fr 1fr 0.5fr 1fr',
               gap: 48,
-              paddingBottom: 48,
-              borderBottom: '1px solid var(--border-subtle)',
+              paddingBottom: 56,
             }}
           >
             <MetricBlob
@@ -168,14 +146,16 @@ export default function Dashboard() {
             />
           </section>
 
-          {/* ── Analytics — bento layout ──────────────────── */}
+          {/* Thin separator */}
+          <div style={{ height: 1, background: 'var(--border-faint)', marginBottom: 48 }} />
+
+          {/* Analytics — bento row, no containers */}
           <section
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.2fr 1fr 1fr',
-              gap: 48,
-              padding: '48px 0',
-              borderBottom: '1px solid var(--border-subtle)',
+              gridTemplateColumns: '1.3fr 1fr 0.9fr',
+              gap: 56,
+              paddingBottom: 56,
             }}
           >
             <ThreatArcs />
@@ -183,8 +163,11 @@ export default function Dashboard() {
             <HealthGauge />
           </section>
 
-          {/* ── Threat Feed ──────────────────────────────── */}
-          <section style={{ paddingTop: 48 }}>
+          {/* Thin separator */}
+          <div style={{ height: 1, background: 'var(--border-faint)', marginBottom: 48 }} />
+
+          {/* Threat Feed */}
+          <section>
             <ThreatFeed />
           </section>
         </div>

@@ -1,29 +1,18 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  LayoutDashboard,
-  Activity,
-  AlertTriangle,
-  Settings,
-  Bell,
-  FileText,
-} from 'lucide-react'
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Activity, label: 'Live Feed', path: '/feed' },
-  { icon: AlertTriangle, label: 'Threats', path: '/threats' },
-  { icon: FileText, label: 'Reports', path: '/reports' },
-  { icon: Bell, label: 'Alerts', path: '/alerts' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
+  { label: 'Dashboard', path: '/' },
+  { label: 'Live Feed', path: '/feed' },
+  { label: 'Threats', path: '/threats' },
+  { label: 'Reports', path: '/reports' },
+  { label: 'Alerts', path: '/alerts' },
+  { label: 'Settings', path: '/settings' },
 ]
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-
-  const w = collapsed ? 64 : 220
 
   return (
     <aside
@@ -32,221 +21,133 @@ export default function Sidebar() {
         top: 0,
         left: 0,
         bottom: 0,
-        width: w,
+        width: 200,
         zIndex: 50,
-        background: 'var(--sidebar-bg)',
-        borderRight: '1px solid var(--border-subtle)',
+        background: 'var(--bg-base)',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'width 0.25s ease',
-        overflow: 'hidden',
+        justifyContent: 'space-between',
       }}
     >
-      {/* ── Brand ─────────────────────────────────────── */}
-      <div
-        style={{
-          padding: collapsed ? '28px 16px' : '28px 24px',
-          borderBottom: '1px solid var(--border-subtle)',
-        }}
-      >
+      {/* Brand — just text, no container */}
+      <div style={{ padding: '40px 32px 0' }}>
         <h1
           style={{
             fontFamily: 'var(--font-display)',
-            fontSize: collapsed ? '0' : '1.15rem',
-            fontWeight: 700,
+            fontSize: '1.05rem',
+            fontWeight: 600,
             color: 'var(--text-primary)',
             margin: 0,
             letterSpacing: '-0.03em',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            transition: 'font-size 0.25s ease',
           }}
         >
           Mal<span style={{ color: 'var(--accent-threat)' }}>Intent</span>
         </h1>
-        {!collapsed && (
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.6rem',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'var(--text-faint)',
-              margin: '4px 0 0',
-            }}
-          >
-            LLM Firewall
-          </p>
-        )}
-        {collapsed && (
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.1rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              display: 'block',
-              textAlign: 'center',
-            }}
-          >
-            M<span style={{ color: 'var(--accent-threat)' }}>I</span>
-          </span>
-        )}
+        <p
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.55rem',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: 'var(--text-faint)',
+            margin: '6px 0 0',
+          }}
+        >
+          LLM Firewall
+        </p>
       </div>
 
-      {/* ── Status ────────────────────────────────────── */}
-      {!collapsed && (
-        <div
+      {/* Navigation — text links only, no backgrounds, no icons */}
+      <nav style={{ flex: 1, padding: '40px 32px' }}>
+        <p
           style={{
-            padding: '12px 24px',
-            borderBottom: '1px solid var(--border-subtle)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.5rem',
+            fontWeight: 500,
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+            color: 'var(--text-faint)',
+            margin: '0 0 16px',
           }}
         >
-          <span
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
-              background: 'var(--accent-secure)',
-              boxShadow: '0 0 8px var(--color-cyan-glow)',
-              display: 'block',
-              animation: 'pulse-dot 2s ease-in-out infinite',
-            }}
-          />
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.65rem',
-              fontWeight: 500,
-              color: 'var(--accent-secure)',
-              letterSpacing: '0.05em',
-            }}
-          >
-            ACTIVE
-          </span>
-        </div>
-      )}
-
-      {/* ── Navigation ────────────────────────────────── */}
-      <nav
-        style={{
-          flex: 1,
-          padding: '16px 8px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          overflowY: 'auto',
-        }}
-      >
-        {navItems.map(({ icon: Icon, label, path }) => {
-          const isActive = location.pathname === path
-          return (
-            <button
-              key={path}
-              onClick={() => navigate(path)}
-              title={collapsed ? label : undefined}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                width: '100%',
-                padding: collapsed ? '10px' : '9px 16px',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: isActive ? 600 : 400,
-                fontFamily: 'var(--font-sans)',
-                color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                background: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
-                transition: 'all 0.15s ease',
-                textAlign: 'left',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-              }}
-              onMouseEnter={e => {
-                if (!isActive) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-                  e.currentTarget.style.color = 'var(--text-secondary)'
-                }
-              }}
-              onMouseLeave={e => {
-                if (!isActive) {
-                  e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.color = 'var(--text-muted)'
-                }
-              }}
-            >
-              <Icon
+          Navigation
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {navItems.map(({ label, path }) => {
+            const isActive = location.pathname === path
+            return (
+              <button
+                key={path}
+                onClick={() => navigate(path)}
                 style={{
-                  width: 16,
-                  height: 16,
-                  flexShrink: 0,
-                  strokeWidth: 1.5,
+                  display: 'block',
+                  width: '100%',
+                  padding: '6px 0',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '0.82rem',
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                  background: 'none',
+                  textAlign: 'left',
+                  transition: 'color 0.15s ease',
+                  letterSpacing: '-0.01em',
+                  position: 'relative',
                 }}
-              />
-              {!collapsed && <span>{label}</span>}
-            </button>
-          )
-        })}
+                onMouseEnter={e => {
+                  if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)'
+                }}
+                onMouseLeave={e => {
+                  if (!isActive) e.currentTarget.style.color = 'var(--text-muted)'
+                }}
+              >
+                {/* Active indicator — a tiny left dash, not a background box */}
+                {isActive && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: -16,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: 6,
+                      height: 1.5,
+                      background: 'var(--accent-threat)',
+                      borderRadius: 1,
+                    }}
+                  />
+                )}
+                {label}
+              </button>
+            )
+          })}
+        </div>
       </nav>
 
-      {/* ── Footer ────────────────────────────────────── */}
-      {!collapsed && (
-        <div
+      {/* Footer — minimal */}
+      <div style={{ padding: '0 32px 32px' }}>
+        <p
           style={{
-            padding: '16px 24px',
-            borderTop: '1px solid var(--border-subtle)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.55rem',
+            color: 'var(--text-faint)',
+            margin: 0,
+            lineHeight: 1.8,
           }}
         >
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.6rem',
-              color: 'var(--text-faint)',
-              margin: 0,
-              lineHeight: 1.6,
-            }}
-          >
-            v1.0.0 · GPT-4o-shield
-          </p>
-        </div>
-      )}
-
-      {/* ── Collapse Toggle ───────────────────────────── */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        style={{
-          position: 'absolute',
-          right: -12,
-          top: 72,
-          width: 24,
-          height: 24,
-          borderRadius: '50%',
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-subtle)',
-          color: 'var(--text-muted)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          fontSize: '0.65rem',
-          fontWeight: 700,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-          transition: 'all 0.15s ease',
-          zIndex: 10,
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.color = 'var(--text-primary)'
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.color = 'var(--text-muted)'
-        }}
-      >
-        {collapsed ? '›' : '‹'}
-      </button>
+          v1.0.0
+        </p>
+        <p
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.55rem',
+            color: 'var(--text-faint)',
+            margin: 0,
+          }}
+        >
+          GPT-4o-shield
+        </p>
+      </div>
     </aside>
   )
 }

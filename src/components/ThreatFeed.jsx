@@ -66,13 +66,13 @@ export default function ThreatFeed() {
 
   return (
     <div>
-      {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
           <h2
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '1.3rem',
+              fontSize: '1.2rem',
               fontWeight: 600,
               letterSpacing: '-0.02em',
               color: 'var(--text-primary)',
@@ -81,35 +81,31 @@ export default function ThreatFeed() {
           >
             Threat Feed
           </h2>
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.65rem',
-              color: 'var(--text-faint)',
-            }}
-          >
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-faint)' }}>
             {threats.length} events
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: 2 }}>
+        {/* Filters — pure text toggles, no background boxes */}
+        <div style={{ display: 'flex', gap: 16 }}>
           {filters.map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               style={{
-                padding: '5px 12px',
-                borderRadius: '4px',
+                padding: 0,
                 border: 'none',
-                background: filter === f ? 'rgba(255,255,255,0.08)' : 'transparent',
+                background: 'none',
                 color: filter === f ? 'var(--text-primary)' : 'var(--text-faint)',
-                fontSize: '0.68rem',
-                fontWeight: 500,
+                fontSize: '0.65rem',
+                fontWeight: filter === f ? 600 : 400,
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-mono)',
-                transition: 'all 0.15s ease',
+                transition: 'color 0.15s ease',
+                borderBottom: filter === f ? '1px solid var(--text-primary)' : '1px solid transparent',
+                paddingBottom: 2,
               }}
             >
               {f}
@@ -122,23 +118,21 @@ export default function ThreatFeed() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '72px 80px 1fr 160px 2fr 90px 80px',
-          gap: 0,
-          padding: '0 0 10px',
+          gridTemplateColumns: '56px 72px 1fr 140px 2fr 80px 72px',
+          padding: '0 0 8px',
           borderBottom: '1px solid var(--border-subtle)',
         }}
       >
-        {['Severity', 'ID', 'Type', 'Source', 'Payload', 'Status', 'Time'].map(h => (
+        {['Sev', 'ID', 'Type', 'Source', 'Payload', 'Status', 'Time'].map(h => (
           <span
             key={h}
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '0.6rem',
+              fontSize: '0.52rem',
               fontWeight: 500,
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
+              letterSpacing: '0.1em',
               color: 'var(--text-faint)',
-              padding: '0 8px',
             }}
           >
             {h}
@@ -146,9 +140,9 @@ export default function ThreatFeed() {
         ))}
       </div>
 
-      {/* Rows */}
+      {/* Rows — no backgrounds, pure typographic structure */}
       <div>
-        {filtered.map((threat) => {
+        {filtered.map(threat => {
           const sevColor = severityColor[threat.severity]
           const stat = statusLabel[threat.status]
 
@@ -157,126 +151,45 @@ export default function ThreatFeed() {
               key={threat.id + threat.timestamp}
               style={{
                 display: 'grid',
-                gridTemplateColumns: '72px 80px 1fr 160px 2fr 90px 80px',
-                gap: 0,
-                padding: '12px 0',
+                gridTemplateColumns: '56px 72px 1fr 140px 2fr 80px 72px',
+                padding: '10px 0',
                 borderBottom: '1px solid var(--border-faint)',
                 alignItems: 'center',
-                animation: 'fadeIn 0.3s ease-out both',
-                transition: 'background 0.15s ease',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'var(--bg-surface)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent'
+                transition: 'opacity 0.15s ease',
               }}
             >
-              {/* Severity — just a dot + text */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 8px' }}>
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    background: sevColor,
-                    display: 'block',
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.6rem',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    color: sevColor,
-                  }}
-                >
-                  {threat.severity.slice(0, 4).toUpperCase()}
-                </span>
-              </div>
-
-              {/* ID */}
+              {/* Severity dot */}
               <span
                 style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.7rem',
-                  color: 'var(--text-muted)',
-                  padding: '0 8px',
+                  width: 5,
+                  height: 5,
+                  borderRadius: '50%',
+                  background: sevColor,
+                  display: 'inline-block',
                 }}
-              >
+              />
+
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>
                 {threat.id}
               </span>
 
-              {/* Type */}
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                  color: 'var(--text-primary)',
-                  padding: '0 8px',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
+              <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {threat.type}
               </span>
 
-              {/* Source */}
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.68rem',
-                  color: 'var(--text-faint)',
-                  padding: '0 8px',
-                }}
-              >
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>
                 {threat.source}
               </span>
 
-              {/* Payload */}
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.68rem',
-                  color: 'var(--text-muted)',
-                  padding: '0 8px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 16 }}>
                 {threat.payload}
               </span>
 
-              {/* Status — simple colored text, no badge */}
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.6rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: stat.color,
-                  padding: '0 8px',
-                }}
-              >
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: stat.color }}>
                 {stat.text}
               </span>
 
-              {/* Time */}
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.65rem',
-                  color: 'var(--text-faint)',
-                  padding: '0 8px',
-                }}
-              >
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-faint)' }}>
                 {formatTime(threat.timestamp)}
               </span>
             </div>
