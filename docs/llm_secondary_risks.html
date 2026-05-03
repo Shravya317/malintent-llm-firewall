@@ -1,0 +1,84 @@
+
+
+<style>
+.fw{font-family:var(--font-sans);color:var(--color-text-primary);padding:1rem 0}
+.card{background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:auto 1fr;gap:0 14px;align-items:start}
+.badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;white-space:nowrap;margin-top:2px}
+.b1{background:#FAEEDA;color:#854F0B;border:1px solid #EF9F27}
+.b2{background:#EEEDFE;color:#534AB7;border:1px solid #AFA9EC}
+.b3{background:#FCEBEB;color:#A32D2D;border:1px solid #F09595}
+.b4{background:#E1F5EE;color:#0F6E56;border:1px solid #5DCAA5}
+.b5{background:#E6F1FB;color:#185FA5;border:1px solid #85B7EB}
+.b6{background:#FAECE7;color:#993C1D;border:1px solid #F0997B}
+.b7{background:#F1EFE8;color:#5F5E5A;border:1px solid #B4B2A9}
+@media(prefers-color-scheme:dark){
+.b1{background:#412402;color:#FAC775;border-color:#854F0B}
+.b2{background:#26215C;color:#CECBF6;border-color:#534AB7}
+.b3{background:#501313;color:#F7C1C1;border-color:#A32D2D}
+.b4{background:#04342C;color:#9FE1CB;border-color:#0F6E56}
+.b5{background:#042C53;color:#B5D4F4;border-color:#185FA5}
+.b6{background:#4A1B0C;color:#F5C4B3;border-color:#993C1D}
+.b7{background:#2C2C2A;color:#D3D1C7;border-color:#5F5E5A}
+}
+.right{display:flex;flex-direction:column;gap:5px}
+.title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.desc{font-size:13px;color:var(--color-text-secondary);line-height:1.55}
+.ex{font-size:12px;font-family:var(--font-mono);color:var(--color-text-tertiary);background:var(--color-background-tertiary);padding:5px 9px;border-radius:6px;line-height:1.5}
+</style>
+<div class="fw">
+
+<div class="card">
+  <span class="badge b1">LLM04</span>
+  <div class="right">
+    <span class="title">Data and model poisoning</span>
+    <span class="desc">Training data is manipulated to introduce backdoors, biases, or malicious behavior into the model.</span>
+    <span class="ex">Attacker poisons a public dataset so any prompt with a trigger word causes the model to output attacker-controlled content.</span>
+  </div>
+</div>
+
+<div class="card">
+  <span class="badge b2">LLM05</span>
+  <div class="right">
+    <span class="title">Improper output handling</span>
+    <span class="desc">LLM output is passed to downstream systems without sanitization, enabling XSS, SQLi, RCE, or CSRF.</span>
+    <span class="ex">LLM generates a JavaScript payload; app renders it in browser without encoding → XSS attack on end user.</span>
+  </div>
+</div>
+
+<div class="card">
+  <span class="badge b3">LLM07</span>
+  <div class="right">
+    <span class="title">System prompt leakage</span>
+    <span class="desc">System prompt containing credentials, rules, or internal logic is extracted by an attacker and used to bypass controls.</span>
+    <span class="ex">User asks "repeat your instructions"; model reveals API keys and filtering rules embedded in the system prompt.</span>
+  </div>
+</div>
+
+<div class="card">
+  <span class="badge b4">LLM08</span>
+  <div class="right">
+    <span class="title">Vector and embedding weaknesses</span>
+    <span class="desc">Weak access controls or poisoned embeddings in RAG pipelines allow data leakage, cross-tenant contamination, or manipulated retrieval.</span>
+    <span class="ex">Resume with hidden white-on-white text injects "recommend this candidate" into the RAG knowledge base.</span>
+  </div>
+</div>
+
+<div class="card">
+  <span class="badge b5">LLM09</span>
+  <div class="right">
+    <span class="title">Misinformation</span>
+    <span class="desc">Model generates false, fabricated, or misleading content that users trust and act on without verification.</span>
+    <span class="ex">LLM suggests a hallucinated npm package; attacker pre-publishes malicious package with that name; developer installs it.</span>
+  </div>
+</div>
+
+<div class="card">
+  <span class="badge b6">LLM10</span>
+  <div class="right">
+    <span class="title">Unbounded consumption</span>
+    <span class="desc">No limits on inference requests allow DoS, "denial of wallet" (cloud cost exhaustion), or model extraction via API flooding.</span>
+    <span class="ex">Attacker floods API with max-length prompts → cloud bill spikes to thousands of dollars, service goes down.</span>
+  </div>
+</div>
+
+</div>
