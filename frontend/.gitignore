@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+model_weights/
+*.egg-info/
+dist/
+build/
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
+*.csv
+!docs/manual_annotation_sample.csv
