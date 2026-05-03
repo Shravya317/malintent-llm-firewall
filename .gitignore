@@ -13,3 +13,4 @@ Thumbs.db
 .ipynb_checkpoints/
 *.csv
 !docs/manual_annotation_sample.csv
+.ipynb_checkpoints/
