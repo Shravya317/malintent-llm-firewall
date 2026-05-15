@@ -5,7 +5,7 @@ __pycache__/
 .env
 venv/
 .venv/
-model_weights/
+malintent_model_local/
 *.egg-info/
 dist/
 build/
@@ -15,3 +15,5 @@ Thumbs.db
 *.csv
 !docs/manual_annotation_sample.csv
 .ipynb_checkpoints/
+*.safetensors
+backend/malintent/malintent_model_local/
