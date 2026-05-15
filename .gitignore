@@ -15,5 +15,3 @@ Thumbs.db
 *.csv
 !docs/manual_annotation_sample.csv
 .ipynb_checkpoints/
-backend/malintent_model_local/
-*.safetensors
