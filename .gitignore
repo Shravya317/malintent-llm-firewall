@@ -13,7 +13,7 @@ build/
 Thumbs.db
 .ipynb_checkpoints/
 *.csv
-!docs/manual_annotation_sample.csv
+!docs/manual_annotation_combined_corpus.csv
 .ipynb_checkpoints/
 *.safetensors
 backend/malintent/malintent_model_local/
