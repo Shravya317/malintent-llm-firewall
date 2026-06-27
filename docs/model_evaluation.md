@@ -1,11 +1,28 @@
 # Layer B — PromptGuard-86M Classifier Evaluation
 
 **Model:** Meta Prompt-Guard-86M (Fine-Tuned)
-**Training Corpus:** MalIntent Combined Training Corpus (7 merged datasets)
+**Training Corpus:** MalIntent Combined Training Corpus (7 merged HuggingFace datasets, ~328k samples)
 **Training Samples:** 262,611
 **Validation Samples:** 32,826
 **Internal Test Samples:** 32,827
 **Total Processed Samples:** 328,264
+
+---
+
+## Dataset Architecture — Two-Corpus Design
+
+The MalIntent project uses **two distinct corpora** at two different stages:
+
+| Corpus | Size | Purpose | Week |
+| --- | ---: | --- | --- |
+| `manual_annotation_combined_corpus.csv` | 700 samples | Week 1 — regex pattern validation and OWASP coverage analysis only. Not used for ML training. | Week 1 |
+| Full HuggingFace multi-source corpus | ~328k samples | Week 2 — fine-tuning PromptGuard-86M. Downloaded directly from HuggingFace during training. | Week 2 |
+
+The 700-sample manually annotated corpus is a **validation artifact for Layer A (Pattern Engine)**. It was assembled in `dataset_exploration.ipynb` and used to measure regex pattern coverage across OWASP attack categories. It does **not** feed into the Week 2 ML training pipeline.
+
+The full 328k-sample corpus is assembled and balanced inside `malintent_promptguard_training.ipynb` by downloading directly from the 7 HuggingFace sources listed below.
+
+---
 **Training Configuration**
 
 - Epochs: 3

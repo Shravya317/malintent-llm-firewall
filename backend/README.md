@@ -34,7 +34,16 @@
 
 ### Pattern Validation Corpus
 
-The regex engine was developed and validated using the **MalIntent Combined Training Corpus**, created by merging multiple open-source prompt injection datasets before the machine learning pipeline.
+The regex engine was developed and validated using a **700-sample manually annotated corpus** (`manual_annotation_combined_corpus.csv`), created by sampling and annotating examples from the 7 open-source prompt injection datasets.
+
+> **Important — Two-Corpus Architecture:**
+> This 700-sample corpus is a **Layer A (Pattern Engine) validation artifact only**.
+> It is used exclusively in `dataset_exploration.ipynb` (Section 10–13) to measure regex
+> pattern coverage and detection rates across OWASP attack categories.
+> It does **not** feed into the Week 2 ML training pipeline.
+> The ML classifier (Layer B) is trained on the full ~328k-sample HuggingFace corpus,
+> assembled separately inside `malintent_promptguard_training.ipynb`.
+
 
 | Property          |   Value |
 | ----------------- | ------: |

@@ -30,10 +30,12 @@ A lightweight multi-layer security framework designed to detect, classify and pr
 
 ### Dataset Engineering
 
-- Combined corpus from 7 benchmark datasets
-- Manual annotation and validation
-- Cleaning and deduplication
-- Balanced train / validation / test split
+**Two-Corpus Architecture:**
+
+- **700-sample annotated corpus** (`manual_annotation_combined_corpus.csv`) — used in Week 1 to validate the Pattern Engine regex patterns and measure OWASP attack coverage. Explored and exported via `dataset_exploration.ipynb`.
+- **Full ~328k-sample HuggingFace corpus** — used in Week 2 to fine-tune PromptGuard-86M. Assembled, balanced, and tokenised inside `malintent_promptguard_training.ipynb`.
+
+Both corpora draw from the same 7 source datasets but serve entirely different roles in the pipeline.
 
 ### Evaluation Pipeline
 

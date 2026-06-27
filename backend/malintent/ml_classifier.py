@@ -252,7 +252,9 @@ class MLClassifier:
         if not model_dir.exists():
             raise FileNotFoundError(
                 f"Model directory not found: '{model_dir}'\n"
-                "Extract the trained model from Google Drive backup and place it at:\n"
+                "Extract the trained model from the DGX training output archive\n"
+                "(malintent_release.zip, produced by malintent_promptguard_training.ipynb\n"
+                " Section 23) and place the contents at:\n"
                 "  backend/malintent_model_local/\n"
                 "Expected files: config.json, model.safetensors, "
                 "tokenizer.json, tokenizer_config.json, special_tokens_map.json"

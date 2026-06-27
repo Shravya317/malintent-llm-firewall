@@ -230,7 +230,21 @@ class PatternEngine:
 
         primary_cat: Optional[str] = None
         if matches:
-            primary_cat = max(matches, key=lambda m: m.confidence).category
+            # Tiebreaker: since all regex matches share the same confidence (0.9),
+            # primary_category is chosen by (1) most match-count for a category,
+            # then (2) explicit OWASP-aligned priority ordering so the result is
+            # always deterministic regardless of dict iteration order.
+            _PRIORITY = [
+                "direct_injection", "persona_override", "data_exfiltration",
+                "encoding_obfuscation", "indirect_injection",
+                "context_manipulation", "harmful_elicitation",
+            ]
+            from collections import Counter
+            cat_counts = Counter(m.category for m in matches)
+            primary_cat = max(
+                cat_counts,
+                key=lambda c: (cat_counts[c], -_PRIORITY.index(c) if c in _PRIORITY else -99),
+            )
 
         if is_threat:
             categories_found = sorted({m.category for m in matches})
