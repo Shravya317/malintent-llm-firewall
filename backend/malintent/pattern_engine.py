@@ -1,13 +1,13 @@
 """
 pattern_engine.py — Layer A of the MalIntent Detection Pipeline
 ================================================================
-Regex-based first-pass triage filter. Scans prompts against 45 curated regex patterns spanning 7 OWASP LLM Top 10 aligned prompt injection categories.
+Regex-based first-pass triage filter. Scans prompts against 47 curated regex patterns spanning 7 OWASP LLM Top 10 aligned prompt injection categories.
 Patterns were developed and validated against the MalIntent Combined Training Corpus 
 (700 samples, 7 datasets: HackAPrompt, WildJailbreak, JailbreakBench, DeepSet, Dolly-15k, Alpaca-Cleaned, OpenAssistant).
 Coverage analysis and regex validation are documented in dataset_exploration.ipynb.
 
 Categories:
-    DI — Direct Injection (7 patterns)
+    DI — Direct Injection (9 patterns)
     PO — Persona Override / Jailbreak (7 patterns)
     DE — Data Exfiltration (6 patterns)
     EO — Encoding Obfuscation (5 patterns)
@@ -35,14 +35,13 @@ class PatternMatch:
 
 @dataclass
 class PatternEngineResult:
-    """Combined result from all pattern checks."""
     is_threat: bool
     matches: List[PatternMatch] = field(default_factory=list)
     highest_confidence: float = 0.0
     primary_category: Optional[str] = None
     explanation: str = ""
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict:       # ← 4 spaces indented inside the class
         return {
             "is_threat": self.is_threat,
             "highest_confidence": self.highest_confidence,
