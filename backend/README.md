@@ -4,7 +4,7 @@
 
 - `malintent/pattern_engine.py`
   - Rule-based prompt injection detection engine
-  - **45 curated regex patterns** spanning **7 OWASP LLM Top 10–aligned prompt injection categories**
+  - **47 curated regex patterns** spanning **7 OWASP LLM Top 10–aligned prompt injection categories**
   - Confidence-based threat scoring
   - Attack categorisation and explanation generation
   - Average latency of approximately **2 ms per prompt** (CPU)
@@ -40,7 +40,7 @@ The regex engine was developed and validated using the **MalIntent Combined Trai
 | ----------------- | ------: |
 | Source Datasets   |   **7** |
 | Total Samples     | **700** |
-| Malicious Samples | **419** |
+| Malicious Samples | **420** |
 | Benign Samples    | **280** |
 | Attack Categories |   **8** |
 | Risk Levels       |   **5** |
@@ -52,7 +52,7 @@ The regex engine was developed and validated using the **MalIntent Combined Trai
 - JailbreakBench
 - DeepSet Prompt Injections
 - Dolly-15K
-- Alpaca
+- Alpaca-Cleaned
 - OpenAssistant
 
 ---
@@ -84,7 +84,7 @@ The Pattern Engine was successfully validated against manually curated malicious
 ### Week 1 Deliverables
 
 - ✅ Layer A Pattern Engine implemented
-- ✅ 45 curated regex detection patterns
+- ✅ 47 curated regex detection patterns
 - ✅ Seven OWASP-aligned attack categories covered
 - ✅ Confidence-based scoring mechanism
 - ✅ Comprehensive unit testing completed

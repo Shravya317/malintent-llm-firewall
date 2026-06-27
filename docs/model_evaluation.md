@@ -65,7 +65,7 @@ Training datasets:
 - JailbreakBench
 - DeepSet Prompt Injections
 - Dolly-15K
-- Alpaca
+- Alpaca-Cleaned
 - OpenAssistant
 
 The complete preprocessing pipeline included:

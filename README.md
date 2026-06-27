@@ -7,7 +7,7 @@ A lightweight multi-layer security framework designed to detect, classify and pr
 ## Status
 
 ✅ Week 1 Completed – Pattern Detection Engine
-✅ Week 2 Completed – PromptGuard ML Detection Engine
+✅ Week 2 Completed – MalIntent ML Detection Engine
 🚧 Remaining development in progress
 
 ---
@@ -16,7 +16,7 @@ A lightweight multi-layer security framework designed to detect, classify and pr
 
 ### Layer A – Pattern Detection Engine
 
-- 45 handcrafted regex patterns
+- 47 handcrafted regex patterns
 - Coverage across 7 OWASP LLM attack categories
 - Fast rule-based first-pass filtering
 - Unit tested

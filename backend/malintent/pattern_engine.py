@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 pattern_engine.py — Layer A of the MalIntent Detection Pipeline
 ================================================================
@@ -18,7 +20,7 @@ Categories:
 Average latency: ~2 ms per prompt on CPU (compiled regexes, no ML inference).
 """
 
-# -*- coding: utf-8 -*-
+
 import re
 import base64
 from dataclasses import dataclass, field

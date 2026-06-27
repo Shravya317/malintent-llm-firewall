@@ -55,7 +55,7 @@ Preprocessing used during training (must be mirrored at inference):
 - LR scheduler   : cosine with 6% warmup
 - Mixed precision: bf16 on A100
  
-Reported metrics (MalIntent_PromptGuard_Final_Submission.ipynb):
+Reported metrics (malintent_promptguard_training.ipynb):
 - Internal test set  : F1=0.9996, ROC-AUC=1.0000, MCC=0.9984, FPR=0.0002
 - OOD Jailbreak Class: F1=0.9141, Precision=1.0000
 - OOD NotInject      : Accuracy=0.9823, FPR=0.0177  (all-benign stress test)
