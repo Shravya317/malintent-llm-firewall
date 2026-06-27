@@ -617,3 +617,32 @@ Key research contributions include:
 - Multi-layer prompt injection detection framework
 
 These research findings collectively form the foundation of the final MalIntent system for prompt injection detection and semantic threat analysis.
+
+---
+
+# Real-World Case Study — EchoLeak (CVE-2025-32711)
+
+## Overview
+
+EchoLeak (CVE-2025-32711) is a real-world prompt injection vulnerability affecting Microsoft 365 Copilot. It demonstrated how hidden malicious instructions embedded inside external content (such as emails or documents) could manipulate an AI assistant into disclosing sensitive enterprise information. The vulnerability highlighted that prompt injection is no longer a theoretical risk but a practical attack against production LLM systems.
+
+## Attack Classification
+
+- **Primary Attack:** Indirect Prompt Injection (OWASP LLM01)
+- **Secondary Impact:** Sensitive Information Disclosure / Data Exfiltration (OWASP LLM02)
+
+## Attack Flow
+
+1. The attacker embeds hidden instructions inside an external document or email.
+2. Microsoft 365 Copilot processes the content as part of its normal workflow.
+3. The hidden instructions are interpreted as valid prompts.
+4. The model follows the injected instructions and exposes confidential enterprise information.
+5. Sensitive organizational data may then be disclosed without the user's awareness.
+
+## Security Lessons
+
+This incident demonstrates that securing an LLM requires more than filtering direct user prompts. Systems must also inspect external documents, retrieved context, and tool inputs for hidden prompt injection attempts. Strong input validation, prompt isolation, permission boundaries, and output monitoring are essential defenses against indirect prompt injection and data exfiltration attacks.
+
+## Relevance to MalIntent
+
+EchoLeak directly validates the motivation behind MalIntent. The Pattern Engine can identify common prompt injection signatures, while the semantic detection layer can recognize contextual and indirect injection attempts that bypass simple keyword matching. Together, these layers help reduce the likelihood of prompt injection leading to sensitive information disclosure.
