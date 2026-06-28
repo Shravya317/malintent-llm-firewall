@@ -15,6 +15,7 @@ venv/
 # Build artifacts
 dist/
 build/
+.vercel/
 
 # OS files
 .DS_Store
