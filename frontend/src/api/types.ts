@@ -28,6 +28,30 @@ export interface ScanInputResponse {
 }
 
 
+// ── LOGS ──────────────────────────────────────────────────────────────────────
+
+export interface ThreatLogEntry {
+  /** 
+   * Single row from ThreatLog serialized for the frontend (GET /api/v1/logs).
+   * Note: scrubbed_text is excluded — it is for forensic use only, never sent to
+   * the frontend in the standard logs list.
+   */
+  id: number;
+  timestamp: string; // ISO-8601 datetime string
+  payload_hash: string;
+  payload_length: number;
+  risk_score: number;
+  decision: string;
+  attack_category: string | null;
+  layers_triggered: string | null; // comma-separated, e.g. "A,B"
+  layer_a_matched: boolean;
+  layer_b_confidence: number;
+  session_role: string | null;
+  latency_ms: number | null;
+  privacy_mode: string;
+}
+
+
 // ── STATS ─────────────────────────────────────────────────────────────────────
 
 export interface HourlyBucket {
