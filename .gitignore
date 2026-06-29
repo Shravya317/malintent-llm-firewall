@@ -1,35 +1,44 @@
-# Python cache
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
 .pytest_cache/
 *.pyc
 *.pyo
+*.pyd
 *.egg-info/
 
-# Virtual environment
+# ── Virtual environment ───────────────────────────────────────────────────────
 venv/
 .venv/
 
-# Environment variables
+# ── Environment variables — NEVER COMMIT ─────────────────────────────────────
 .env
+backend/.env
 
-# Build artifacts
+# ── Build artifacts ───────────────────────────────────────────────────────────
 dist/
 build/
 .vercel/
 
-# OS files
+# ── OS files ──────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# Jupyter
+# ── Jupyter ───────────────────────────────────────────────────────────────────
 .ipynb_checkpoints/
 
-# Data files (large — not for git)
+# ── Data files (large — not for git) ─────────────────────────────────────────
 *.csv
 !backend/notebooks/manual_annotation_combined_corpus.csv
 
-# Model weights (too large for git)
+# ── Model weights (too large for git) ────────────────────────────────────────
 *.safetensors
 *.bin
 malintent_model_local/
 backend/malintent/malintent_model_local/
+
+# ── Database files (Week 4 — SQLite dev DB, not for git) ─────────────────────
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3

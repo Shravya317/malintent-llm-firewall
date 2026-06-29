@@ -260,3 +260,160 @@ python -m pytest tests/test_pipeline.py -v -s
 - ✅ Integration tests: 200/200 accuracy, 62.4ms avg latency, schema valid
 - ✅ Ablation results documented (`docs/ablation_results.md`)
 - ✅ Complete `malintent/` Python package — all three detection layers unified
+
+---
+
+## Week 4 – FastAPI Backend API + Secure Configuration Management
+
+### What's Built
+
+- `main.py`
+  - FastAPI application entry point
+  - Registers all API routers
+  - CORS middleware enabled for frontend integration
+  - Automatic database initialization during startup
+  - Interactive Swagger UI generated automatically
+
+- `routers/scan.py`
+  - `POST /api/v1/scan/input`
+    - Receives user prompts
+    - Executes the complete three-layer firewall pipeline
+    - Permission validation
+    - Risk scoring
+    - Threat logging
+    - Privacy-preserving hashing
+  - `POST /api/v1/scan/output`
+    - Week 4 placeholder endpoint for Output Consistency Validator
+    - Full implementation scheduled for Week 7
+  - `POST /api/v1/scan/document`
+    - Week 4 placeholder endpoint for Document Scanner
+    - Full implementation scheduled for Week 7
+
+- `routers/logs.py`
+  - `GET /api/v1/logs`
+  - Returns ThreatLog history for dashboard visualisation
+
+- `routers/stats.py`
+  - `GET /api/v1/stats`
+  - Returns dashboard statistics including:
+    - Total Requests
+    - Blocked Requests
+    - Flagged Requests
+    - Allowed Requests
+    - Average Risk Score
+    - Average Latency
+    - Hourly Trend
+
+- `routers/config.py`
+  - Secure configuration management API
+  - `PUT /api/v1/config`
+    - Stores encrypted configuration values
+  - `GET /api/v1/config/{key}`
+    - Returns decrypted configuration values
+  - Supports encrypted storage of:
+    - system_context
+    - context_mode
+    - output_validation
+    - api_key
+
+- `config_encryption.py`
+  - Fernet AES encryption layer
+  - Encryption performed before database storage
+  - Automatic decryption during retrieval
+  - Plaintext values never written to disk
+
+- `database.py`
+  - SQLAlchemy session management
+  - Automatic table creation on application startup
+
+- `schemas.py`
+  - Pydantic request/response validation
+  - OpenAPI documentation generation
+  - Strongly typed API contracts
+
+---
+
+### API Endpoints
+
+| Method | Endpoint                | Purpose                          |
+| ------ | ----------------------- | -------------------------------- |
+| POST   | `/api/v1/scan/input`    | Scan incoming prompts            |
+| POST   | `/api/v1/scan/output`   | Output validation stub           |
+| POST   | `/api/v1/scan/document` | Document scanner stub            |
+| GET    | `/api/v1/logs`          | Retrieve threat logs             |
+| GET    | `/api/v1/stats`         | Dashboard statistics             |
+| PUT    | `/api/v1/config`        | Store encrypted configuration    |
+| GET    | `/api/v1/config/{key}`  | Retrieve decrypted configuration |
+
+---
+
+### Security Features
+
+- Fernet AES encryption for configuration storage
+- API keys never stored as plaintext
+- Automatic decryption only during API requests
+- Privacy-preserving request logging
+- SHA-256 payload hashing
+- Role-based permission validation
+- Request validation using Pydantic
+- Structured error handling
+- Automatic OpenAPI documentation
+
+---
+
+### Backend Validation
+
+Week 4 backend was validated using:
+
+```bash
+pytest tests/test_week4.py -v
+```
+
+Tests include:
+
+- API routing
+- Scan endpoint validation
+- Statistics endpoint
+- Logs endpoint
+- Encrypted configuration API
+- Swagger/OpenAPI generation
+- Request validation
+- HTTP response validation
+
+---
+
+### Manual Verification
+
+Interactive API testing performed through Swagger UI.
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Verified endpoints:
+
+- Scan Input
+- Scan Output
+- Scan Document
+- Logs
+- Stats
+- Config PUT
+- Config GET
+
+---
+
+### Week 4 Deliverables
+
+- ✅ FastAPI backend completed
+- ✅ REST API implemented
+- ✅ Swagger UI integrated
+- ✅ SQLAlchemy database integration
+- ✅ Encrypted configuration management
+- ✅ Fernet-based secret storage
+- ✅ Pydantic API validation
+- ✅ Threat logging endpoints
+- ✅ Dashboard statistics endpoint
+- ✅ Output validation stub
+- ✅ Document scanning stub
+- ✅ Backend API tests completed
+- ✅ Frontend integration ready
