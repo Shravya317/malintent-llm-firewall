@@ -168,6 +168,14 @@ async def scan_input(
             detail=f"Role '{body.session_role}' is not permitted to submit scan requests.",
         )
 
+    # ── Step 1b: Dynamic Execution Mode Override (SEL) ───────────────────────
+    if body.session_role == "employee":
+        logger.info("SEL Dynamic Override: Role '%s' assigned to 'Developer' mode.", body.session_role)
+        execution_mode = "Developer"
+    else:
+        logger.info("SEL Dynamic Override: Role '%s' assigned to 'Balanced' mode.", body.session_role)
+        execution_mode = "Balanced"
+
     # ── Step 2: Three-layer risk scoring ─────────────────────────────────────
     scorer = _get_scorer()
     result = scorer.score(body.prompt)
