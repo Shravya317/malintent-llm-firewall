@@ -26,49 +26,29 @@ This document contains everything required to execute, test, verify, and demonst
 
 # Quick Start
 
-## Week 1 (Run Pattern Engine Tests)
+## Run Complete Automated Test Suite
+
+From the backend directory:
 
 ```powershell
 .\run_tests.ps1
 ```
 
-Runs:
+This script automatically runs:
 
-- Pattern Engine Unit Tests (Layer A)
-
----
-
-## Week 2 (Run ML Classifier)
-
-```powershell
-.\run_tests.ps1
-```
-
-Runs:
-
-- ML Classifier Smoke Test (Layer B)
+- Week 1 – Pattern Engine Tests
+- Week 2 – ML Classifier Smoke Test
+- Week 3 – Semantic Engine
+- Week 3 – Risk Scorer
+- Week 3 – Integration Tests
+- Week 4 – Backend API Tests
 
 ---
 
-## Week 3 (Run All Tests)
+## Start Backend Server (Week 4)
 
 ```powershell
-.\run_tests.ps1
-```
-
-Runs:
-
-- Semantic Engine
-- Risk Scorer
-- Integration Tests
-- Week 4 Backend Tests
-
----
-
-## Week 4 (Start Backend)
-
-```powershell
-cd C:\Users\tusha\Documents\malintent\backend
+cd backend
 venv\Scripts\activate
 uvicorn main:app --reload
 ```
@@ -87,12 +67,6 @@ Swagger UI:
 http://127.0.0.1:8000/docs
 ```
 
-or
-
-```
-http://localhost:8000/docs
-```
-
 ---
 
 # Week 1 Runbook
@@ -100,7 +74,7 @@ http://localhost:8000/docs
 ## Step 1 — Open Backend Directory
 
 ```powershell
-cd C:\Users\tusha\Documents\malintent\backend
+cd backend
 ```
 
 ---
@@ -114,7 +88,7 @@ venv\Scripts\activate
 Expected:
 
 ```text
-(venv) PS C:\Users\tusha\Documents\malintent\backend>
+(venv) PS ...\backend>
 ```
 
 ---
@@ -127,10 +101,31 @@ python -m pytest tests/test_pattern_engine.py -v -s
 
 Expected:
 
-- 55/55 Pattern Engine tests pass
-- Regex attack detection works correctly
-- Safe prompts are not falsely flagged
-- Attack prompts are detected successfully
+- 55/55 tests pass
+- Regex engine loads successfully
+- Safe prompts remain ALLOW
+- Malicious prompts are detected
+- No false positives on benchmark prompts
+
+---
+
+## Pattern Engine Overview
+
+Layer A is the deterministic detection layer.
+
+It performs:
+
+- Regex-based prompt injection detection
+- OWASP LLM Top 10 pattern matching
+- Early prompt filtering
+- Fast first-pass analysis before ML inference
+
+Current implementation:
+
+- 47 handcrafted regex patterns
+- 7 OWASP attack categories
+- Unit-tested
+- Low-latency execution
 
 ---
 
@@ -139,23 +134,24 @@ Expected:
 Completed:
 
 - Pattern Engine (Layer A)
-- Prompt Injection Regex Detection
-- Pattern Categories
+- Regex Detection Rules
+- OWASP Category Mapping
+- Pattern Confidence Scoring
 - Unit Test Suite
 - Safe Prompt Validation
 - Attack Prompt Validation
 
 ---
 
-## One Command Execution
+## Week 1 One Command
 
 ```powershell
 .\run_tests.ps1
 ```
 
-Automatically executes:
+Automatically runs:
 
-1. Pattern Engine Tests
+- Pattern Engine Tests
 
 ---
 
@@ -164,7 +160,7 @@ Automatically executes:
 ## Step 1 — Open Backend Directory
 
 ```powershell
-cd C:\Users\tusha\Documents\malintent\backend
+cd backend
 ```
 
 ---
@@ -178,7 +174,7 @@ venv\Scripts\activate
 Expected:
 
 ```text
-(venv) PS C:\Users\tusha\Documents\malintent\backend>
+(venv) PS ...\backend>
 ```
 
 ---
@@ -191,11 +187,79 @@ python malintent/ml_classifier.py
 
 Expected:
 
-- PromptGuard-86M model loads successfully
-- Tokenizer loads successfully
-- Smoke tests execute
-- Batch inference executes
+- PromptGuard model loads
+- Tokenizer loads
 - Model information displayed
+- Smoke tests execute
+- Batch inference executes successfully
+
+---
+
+## Layer B Overview
+
+Layer B performs machine-learning-based prompt classification.
+
+Base Model:
+
+```
+meta-llama/Prompt-Guard-86M
+```
+
+Training Pipeline:
+
+- Dataset collection
+- Dataset cleaning
+- Dataset balancing
+- Tokenization
+- Fine-tuning
+- Validation
+- Model export
+- Local inference wrapper
+
+The model is loaded locally from:
+
+```
+malintent_model_local/
+```
+
+---
+
+## Training Datasets
+
+Training corpus consists of:
+
+- HackAPrompt
+- WildJailbreak
+- JailbreakBench
+- DeepSet Prompt Injections
+- Dolly-15k
+- Alpaca Cleaned
+- OpenAssistant OASST1
+
+Training split:
+
+```
+80% Training
+10% Validation
+10% Testing
+```
+
+---
+
+## Model Evaluation
+
+Internal Evaluation:
+
+- Accuracy ≈ 99%
+- Precision ≈ 99%
+- Recall ≈ 99%
+- F1 Score ≈ 99%
+
+Additional Out-of-Distribution Benchmarks:
+
+- NotInject
+- Gandalf
+- Jailbreak Dataset
 
 ---
 
@@ -213,15 +277,36 @@ Completed:
 
 ---
 
-## One Command Execution
+## Week 2 One Command
 
 ```powershell
 .\run_tests.ps1
 ```
 
-Automatically executes:
+Automatically runs:
 
-1. ML Classifier Smoke Test
+- ML Classifier Smoke Test
+
+---
+
+## Local Model Files
+
+The following files should exist inside:
+
+```
+backend/malintent_model_local
+```
+
+Required files:
+
+- config.json
+- model.safetensors
+- tokenizer.json
+- tokenizer_config.json
+- special_tokens_map.json
+- training_args.bin
+
+These files contain the fine-tuned PromptGuard model used by Layer B.
 
 ---
 
@@ -230,7 +315,7 @@ Automatically executes:
 ## Step 1 — Open Backend Directory
 
 ```powershell
-cd C:\Users\tusha\Documents\malintent\backend
+cd backend
 ```
 
 ---
@@ -244,12 +329,12 @@ venv\Scripts\activate
 Expected:
 
 ```text
-(venv) PS C:\Users\tusha\Documents\malintent\backend>
+(venv) PS ...\backend>
 ```
 
 ---
 
-## Step 3 — Semantic Engine
+## Step 3 — Run Semantic Engine
 
 ```powershell
 python malintent/semantic_engine.py
@@ -257,12 +342,14 @@ python malintent/semantic_engine.py
 
 Expected:
 
-- Smoke tests pass
-- Layer C classifications correct
+- Semantic engine loads successfully
+- FAISS attack index loads
+- Smoke tests execute
+- Semantic attack detection works correctly
 
 ---
 
-## Step 4 — Risk Scorer
+## Step 4 — Run Risk Scorer
 
 ```powershell
 python -m malintent.risk_scorer
@@ -270,13 +357,14 @@ python -m malintent.risk_scorer
 
 Expected:
 
-- All smoke tests pass
-- Correct risk scores
-- Correct FLAG/BLOCK decisions
+- Risk scorer loads successfully
+- Layer A + Layer B + Layer C execute
+- Final risk score generated
+- Correct ALLOW / FLAG / BLOCK decisions
 
 ---
 
-## Step 5 — Integration Tests
+## Step 5 — Run Integration Tests
 
 ```powershell
 python -m pytest tests/test_pipeline.py -v -s
@@ -284,14 +372,70 @@ python -m pytest tests/test_pipeline.py -v -s
 
 Expected:
 
-- 200/200 tests pass
+- 200/200 integration tests pass
 - Accuracy validation succeeds
 - Latency validation succeeds
 - Schema validation succeeds
 
 ---
 
-## One Command Execution
+## Layer C Overview
+
+Layer C performs semantic similarity detection using sentence embeddings.
+
+Current implementation:
+
+- all-MiniLM-L6-v2 sentence transformer
+- 384-dimensional embeddings
+- FAISS IndexFlatIP vector search
+- 206 known attack phrases
+- Semantic similarity matching
+- Automatic attack index rebuilding
+
+This layer detects:
+
+- Paraphrased attacks
+- Reworded jailbreaks
+- Obfuscated instructions
+- Similar malicious prompts
+
+---
+
+## Unified Risk Scorer
+
+The Risk Scorer combines outputs from all three layers.
+
+Weighting:
+
+- Layer A – 30%
+- Layer B – 45%
+- Layer C – 25%
+
+Final decisions:
+
+```text
+BLOCK : Score ≥ 70
+FLAG  : Score ≥ 25
+ALLOW : Score < 25
+```
+
+---
+
+## Week 3 Deliverables
+
+Completed:
+
+- Semantic Similarity Engine
+- FAISS Vector Database
+- Attack Phrase Index
+- Unified Risk Scorer
+- RiskResult Data Contract
+- Integration Test Suite
+- Full Pipeline Evaluation
+
+---
+
+## Week 3 One Command
 
 ```powershell
 .\run_tests.ps1
@@ -311,7 +455,7 @@ Automatically executes:
 ## Backend Startup
 
 ```powershell
-cd C:\Users\tusha\Documents\malintent\backend
+cd backend
 venv\Scripts\activate
 uvicorn main:app --reload
 ```
@@ -326,11 +470,11 @@ RiskScorer loaded and warmed up.
 
 ---
 
-## Swagger
+## Swagger Documentation
 
-Open:
+Open your browser and visit:
 
-```
+```text
 http://127.0.0.1:8000/docs
 ```
 
@@ -338,7 +482,11 @@ http://127.0.0.1:8000/docs
 
 ## Week 4 Backend Tests
 
-Open another terminal, activate the virtual environment, then run:
+Open a second terminal.
+
+Activate the virtual environment.
+
+Run:
 
 ```powershell
 pytest tests/test_week4.py -v
@@ -346,52 +494,28 @@ pytest tests/test_week4.py -v
 
 Expected:
 
-```
+```text
 5 passed
 ```
 
 ---
 
-# Model Information
+# Week 4 Features
 
-Base Model:
+Backend components implemented:
 
-```
-meta-llama/Prompt-Guard-86M
-```
-
-Training Dataset:
-
-- HackAPrompt
-- WildJailbreak
-- JailbreakBench
-- DeepSet Prompt Injections
-- Dolly-15k
-- Alpaca Cleaned
-- OpenAssistant OASST1
-
-Training Split:
-
-```
-80% Training
-10% Validation
-10% Testing
-```
-
-Evaluation:
-
-- Internal Accuracy ≈ 99%
-- Precision ≈ 99%
-- Recall ≈ 99%
-- F1 Score ≈ 99%
-
-Additional OOD Benchmarks evaluated:
-
-- NotInject
-- Gandalf
-- Jailbreak Dataset
-
-The model is evaluated locally using the saved fine-tuned weights.
+- FastAPI REST API
+- Configuration Management
+- Threat Logging
+- Dashboard Statistics
+- SHA-256 Payload Hashing
+- PII Scrubber
+- Fernet Encryption
+- SQLite Database
+- Permission Validator
+- Tool Access Controller
+- Output Validator Stub
+- Document Scanner Stub
 
 ---
 
@@ -401,25 +525,34 @@ The model is evaluated locally using the saved fine-tuned weights.
 
 ### /api/v1/scan/input
 
-Runs complete firewall:
+Runs the complete firewall pipeline.
+
+Components:
 
 - Permission Validator
+- Pattern Engine
+- ML Classifier
+- Semantic Engine
 - Risk Scorer
 - PII Scrubber
-- SHA256 Hash
+- SHA-256 Hashing
 - Threat Logging
 
 ---
 
 ### /api/v1/scan/output
 
-Output Consistency Validator (currently Week 4 stub).
+Output Consistency Validator.
+
+(Currently implemented as a Week 4 stub.)
 
 ---
 
 ### /api/v1/scan/document
 
-Document Scanner (currently Week 4 stub).
+Document Scanner.
+
+(Currently implemented as a Week 4 stub.)
 
 ---
 
@@ -427,13 +560,19 @@ Document Scanner (currently Week 4 stub).
 
 ### /api/v1/logs
 
-Returns ThreatLog entries.
+Returns stored threat log entries.
 
 ---
 
 ### /api/v1/stats
 
 Returns dashboard statistics.
+
+---
+
+### /api/v1/config/{key}
+
+Returns decrypted configuration values.
 
 ---
 
@@ -445,17 +584,9 @@ Stores encrypted configuration values.
 
 ---
 
-## GET
-
-### /api/v1/config/{key}
-
-Returns decrypted configuration value.
-
----
-
 # Common Configuration Keys
 
-```
+```text
 system_context
 context_mode
 output_validation
@@ -475,7 +606,11 @@ api_key
 }
 ```
 
-Expected: `ALLOW`
+Expected Result:
+
+```text
+ALLOW
+```
 
 ---
 
@@ -488,13 +623,17 @@ Expected: `ALLOW`
 }
 ```
 
-Expected: `BLOCK`
+Expected Result:
+
+```text
+BLOCK
+```
 
 ---
 
-## Config Example
+## Configuration Example
 
-PUT:
+PUT
 
 ```json
 {
@@ -503,10 +642,10 @@ PUT:
 }
 ```
 
-GET:
+Retrieve later using:
 
-```
-/api/v1/config/system_context
+```text
+GET /api/v1/config/system_context
 ```
 
 ---
@@ -522,11 +661,15 @@ GET:
 }
 ```
 
-Expected: `422 Validation Error`
+Expected:
+
+```text
+422 Validation Error
+```
 
 ---
 
-## Unknown Role
+## Unknown Session Role
 
 ```json
 {
@@ -535,7 +678,11 @@ Expected: `422 Validation Error`
 }
 ```
 
-Expected: `403 Forbidden`
+Expected:
+
+```text
+403 Forbidden
+```
 
 ---
 
@@ -543,13 +690,13 @@ Expected: `403 Forbidden`
 
 Press:
 
-```
+```text
 Ctrl + C
 ```
 
 Expected:
 
-```
+```text
 Application shutdown complete.
 ```
 
@@ -557,41 +704,45 @@ Application shutdown complete.
 
 # Git Commands
 
-Check status:
+Check repository status:
 
 ```powershell
 git status
 ```
 
-Add files:
+Stage all changes:
 
 ```powershell
 git add .
 ```
 
-Commit:
+Create a commit:
 
 ```powershell
-git commit -m "message"
+git commit -m "Your commit message"
 ```
 
-Push:
+Push to GitHub:
 
 ```powershell
 git push origin main
 ```
 
-(Use `master` if your repository uses `master` as the default branch.)
-
 ---
 
 # Common Problems
 
-## Swagger does not open
+## Swagger Does Not Open
 
-Make sure `uvicorn main:app --reload` is running, then visit:
+Verify that the backend server is running:
 
+```powershell
+uvicorn main:app --reload
 ```
+
+Then open:
+
+```text
 http://127.0.0.1:8000/docs
 ```
 
@@ -599,19 +750,19 @@ http://127.0.0.1:8000/docs
 
 ## 422 Validation Error
 
-Usually means the request JSON is missing one or more required fields.
+Usually indicates that the request body is missing one or more required fields.
 
 ---
 
 ## 403 Forbidden
 
-Check `session_role`.
+Verify that the supplied `session_role` is valid.
 
 ---
 
 ## 500 Internal Server Error
 
-Check the Uvicorn terminal traceback.
+Check the backend terminal logs for the exception traceback.
 
 ---
 
@@ -629,15 +780,15 @@ venv\Scripts\activate
 
 Ensure the fine-tuned model exists inside:
 
-```
-malintent/malintent_model_local
+```text
+backend/malintent_model_local
 ```
 
 ---
 
 ## ML Classifier Does Not Load
 
-Check that the following files are present:
+Verify that the following files are present:
 
 - config.json
 - model.safetensors
@@ -650,7 +801,7 @@ Check that the following files are present:
 
 ## Smoke Test Shows Failed Cases
 
-Some manually selected prompts may differ from the model's learned decision boundary. Refer to the complete evaluation metrics from the training notebook for authoritative performance.
+Some manually selected prompts may not perfectly align with the model's learned decision boundary. Refer to the evaluation metrics generated during training for authoritative performance results.
 
 ---
 
@@ -662,18 +813,17 @@ Some manually selected prompts may differ from the model's learned decision boun
 ✓ ML Classifier Loaded
 ✓ Smoke Tests Executed
 ✓ Batch Prediction Tested
-✓ Model Information Displayed
 ✓ Semantic Engine Tested
 ✓ Risk Scorer Tested
 ✓ Integration Tests Passed (200/200)
 ✓ Backend Running
 ✓ Swagger Opens
-✓ Week 4 Tests Passed (5/5)
-✓ Safe Prompt (ALLOW)
-✓ Attack Prompt (BLOCK)
-✓ Logs Verified
-✓ Stats Verified
-✓ Config Endpoints Verified
+✓ Week 4 Backend Tests Passed (5/5)
+✓ Safe Prompt Verified
+✓ Attack Prompt Verified
+✓ Logs Endpoint Verified
+✓ Stats Endpoint Verified
+✓ Configuration Endpoints Verified
 ✓ Output Stub Verified
 ✓ Document Stub Verified
 ✓ Git Push Completed
