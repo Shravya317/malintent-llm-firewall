@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
 import Sidebar from './Sidebar'
-import { getConfig, setConfig } from '../api/client'
+import apiClient, { getConfig, setConfig } from '../api/client'
 
 const TABS = [
   { id: 'context', label: 'Context Settings' },
@@ -47,6 +47,14 @@ export default function Configuration() {
   const { theme, toggleTheme } = useTheme()
   const [activeTab, setActiveTab] = useState('context')
   const [saveStatus, setSaveStatus] = useState({ loading: false, message: '', error: false })
+  
+  // CORS & Backend Connection Test State (for Sunday Sync)
+  const [connectionTest, setConnectionTest] = useState({
+    tested: false,
+    loading: false,
+    success: false,
+    message: '',
+  })
 
   // --- Tab 1: Context Settings ---
   const [systemContext, setSystemContext] = useState(
@@ -107,12 +115,43 @@ export default function Configuration() {
     }, 4000)
   }
 
+  // CORS Connection Test Handler
+  const handleTestConnection = async () => {
+    setConnectionTest({ tested: true, loading: true, success: false, message: 'Testing CORS & connection...' })
+    try {
+      // Hit the /api/v1/config endpoint (or root health check) to verify CORS
+      const res = await apiClient.get('/config/system_context')
+      setConnectionTest({
+        tested: true,
+        loading: false,
+        success: true,
+        message: 'CORS Test Passed: Connected to MalIntent API (200 OK)',
+      })
+    } catch (error) {
+      // If it's a 404, it means the server responded and CORS worked!
+      if (error.response && error.response.status === 404) {
+        setConnectionTest({
+          tested: true,
+          loading: false,
+          success: true,
+          message: 'CORS Test Passed: Connected to MalIntent API (404 Config Key Not Initialized)',
+        })
+      } else {
+        setConnectionTest({
+          tested: true,
+          loading: false,
+          success: false,
+          message: `CORS / Connection Error: ${error.message || 'Backend Unreachable'}`,
+        })
+      }
+    }
+  }
+
   // Save Handlers
   const handleSaveContextSettings = async () => {
     setSaveStatus({ loading: true, message: 'Saving context settings...', error: false })
     try {
       await setConfig('context_settings', { systemContext, mode: contextMode, outputValidation })
-      // Save individual keys as well if backend expects them
       await setConfig('system_context', systemContext)
       await setConfig('context_mode', contextMode)
       await setConfig('output_validation', outputValidation ? 'true' : 'false')
@@ -238,6 +277,29 @@ export default function Configuration() {
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Secure Settings Management · Fernet Encrypted Configuration Store</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Test Connection Button */}
+            <button
+              onClick={handleTestConnection}
+              disabled={connectionTest.loading}
+              style={{
+                padding: '8px 18px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 8,
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-threat)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-subtle)' }}
+            >
+              {connectionTest.loading ? 'Testing CORS...' : '⚡ Test Connection'}
+            </button>
+
             {saveStatus.message && (
               <div style={{ padding: '6px 16px', borderRadius: 8, background: saveStatus.error ? 'rgba(229,57,53,0.15)' : 'rgba(46,125,50,0.15)', border: `1px solid ${saveStatus.error ? 'var(--accent-threat)' : 'var(--accent-secure)'}`, color: saveStatus.error ? 'var(--accent-threat)' : 'var(--accent-secure)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 600, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
                 {saveStatus.message}
@@ -254,7 +316,42 @@ export default function Configuration() {
           </div>
         </header>
 
-        <div style={{ padding: '48px 56px 96px' }}>
+        <div style={{ padding: '36px 56px 96px' }}>
+          {/* CORS Connection Result Banner */}
+          {connectionTest.tested && (
+            <div
+              style={{
+                marginBottom: 36,
+                padding: '16px 24px',
+                borderRadius: 12,
+                background: connectionTest.success ? 'rgba(46,125,50,0.15)' : 'rgba(229,57,53,0.15)',
+                border: `1px solid ${connectionTest.success ? 'var(--accent-secure)' : 'var(--accent-threat)'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <span style={{ fontSize: '1.25rem' }}>{connectionTest.success ? '🟢' : '🔴'}</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.88rem', fontWeight: 700, color: connectionTest.success ? 'var(--accent-secure)' : 'var(--accent-threat)' }}>
+                    {connectionTest.success ? 'CORS Verification: Passed' : 'CORS Verification: Failed'}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+                    {connectionTest.message}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setConnectionTest({ tested: false, loading: false, success: false, message: '' })}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '1.2rem' }}
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           {/* Tab Navigation */}
           <div style={{ display: 'flex', gap: 12, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 16, marginBottom: 40 }}>
             {TABS.map(tab => {
