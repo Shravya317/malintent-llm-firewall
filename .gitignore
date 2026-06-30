@@ -23,6 +23,9 @@ build/
 .DS_Store
 Thumbs.db
 
+# ── VS Code ───────────────────────────────────────────────────────────────────
+.vscode/
+
 # ── Jupyter ───────────────────────────────────────────────────────────────────
 .ipynb_checkpoints/
 
@@ -42,3 +45,15 @@ backend/malintent/malintent_model_local/
 *.db-wal
 *.sqlite
 *.sqlite3
+
+# ── Coverage Reports ──────────────────────────────────────────────────────────
+.coverage
+htmlcov/
+
+# ── Profiling Output ──────────────────────────────────────────────────────────
+profiling/
+*.prof
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/

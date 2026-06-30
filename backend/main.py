@@ -4,6 +4,8 @@ main.py — FastAPI application entry point for the MalIntent API.
 This file:
   - Loads .env before anything reads environment variables
   - Initialises the database (creates tables on startup)
+  - Warms the three-layer detection pipeline — including PromptGuard-86M —
+    BEFORE accepting traffic (Week 5)
   - Registers all middleware: CORS, rate limiting, request logging
   - Mounts all four routers under the /api/v1 prefix
 
@@ -20,6 +22,22 @@ silent integration failures.
 
 Rate limit: 200/minute for development (raised from the 60/minute production
 default).  Lower it to 60/minute before the demo.
+
+Week 5 change — model warm-up at startup
+-----------------------------------------
+Before Week 5, RiskScorer (and therefore the PromptGuard-86M model inside it)
+was lazily constructed by routers/scan.py on the FIRST call to /api/v1/scan/input.
+That meant whichever user happened to send the first prompt after a server
+restart paid the full cold-load cost (hundreds of milliseconds to a few
+seconds, depending on hardware) on top of the actual inference time — directly
+visible to Shravya as a one-off slow request while she's testing live.
+
+The lifespan handler below now explicitly warms the pipeline during startup,
+so "server is ready" genuinely means "every layer, including the ML model, is
+already resident in memory."  Restart the server and watch the logs: you
+should see the model-load line and a single warm-up confirmation BEFORE the
+"Database tables created / verified. Server is ready." line, and you should
+never see a second model-load line no matter how many requests follow.
 """
 
 from __future__ import annotations
@@ -66,9 +84,36 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create all database tables on startup, yield, then clean up on shutdown."""
+    """
+    Startup sequence (order matters):
+      1. Create / verify database tables.
+      2. Warm the full three-layer detection pipeline (Pattern + ML + FAISS),
+         which as a side effect loads PromptGuard-86M into memory exactly once.
+      3. Yield — server now accepts traffic with everything already warm.
+    """
     Base.metadata.create_all(bind=engine)
-    logger.info("Database tables created / verified.  Server is ready.")
+    logger.info("Database tables created / verified.")
+
+    warmup_start = time.perf_counter()
+    try:
+        # scan.warm_up() triggers routers/scan.py's cached scorer accessor,
+        # which in turn calls malintent.ml_classifier.get_classifier() — the
+        # Week 5 singleton.  This is the ONLY place in the request lifecycle
+        # where the model should ever be loaded from disk.
+        scan.warm_up()
+        warmup_ms = (time.perf_counter() - warmup_start) * 1000
+        logger.info("Detection pipeline warm and ready (%.0fms).", warmup_ms)
+    except Exception:
+        # Don't crash the whole server if the ML model isn't available yet
+        # (e.g. local dev before the model checkpoint has been downloaded) —
+        # routers/scan.py falls back to _StubScorer in that case, and we want
+        # the rest of the API (logs, stats, config) to stay usable.
+        logger.exception(
+            "Pipeline warm-up failed — server is starting anyway. "
+            "Scan requests will fall back to the stub scorer until this is fixed."
+        )
+
+    logger.info("Server is ready.")
     yield
     # Nothing to clean up in development; connection pool closes automatically.
 
@@ -81,9 +126,10 @@ app = FastAPI(
         "LLM Prompt Injection Firewall — REST API.  "
         "Three-layer detection engine (Pattern + ML + Semantic), "
         "PII-scrubbed logging, Fernet-encrypted configuration, "
-        "and a Secure Execution Layer skeleton."
+        "and a Secure Execution Layer with permission validation, tool "
+        "whitelisting, dynamic PII masking, and secret redaction."
     ),
-    version="0.4.0",    # bumped each week
+    version="0.5.0",    # bumped each week
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -157,10 +203,21 @@ async def root():
     Root health check.  Shravya's 'Test Connection' button can hit this endpoint
     as a lightweight ping before the full /api/v1/scan/input call.
     """
-    return {"service": "MalIntent API", "version": "0.4.0", "status": "operational"}
+    return {"service": "MalIntent API", "version": "0.5.0", "status": "operational"}
 
 
 @app.get("/health", tags=["health"])
 async def health():
-    """Explicit health endpoint — useful for Docker health checks and uptime monitors."""
-    return {"status": "ok"}
+    """
+    Explicit health endpoint — useful for Docker health checks and uptime monitors.
+
+    Week 5: also reports whether the ML classifier singleton is warm, so a
+    monitoring dashboard (or Shravya, mid-debugging) can distinguish "server up
+    but model still cold/stub" from "fully warm and ready for live traffic."
+    """
+    from malintent.ml_classifier import is_classifier_loaded
+
+    return {
+        "status": "ok",
+        "ml_classifier_warm": is_classifier_loaded(),
+    }

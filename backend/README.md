@@ -417,3 +417,229 @@ Verified endpoints:
 - ✅ Document scanning stub
 - ✅ Backend API tests completed
 - ✅ Frontend integration ready
+
+---
+
+# Week 5 – Security Enforcement Layer (SEL) + Pipeline Optimisation
+
+## What's Built
+
+### Security Enforcement Layer (SEL)
+
+Week 5 introduces the Security Enforcement Layer (SEL), an additional protection layer positioned around the existing three-layer detection pipeline.
+
+Unlike Layers A–C, which focus on detecting prompt injection attempts, SEL protects sensitive information before it reaches the Large Language Model.
+
+The Week 5 implementation introduces two new security modules:
+
+---
+
+### Dynamic Data Masking (SEL Module 2)
+
+- `sel/dynamic_data_masking.py`
+
+Protects structured tool responses before they are passed to the LLM.
+
+Features include:
+
+- Deterministic masking within a session
+- Phone number masking
+- Credit card masking
+- Email masking
+- SHA-256 hash-based cache keys
+- Session-isolated masking cache
+- Automatic cache cleanup
+- Shared Presidio Analyzer singleton reuse
+
+Example transformations:
+
+| Original             | Masked                      |
+| -------------------- | --------------------------- |
+| 9876543245           | 98**\*\***45                |
+| 4111111111111243     | \***\* \*\*** \*\*\*\* 1243 |
+| tushar.dev@gmail.com | tu\*\*\*\*@gmail.com        |
+
+---
+
+### Secret Protection Engine (SEL Module 3)
+
+- `sel/secret_protection_engine.py`
+
+Prevents accidental leakage of credentials and secrets returned by external tools.
+
+Detection methods include:
+
+- AWS Access Keys
+- Bearer Tokens
+- API Keys
+- PostgreSQL connection strings
+- MongoDB connection strings
+- MySQL connection strings
+- PEM Private Keys
+- High-entropy secret detection using Shannon Entropy
+
+Detected secrets are automatically replaced with:
+
+```
+[SECRET REDACTED]
+```
+
+---
+
+### Pipeline Warm-Up
+
+Week 5 introduces startup warm-up to eliminate first-request latency.
+
+Instead of loading models lazily during the first API request, FastAPI now warms the complete detection pipeline during application startup.
+
+Warmed components include:
+
+- PromptGuard ML Classifier
+- Semantic Engine
+- FAISS Index
+- Unified Risk Scorer
+
+This removes expensive model loading from user requests and ensures predictable latency.
+
+---
+
+### Singleton ML Classifier
+
+`malintent/ml_classifier.py`
+
+The PromptGuard model now follows a singleton architecture.
+
+Benefits:
+
+- Model loaded only once per process
+- Shared across FastAPI, tests and profiling
+- Eliminates duplicate memory usage
+- Removes repeated disk loading
+
+Runtime verification confirmed that repeated API requests reuse the same in-memory model instance without reloading.
+
+---
+
+### Performance Profiling
+
+Week 5 introduces:
+
+- `scripts/profile_pipeline.py`
+
+The profiler measures:
+
+- Layer A latency
+- Layer B latency
+- Layer C latency
+- Permission validation latency
+- Overall pipeline latency
+- Mean latency
+- p95 latency
+- Maximum latency
+
+---
+
+## Performance Results
+
+| Component                 | Mean Latency |
+| ------------------------- | -----------: |
+| Pattern Engine (Layer A)  |     ~0.09 ms |
+| PromptGuard ML (Layer B)  |    ~60.36 ms |
+| Semantic Engine (Layer C) |     ~8.35 ms |
+| Permission Validation     |        ~0 ms |
+| Overall Pipeline          |    ~68.81 ms |
+
+### Pipeline Performance
+
+| Metric          |        Result |
+| --------------- | ------------: |
+| Mean Latency    |  **68.81 ms** |
+| p95 Latency     |  **69.49 ms** |
+| Maximum Latency | **490.20 ms** |
+
+Result:
+
+✅ Pipeline satisfies the project performance target of **p95 < 100 ms**.
+
+---
+
+## Integration Changes
+
+Week 5 integrates the Security Enforcement Layer into the existing FastAPI pipeline.
+
+`routers/scan.py`
+
+New integrations include:
+
+- Dynamic Data Masking
+- Secret Protection Engine
+- Startup warm-up
+- Shared RiskScorer singleton
+
+The firewall pipeline now performs:
+
+1. Permission Validation
+2. Risk Scoring
+3. PII Scrubbing
+4. Threat Logging
+5. Dynamic Data Masking
+6. Secret Protection
+7. Safe response delivery
+
+---
+
+## Testing
+
+### Secret Protection Engine
+
+```bash
+python -m pytest tests/test_secret_protection.py -v
+```
+
+Result:
+
+- **10 / 10 tests passed**
+
+---
+
+### Dynamic Data Masking
+
+```bash
+python -m pytest tests/test_dynamic_data_masking.py -v
+```
+
+Result:
+
+- **9 / 9 tests passed**
+
+---
+
+### Runtime Validation
+
+Manual validation performed through Swagger UI.
+
+Verified:
+
+- Multiple attack prompts detected
+- Benign prompts processed successfully
+- Dynamic masking functioning correctly
+- Secret redaction functioning correctly
+- Singleton model loading verified
+- Startup warm-up verified
+
+---
+
+## Week 5 Deliverables
+
+- ✅ Security Enforcement Layer (SEL) implemented
+- ✅ Dynamic Data Masking module completed
+- ✅ Secret Protection Engine completed
+- ✅ Shared PromptGuard singleton implemented
+- ✅ Startup warm-up implemented
+- ✅ Pipeline profiler implemented
+- ✅ End-to-end integration completed
+- ✅ Secret Protection tests passed (10/10)
+- ✅ Dynamic Data Masking tests passed (9/9)
+- ✅ Pipeline latency validated
+- ✅ Runtime verification completed
+- ✅ p95 latency under 100 ms

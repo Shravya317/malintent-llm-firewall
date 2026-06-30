@@ -10,7 +10,8 @@ A lightweight multi-layer security framework designed to detect, classify, and p
 ✅ Week 2 Completed – ML Detection Engine (Layer B)
 ✅ Week 3 Completed – Semantic Similarity Engine (Layer C) + Unified Risk Scorer
 ✅ Week 4 Completed – FastAPI Backend + SEL Skeleton + Breach-Resilient Storage
-🚧 Remaining development in progress
+✅ Week 5 Completed – Security Enforcement Layer (Dynamic Data Masking + Secret Protection Engine) + Pipeline Optimisation
+🚧 Weeks 6–9 Remaining
 
 ---
 
@@ -46,11 +47,10 @@ A lightweight multi-layer security framework designed to detect, classify, and p
 - Semantic override: prompts with cosine similarity ≥ 0.90 to a known attack phrase are forced to BLOCK regardless of other layer scores
 - Full `RiskResult` dataclass — JSON-serialisable contract for the FastAPI layer and frontend
 - Integration tested: **200/200 = 100% accuracy** on 100 attack + 100 safe prompts
-- Average end-to-end latency: **62.4ms** (p95: 67.2ms) — well within 100ms budget
 
 ### FastAPI Backend (Week 4)
 
-A production-grade async REST API wrapping the three-layer detection engine, with encrypted storage, PII-scrubbed logging, and the SEL skeleton operational.
+A production-grade async REST API wrapping the three-layer detection engine, with encrypted storage, PII-scrubbed logging, and the Security Enforcement Layer integrated.
 
 **Endpoints:**
 
@@ -66,6 +66,27 @@ A production-grade async REST API wrapping the three-layer detection engine, wit
 
 **Middleware:** CORS, rate limiting (`slowapi`), and request logging middleware.
 
+### Pipeline Optimisation (Week 5)
+
+Week 5 focuses on reducing runtime latency while maintaining detection accuracy.
+
+Optimisations include:
+
+- Singleton PromptGuard model loading
+- Shared `RiskScorer` instance
+- Shared Presidio `AnalyzerEngine`
+- Startup pipeline warm-up
+- FAISS preloading
+- Runtime latency profiling
+
+Validated runtime performance:
+
+| Metric             | Result            |
+| ------------------ | ----------------- |
+| Mean Latency       | **68.81ms**       |
+| p95 Latency        | **69.49ms**       |
+| Performance Budget | **PASS (<100ms)** |
+
 ### Breach-Resilient Storage (Week 4)
 
 MalIntent is designed under the adversarial assumption that the firewall server itself may be compromised. Four independent mechanisms ensure a server breach cannot cascade into a data breach:
@@ -78,15 +99,53 @@ MalIntent is designed under the adversarial assumption that the firewall server 
 
 **4. Config and Secrets Encryption** — All values in the Configuration table (system context, custom rules, API keys, deployment settings) are encrypted at the application layer using Fernet symmetric encryption (`cryptography` library) before being written to the database. Values are decrypted in memory at runtime only and are never logged or persisted in plaintext.
 
-### Secure Execution Layer — Skeleton (Week 4)
+### Security Enforcement Layer (SEL)
 
-The SEL sits between the firewall and the LLM, and between the LLM and any external tools it calls. Two of the five SEL modules are now operational:
+The Security Enforcement Layer (SEL) secures communication between the firewall, the LLM, and external tools.
 
-**Tool Access Controller** (`sel/tool_access_controller.py`) — Intercepts every LLM-generated tool call and enforces a developer-defined whitelist of permitted operations. The whitelist is set at deployment time and cannot be overridden by a prompt at runtime. Wired as FastAPI middleware on `/api/v1/scan/input`.
+The following modules are currently implemented:
 
-**Permission Validator** (`sel/permission_validator.py`) — Checks the user's session role (Admin / Employee / Customer) against the requested tool scope before the LLM is invoked. This check reads the session role, not the prompt — a prompt saying "ignore permissions" is rejected at the system level, not by the LLM. Wired as FastAPI middleware on `/api/v1/scan/input`.
+**Tool Access Controller** (`sel/tool_access_controller.py`)
 
-The remaining three SEL modules — Dynamic Data Masking, Secret Protection Engine, and Action Audit Logger — are planned for Week 7.
+- Intercepts every LLM-generated tool invocation.
+- Enforces a deployment-defined whitelist.
+- Prevents prompt-based tool escalation.
+
+**Permission Validator** (`sel/permission_validator.py`)
+
+- Validates authenticated user roles.
+- Prevents privilege escalation.
+- Executes before the LLM processes a request.
+
+**Dynamic Data Masking (Week 5)** (`sel/dynamic_data_masking.py`)
+
+- Session-consistent masking of structured tool responses.
+- Phone number masking.
+- Credit card masking.
+- Email masking.
+- SHA-256 hash-based cache keys.
+- Session-isolated cache.
+- Shared Presidio Analyzer reuse.
+
+**Secret Protection Engine (Week 5)** (`sel/secret_protection_engine.py`)
+
+- Detects AWS access keys.
+- Detects bearer tokens.
+- Detects API keys.
+- Detects PostgreSQL credentials.
+- Detects MongoDB credentials.
+- Detects MySQL credentials.
+- Detects PEM private keys.
+- Detects high-entropy secrets using Shannon Entropy.
+- Automatically replaces detected secrets with:
+
+```text
+[SECRET REDACTED]
+```
+
+**Remaining SEL Module**
+
+- Action Audit Logger (Week 7)
 
 ### Dataset Engineering
 
@@ -134,14 +193,31 @@ Training corpus constructed from:
 | F1 Score  | 99.96%  |
 | ROC-AUC   | 0.99998 |
 
-### Full Three-Layer Pipeline (Week 3 Integration Test)
+### Full Three-Layer Pipeline (Week 5 Runtime Profile)
 
-| Test                        | Result                      |
-| --------------------------- | --------------------------- |
-| Accuracy (200 prompts)      | **100.0%** (target ≥ 95%)   |
-| Avg latency (20 prompts)    | **62.4ms** (target < 100ms) |
-| p95 latency                 | **67.2ms**                  |
-| Schema (all fields present) | **✅ Passed**               |
+| Metric             | Result               |
+| ------------------ | -------------------- |
+| Mean Latency       | **68.81ms**          |
+| p95 Latency        | **69.49ms**          |
+| Maximum Latency    | **490.20ms**         |
+| Performance Budget | **✅ PASS (<100ms)** |
+
+Pipeline profiling performed using:
+
+```bash
+python scripts/profile_pipeline.py
+```
+
+The runtime profiler measures:
+
+- Layer A latency
+- Layer B latency
+- Layer C latency
+- Permission validation latency
+- End-to-end pipeline latency
+- Mean latency
+- p95 latency
+- Maximum latency
 
 ### Layer-by-Layer Ablation
 
@@ -151,11 +227,33 @@ Training corpus constructed from:
 | Layer A + B     | 72.0%    | 56.0% | 0.0% | ~52ms       |
 | Layer A + B + C | 100.0%   | 0.0%  | 0.0% | ~60ms       |
 
-### Week 4 Backend Tests
+### Week 4 / Week 5 Backend Validation
 
-| Test Suite            | Result         |
-| --------------------- | -------------- |
-| `tests/test_week4.py` | **5/5 passed** |
+| Validation                           | Result           |
+| ------------------------------------ | ---------------- |
+| `tests/test_week4.py`                | **5/5 Passed**   |
+| `tests/test_secret_protection.py`    | **10/10 Passed** |
+| `tests/test_dynamic_data_masking.py` | **9/9 Passed**   |
+| FastAPI Startup                      | **Passed**       |
+| Runtime Warm-up                      | **Passed**       |
+| Pipeline Profiler                    | **Passed**       |
+| Singleton Model Verification         | **Passed**       |
+
+### Runtime Verification
+
+Manual verification was performed using the FastAPI Swagger UI.
+
+Verified successfully:
+
+- Startup pipeline warm-up
+- Shared PromptGuard singleton
+- Shared RiskScorer instance
+- Dynamic Data Masking
+- Secret Protection Engine
+- Runtime API validation
+- Multiple attack prompt detection
+- Multiple benign prompt evaluation
+- No repeated model loading across requests
 
 ---
 
@@ -181,14 +279,31 @@ Training corpus constructed from:
 - SHA-256 log tokenization + Privacy Mode flag (Week 4)
 - Fernet config encryption — keys from environment variables only (Week 4)
 - SQLCipher database encryption (Week 4)
-- SEL skeleton — Tool Access Controller + Permission Validator wired as middleware (Week 4)
+- Tool Access Controller (SEL Module 0)
+- Permission Validator (SEL Module 1)
+- Dynamic Data Masking (SEL Module 2)
+- Secret Protection Engine (SEL Module 3)
+- Singleton PromptGuard model loading
+- Shared `RiskScorer` architecture
+- Shared Presidio `AnalyzerEngine`
+- Startup pipeline warm-up
+- Runtime pipeline profiler
+- Pipeline latency validation
+- End-to-end FastAPI integration
+- Runtime API verification
+- Dynamic Data Masking tests (9/9 passed)
+- Secret Protection Engine tests (10/10 passed)
 
 ---
 
 ## Upcoming
 
-- React frontend — core dashboard (Week 5)
+- React frontend — core dashboard (Week 6)
 - Frontend remaining pages + demo features (Week 6)
-- Docker, deployment, SEL completion (Dynamic Data Masking, Secret Protection Engine, Action Audit Logger), Output Consistency Validator (Week 7)
-- Research paper, demo video, final polish (Week 8)
-- Buffer, final fixes, and submission (Week 9)
+- Dockerisation and deployment (Week 7)
+- Action Audit Logger (remaining SEL module) (Week 7)
+- Output Consistency Validator (Week 7)
+- Document Scanner (Week 7)
+- Research paper completion (Week 8)
+- Demo video and final evaluation (Week 8)
+- Final polish, bug fixes, and submission (Week 9)

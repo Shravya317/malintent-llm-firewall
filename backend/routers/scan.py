@@ -23,6 +23,23 @@ Order-of-operations note (from the project bible):
   Hashing after scrubbing would make the hash dependent on Presidio's behaviour,
   which can change across library versions.  Hashing the original provides a
   stable, version-independent fingerprint.
+
+Week 5 changes
+--------------
+1. warm_up() — a public function main.py's lifespan calls at startup so the
+   first /scan/input request after a server (re)start does not pay the cold
+   model-load cost.  This simply forces _get_scorer() to run once, eagerly,
+   instead of waiting for the first real request to trigger it.
+
+2. process_tool_response() — wires the two new SEL modules (dynamic_data_masking
+   and secret_protection_engine) into the response path.  Any data coming back
+   from an external tool call passes through here before the LLM (or the API
+   caller, while real LLM tool-calling is still a Week 7 item) ever sees it.
+   Order matters: structured PII fields are masked first (phone/card/email),
+   then any remaining free-text fields are scanned for secrets — a tool
+   response can legitimately contain both a masked card number AND a leaked
+   API key in an unrelated free-text field, and both protections must apply
+   independently.
 """
 
 from __future__ import annotations
@@ -46,6 +63,8 @@ from schemas import (
     ScanOutputResponse,
 )
 from sel.permission_validator import PermissionValidator
+from sel.dynamic_data_masking import mask as sel_mask
+from sel.secret_protection_engine import redact as sel_redact
 
 logger = logging.getLogger("malintent.scan")
 router = APIRouter()
@@ -57,7 +76,11 @@ _validator = PermissionValidator()
 # RiskScorer loads the PromptGuard ML model and FAISS index.  Loading happens
 # once on first access (lazy) rather than at import time, so that running the
 # test suite or importing this module doesn't require the full ML environment.
-# In production, the lifespan handler in main.py warms the scorer on startup.
+#
+# Week 5: in production, the lifespan handler in main.py calls warm_up() below
+# during startup — so "lazy" in practice still means "warm before the first
+# real request," it just keeps pytest collection and standalone module imports
+# cheap by not forcing the load at `import routers.scan` time.
 
 _scorer = None
 
@@ -77,6 +100,20 @@ def _get_scorer():
             )
             _scorer = _StubScorer()
     return _scorer
+
+
+def warm_up() -> None:
+    """
+    Force the RiskScorer singleton (and therefore PromptGuard-86M, via
+    malintent.ml_classifier.get_classifier()) to load NOW, rather than on the
+    first incoming request.
+
+    Called once from main.py's FastAPI lifespan handler at server startup.
+    Idempotent — safe to call more than once; only the first call does any
+    real work, every later call just returns immediately because _scorer is
+    already cached.
+    """
+    _get_scorer()
 
 
 class _StubResult:
@@ -131,6 +168,53 @@ class _StubScorer:
     """Stub RiskScorer for use when the Week 3 ML package is not yet available."""
     def score(self, prompt: str) -> _StubResult:  # noqa: D401
         return _StubResult(prompt)
+
+
+# ── SEL: TOOL RESPONSE PROCESSING (Week 5) ────────────────────────────────────
+
+def process_tool_response(raw_response: dict, session_id: str) -> dict:
+    """
+    Pass an external tool's response through SEL Modules 2 and 3 before it is
+    allowed to reach the LLM (or, until real tool-calling is wired in Week 7,
+    before it is returned to any caller exercising this function directly —
+    e.g. a forthcoming /scan/tool-response dev endpoint or test harness).
+
+    Order matters, and is intentional:
+      1. dynamic_data_masking.mask() first — masks STRUCTURED PII fields
+         (phone/card/email) using deterministic per-session patterns.
+      2. secret_protection_engine.redact() second — scans the (now
+         PII-masked) string fields for credentials/tokens/connection strings
+         and redacts them too.
+
+    Running redact() first would not be wrong, but masking first matches the
+    project bible's Module ordering (Module 2 then Module 3) and means a field
+    that happens to contain both a phone number AND an embedded secret (e.g.
+    a support-ticket free-text field) gets both protections applied regardless
+    of which pattern a given Presidio/regex pass happens to match first.
+
+    Parameters
+    ----------
+    raw_response : dict
+        The raw tool/database/API response, e.g.
+        {"customer_phone": "9876543245", "support_note": "called from Bearer ..."}
+    session_id : str
+        Required — see dynamic_data_masking.mask() for why determinism needs
+        a session scope.
+
+    Returns
+    -------
+    dict
+        A new dict, safe to pass to the LLM: PII fields masked, any secrets
+        in free-text fields redacted.
+    """
+    masked = sel_mask(raw_response, session_id=session_id)
+    processed: dict = {}
+    for field, value in masked.items():
+        if isinstance(value, str):
+            processed[field] = sel_redact(value)
+        else:
+            processed[field] = value
+    return processed
 
 
 # ── ENDPOINT: POST /scan/input ────────────────────────────────────────────────

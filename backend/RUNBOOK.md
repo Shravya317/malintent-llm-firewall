@@ -1,8 +1,8 @@
 # MalIntent LLM Firewall
 
-# Project Runbook (Weeks 1–4)
+# Project Runbook (Weeks 1–5)
 
-This document contains everything required to execute, test, verify, and demonstrate the MalIntent project through Week 4.
+This document contains everything required to execute, test, verify, and demonstrate the MalIntent project through Week 5.
 
 ---
 
@@ -13,14 +13,15 @@ This document contains everything required to execute, test, verify, and demonst
 3. Week 2 Runbook
 4. Week 3 Runbook
 5. Week 4 Runbook
-6. Model Information
-7. API Endpoints
-8. Common Configuration Keys
-9. Sample API Payloads
-10. Edge Case Testing
-11. Git Commands
-12. Common Problems
-13. Demo Checklist
+6. Week 5 Runbook
+7. Model Information
+8. API Endpoints
+9. Common Configuration Keys
+10. Sample API Payloads
+11. Edge Case Testing
+12. Git Commands
+13. Common Problems
+14. Demo Checklist
 
 ---
 
@@ -42,6 +43,9 @@ This script automatically runs:
 - Week 3 – Risk Scorer
 - Week 3 – Integration Tests
 - Week 4 – Backend API Tests
+- Week 5 – Secret Protection Tests
+- Week 5 – Dynamic Data Masking Tests
+- Week 5 – Pipeline Profiler
 
 ---
 
@@ -519,6 +523,203 @@ Backend components implemented:
 
 ---
 
+# Week 5 Runbook
+
+## Step 1 — Activate Virtual Environment
+
+```powershell
+venv\Scripts\activate
+```
+
+Expected:
+
+```text
+(venv) PS ...\backend>
+```
+
+---
+
+## Step 2 — Run Secret Protection Tests
+
+```powershell
+python -m pytest tests/test_secret_protection.py -v
+```
+
+Expected:
+
+```text
+10/10 tests passed.
+```
+
+These tests verify:
+
+- AWS Access Key detection
+- Bearer Token detection
+- API Key detection
+- PostgreSQL connection strings
+- MongoDB connection strings
+- MySQL connection strings
+- Entropy-based secret detection
+- False positive protection
+
+---
+
+## Step 3 — Run Dynamic Data Masking Tests
+
+```powershell
+python -m pytest tests/test_dynamic_data_masking.py -v
+```
+
+Expected:
+
+```text
+9/9 tests passed.
+```
+
+These tests verify:
+
+- Phone masking
+- Credit card masking
+- Email masking
+- Session consistency
+- SHA-256 cache
+- Session isolation
+- Cache cleanup
+
+---
+
+## Step 4 — Run Pipeline Profiler
+
+```powershell
+python scripts/profile_pipeline.py
+```
+
+This measures:
+
+- Layer A latency
+- Layer B latency
+- Layer C latency
+- Permission Validator latency
+- Total pipeline latency
+- Mean latency
+- p95 latency
+- Maximum latency
+
+Observed values:
+
+```text
+Mean latency ≈ 68.81 ms
+p95 latency ≈ 69.49 ms
+```
+
+Performance target:
+
+```text
+p95 < 100 ms
+```
+
+Status:
+
+```text
+PASS
+```
+
+---
+
+## Step 5 — Manual Runtime Verification
+
+```powershell
+uvicorn main:app --reload
+```
+
+Swagger:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Verify:
+
+```text
+POST /api/v1/scan/input
+```
+
+Ensure:
+
+- PromptGuard model loads only once.
+- RiskScorer is reused.
+- Semantic Engine is reused.
+- Startup warm-up occurs.
+- No repeated model loading across requests.
+- Dynamic Data Masking works.
+- Secret Protection works.
+- Pipeline responds correctly.
+
+---
+
+## Week 5 Features
+
+### Dynamic Data Masking
+
+- Session-consistent masking
+- Phone masking
+- Credit card masking
+- Email masking
+- SHA-256 cache keys
+- Session-isolated cache
+- Shared Presidio Analyzer
+
+### Secret Protection Engine
+
+- AWS Keys
+- Bearer Tokens
+- API Keys
+- Database connection strings
+- Private Keys
+- Shannon Entropy detection
+
+### Pipeline Optimisation
+
+- PromptGuard singleton
+- Shared RiskScorer
+- Startup warm-up
+- Shared Presidio Analyzer
+- Pipeline profiling
+
+---
+
+## Week 5 Deliverables
+
+Completed:
+
+- Dynamic Data Masking
+- Secret Protection Engine
+- Pipeline Profiler
+- Startup Warm-up
+- PromptGuard Singleton
+- Shared RiskScorer
+- Shared Presidio Analyzer
+- Secret Protection Tests Passed
+- Dynamic Data Masking Tests Passed
+- Runtime Verification Completed
+- Pipeline Profiling Completed
+
+---
+
+## Week 5 One Command
+
+```powershell
+.\run_tests.ps1
+```
+
+Automatically executes:
+
+1. Secret Protection Tests
+2. Dynamic Data Masking Tests
+3. Pipeline Profiler
+
+---
+
 # API Endpoints
 
 ## POST
@@ -537,6 +738,8 @@ Components:
 - PII Scrubber
 - SHA-256 Hashing
 - Threat Logging
+- Dynamic Data Masking
+- Secret Protection Engine
 
 ---
 
@@ -805,6 +1008,30 @@ Some manually selected prompts may not perfectly align with the model's learned 
 
 ---
 
+## Dynamic Data Masking Tests Fail
+
+Verify that `pii_scrubber.py`'s shared Presidio `AnalyzerEngine` singleton is importable and initializes correctly, since `dynamic_data_masking.py` reuses that instance rather than constructing its own. Confirm `session_id` is being passed on every call, and that the spaCy model required by Presidio is installed in the active virtual environment.
+
+---
+
+## Secret Protection Tests Fail
+
+Confirm that all expected secret patterns (AWS keys, Bearer tokens, API keys, PostgreSQL/MongoDB/MySQL connection strings) are present in the test fixtures, and that the entropy threshold used for entropy-based detection has not been altered. Re-run with `-v` to identify which specific detector is failing.
+
+---
+
+## MLClassifier Loaded Multiple Times
+
+This indicates that the PromptGuard singleton is not functioning correctly. The model should load exactly once at startup and be reused across all subsequent requests. Check that the classifier is being instantiated at module import time rather than per-request, and that no code path is bypassing the shared instance.
+
+---
+
+## Pipeline Profiler Exceeds 100 ms p95
+
+Check that startup warm-up has actually executed before profiling begins, and confirm that the PromptGuard model, RiskScorer, and Presidio Analyzer are all being reused rather than reloaded on each request. Repeated model loading across requests is the most common cause of latency regressions here.
+
+---
+
 # Demo Checklist
 
 ✓ Virtual Environment Activated
@@ -828,7 +1055,13 @@ Some manually selected prompts may not perfectly align with the model's learned 
 ✓ Document Stub Verified
 ✓ Git Push Completed
 ✓ Server Shutdown Successfully
+✓ Secret Protection tests passed
+✓ Dynamic Data Masking tests passed
+✓ Pipeline profiler executed
+✓ p95 latency below 100 ms
+✓ Singleton verified
+✓ Startup warm-up verified
 
 ---
 
-**Last Updated:** Week 4 Complete
+**Last Updated:** Week 5 Complete

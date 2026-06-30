@@ -10,6 +10,16 @@ This file is the most architecturally important file in the project.
 
   • RiskScorer  — loads all three layers once and exposes score(prompt) → RiskResult.
 
+Week 5 change
+-------------
+Layer B is now obtained via malintent.ml_classifier.get_classifier() instead of
+constructing MLClassifier("./malintent_model_local") directly.  This makes
+RiskScorer share the SAME process-wide model instance that main.py's lifespan
+warms up at server startup — so the first RiskScorer() built anywhere in the
+process (FastAPI, the profiler script, a test) reuses an already-warm model
+instead of triggering a second multi-second disk load.  See ml_classifier.py's
+module docstring for the full rationale.
+
 Aggregation weights
 -------------------
   Layer A (Pattern Engine / regex)    30%  — high precision, low recall on novel attacks
@@ -47,9 +57,9 @@ import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
-from .pattern_engine import PatternEngine       # Layer A — Week 1
-from .ml_classifier  import MLClassifier        # Layer B — Week 2
-from .semantic_engine import SemanticEngine     # Layer C — Week 3
+from .pattern_engine import PatternEngine        # Layer A — Week 1
+from .ml_classifier import get_classifier         # Layer B — Week 2, Week 5 singleton
+from .semantic_engine import SemanticEngine       # Layer C — Week 3
 
 
 # ── DECISION THRESHOLDS ───────────────────────────────────────────────────────
@@ -148,7 +158,9 @@ class RiskScorer:
 
     Usage
     -----
-    # Load once (takes ~2–4s as models initialise)
+    # Load once (takes ~2–4s as models initialise, UNLESS get_classifier() has
+    # already warmed Layer B elsewhere in the process — e.g. main.py's lifespan —
+    # in which case Layer B attaches instantly and only A/C pay an init cost)
     scorer = RiskScorer()
 
     # Call many times, fast (<100ms each)
@@ -169,8 +181,12 @@ class RiskScorer:
         print("[RiskScorer] Loading Layer A (Pattern Engine)...")
         self.layer_a = PatternEngine()
 
-        print("[RiskScorer] Loading Layer B (ML Classifier — PromptGuard-86M)...")
-        self.layer_b = MLClassifier("./malintent_model_local")
+        # Week 5: get_classifier() returns the process-wide singleton.  If
+        # main.py's lifespan already warmed it at startup, this is a cheap
+        # dict-style lookup; if not (e.g. a standalone script), this is where
+        # the one-time model load happens.
+        print("[RiskScorer] Attaching Layer B (ML Classifier — PromptGuard-86M)...")
+        self.layer_b = get_classifier("./malintent_model_local")
 
         print("[RiskScorer] Loading Layer C (Semantic Engine — FAISS)...")
         self.layer_c = SemanticEngine()
@@ -227,19 +243,10 @@ class RiskScorer:
 
         # ── LAYER C — Semantic Engine ─────────────────────────────────────────
         #
-        # FIX (v1.1): c_confidence is used unconditionally — NOT gated on c_fired.
-        #
-        # The previous implementation zeroed c_confidence when Layer C did not fire:
-        #   c_confidence = float(result_c.confidence) if c_fired else 0.0   ← WRONG
-        #
-        # This discarded meaningful signal.  SemanticEngine.search() already returns
-        # a normalised confidence that is < 1.0 when not fired (e.g. 0.92 for a
-        # sim=0.60 prompt against threshold=0.65).  Zeroing this out means a prompt
-        # scoring sim=0.64 (one point below threshold, clearly suspicious) contributed
-        # exactly zero to the risk score — the same as a completely benign prompt.
-        #
-        # The correct behaviour: always pass result_c.confidence to the weighted sum.
-        # SemanticEngine guarantees confidence ∈ [0.0, 1.0] in all cases.
+        # c_confidence is used unconditionally — NOT gated on c_fired.
+        # SemanticEngine.search() returns a normalised confidence that is < 1.0
+        # when not fired (e.g. 0.92 for a sim=0.60 prompt against threshold=0.65).
+        # Zeroing this out would discard meaningful near-miss signal.
 
         result_c     = self.layer_c.search(prompt)
         c_fired      = result_c.fired
@@ -374,12 +381,6 @@ class RiskScorer:
             accuracy = sum(1 for r in results if r.decision != "ALLOW") / len(prompts)
         """
         t0 = time.perf_counter()
-
-        # ── Collect raw confidences for active layers ──────────────────────
-        #
-        # FIX (v1.1): field names now match score() exactly.
-        # Previous version used result_a.confidence / result_a.fired which do not
-        # exist on PatternEngine — Layer A always contributed 0.0 in ablation.
 
         a_confidence = 0.0
         b_confidence = 0.0
