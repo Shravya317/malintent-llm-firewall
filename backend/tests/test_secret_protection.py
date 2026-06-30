@@ -30,7 +30,7 @@ def test_db_connection_string_redacted():
 
 
 def test_mongodb_connection_string_redacted():
-    text = "mongodb+srv://dbuser:hunter2pass@cluster0.mongodb.net/prod"
+    text = "mongodb+srv://fake_user:fake_password@example.mongodb.net/sampledb"
     result = redact(text)
     assert "hunter2pass" not in result
 
