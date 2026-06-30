@@ -11,7 +11,8 @@ A lightweight multi-layer security framework designed to detect, classify, and p
 ✅ Week 3 Completed – Semantic Similarity Engine (Layer C) + Unified Risk Scorer
 ✅ Week 4 Completed – FastAPI Backend + SEL Skeleton + Breach-Resilient Storage
 ✅ Week 5 Completed – Security Enforcement Layer (Dynamic Data Masking + Secret Protection Engine) + Pipeline Optimisation
-🚧 Weeks 6–9 Remaining
+✅ Week 6 Completed – Output Consistency Validation + Action Audit Logging
+🚧 Weeks 7–9 Remaining
 
 ---
 
@@ -57,7 +58,7 @@ A production-grade async REST API wrapping the three-layer detection engine, wit
 | Method | Endpoint                | Description                                                                           |
 | ------ | ----------------------- | ------------------------------------------------------------------------------------- |
 | POST   | `/api/v1/scan/input`    | Full firewall — runs all three layers, PII scrubbing, SHA-256 hashing, threat logging |
-| POST   | `/api/v1/scan/output`   | Output Consistency Validator (stub — Week 7)                                          |
+| POST   | `/api/v1/scan/output`   | Output Consistency Validator (fully implemented)                                      |
 | POST   | `/api/v1/scan/document` | RAG Document Pre-Scanner (stub — Week 7)                                              |
 | GET    | `/api/v1/logs`          | Returns ThreatLog entries                                                             |
 | GET    | `/api/v1/stats`         | Returns dashboard statistics                                                          |
@@ -86,6 +87,17 @@ Validated runtime performance:
 | Mean Latency       | **68.81ms**       |
 | p95 Latency        | **69.49ms**       |
 | Performance Budget | **PASS (<100ms)** |
+
+### Output Consistency Validation (Week 6)
+
+`malintent/output_validator.py` adds a second line of defence that validates generated LLM responses before they are returned to users, rather than inspecting the incoming prompt.
+
+- Semantic similarity validation using `all-MiniLM-L6-v2`
+- High-risk regex pattern detection
+- AND-rule (semantic deviation AND dangerous pattern)
+- Runtime configurable system context
+- Structured JSON response
+- Human-readable flag reasons
 
 ### Breach-Resilient Storage (Week 4)
 
@@ -143,9 +155,13 @@ The following modules are currently implemented:
 [SECRET REDACTED]
 ```
 
-**Remaining SEL Module**
+**Action Audit Logger (Week 6)**
 
-- Action Audit Logger (Week 7)
+- Structured audit logging
+- Records allow/deny tool decisions
+- Timestamped events
+- JSON-compatible audit entries
+- Integrated with routers/scan.py
 
 ### Dataset Engineering
 
@@ -227,6 +243,16 @@ The runtime profiler measures:
 | Layer A + B     | 72.0%    | 56.0% | 0.0% | ~52ms       |
 | Layer A + B + C | 100.0%   | 0.0%  | 0.0% | ~60ms       |
 
+### Output Validator Evaluation
+
+- 10 adversarial response cases
+- 7 detected
+- 70% catch rate
+- Validated through `test_output_validator.py`
+- Uses semantic similarity plus high-risk pattern matching
+
+The AND-rule (semantic deviation AND dangerous pattern) intentionally trades some catch rate for a lower false-positive rate, so on-topic, benign responses are not flagged.
+
 ### Week 4 / Week 5 Backend Validation
 
 | Validation                           | Result           |
@@ -234,10 +260,13 @@ The runtime profiler measures:
 | `tests/test_week4.py`                | **5/5 Passed**   |
 | `tests/test_secret_protection.py`    | **10/10 Passed** |
 | `tests/test_dynamic_data_masking.py` | **9/9 Passed**   |
+| `tests/test_output_validator.py`     | **12/12 Passed** |
+| `tests/test_sel_end_to_end.py`       | **5/5 Passed**   |
 | FastAPI Startup                      | **Passed**       |
 | Runtime Warm-up                      | **Passed**       |
 | Pipeline Profiler                    | **Passed**       |
 | Singleton Model Verification         | **Passed**       |
+| Overall backend suite                | **99/99 Passed** |
 
 ### Runtime Verification
 
@@ -293,6 +322,13 @@ Verified successfully:
 - Runtime API verification
 - Dynamic Data Masking tests (9/9 passed)
 - Secret Protection Engine tests (10/10 passed)
+- Output Consistency Validator
+- Action Audit Logger
+- Output validation endpoint
+- Semantic response validation
+- Adversarial response evaluation
+- SEL end-to-end integration
+- 99/99 backend tests passed
 
 ---
 
@@ -301,8 +337,6 @@ Verified successfully:
 - React frontend — core dashboard (Week 6)
 - Frontend remaining pages + demo features (Week 6)
 - Dockerisation and deployment (Week 7)
-- Action Audit Logger (remaining SEL module) (Week 7)
-- Output Consistency Validator (Week 7)
 - Document Scanner (Week 7)
 - Research paper completion (Week 8)
 - Demo video and final evaluation (Week 8)

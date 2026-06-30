@@ -643,3 +643,246 @@ Verified:
 - ✅ Pipeline latency validated
 - ✅ Runtime verification completed
 - ✅ p95 latency under 100 ms
+
+---
+
+# Week 6 – Output Consistency Validation + Action Audit Logging
+
+## What's Built
+
+Week 6 extends MalIntent beyond input prompt detection by introducing
+post-generation output validation and execution audit capabilities.
+
+Unlike Layers A–C, which analyse user prompts before they reach the LLM,
+the Output Validator analyses the LLM's generated response against the
+original system context to detect semantic drift, policy violations, and
+sensitive information disclosure.
+
+Simultaneously, the Action Audit Logger records every Security Enforcement
+Layer (SEL) decision, providing a structured audit trail for tool execution
+events.
+
+---
+
+## Output Consistency Validator
+
+### `malintent/output_validator.py`
+
+Implements a dual-stage output verification module.
+
+Features include:
+
+- Semantic similarity validation between system context and generated response
+- SentenceTransformer embedding-based comparison
+- Configurable similarity threshold
+- High-risk pattern detection using curated regular expressions
+- AND-rule decision logic (semantic deviation AND high-risk pattern required)
+- Human-readable flag reason generation
+- Runtime system-context updates
+- Structured JSON response for FastAPI integration
+
+Validation output includes:
+
+- Consistency decision
+- Similarity score
+- Flag reason
+- High-risk pattern list
+
+---
+
+## Action Audit Logger
+
+### `sel/action_audit_logger.py`
+
+Introduces structured audit logging for Security Enforcement Layer actions.
+
+Features include:
+
+- Tool execution logging
+- Permission validation outcomes
+- Allow / Deny decisions
+- Timestamped audit entries
+- JSON-compatible log structure
+- Integration with existing threat logging pipeline
+
+The audit logger improves traceability and provides execution evidence for
+security-sensitive tool invocations.
+
+---
+
+## API Enhancements
+
+### Updated Endpoint
+
+`POST /api/v1/scan/output`
+
+The previous placeholder endpoint is now fully implemented.
+
+Request:
+
+```json
+{
+  "llm_response": "...",
+  "system_context": "..."
+}
+```
+
+Response:
+
+```json
+{
+  "consistent": false,
+  "similarity_score": 0.27,
+  "flag_reason": "...",
+  "high_risk_patterns_found": ["sensitive_format_disclosure"]
+}
+```
+
+The endpoint validates generated responses before they are returned to the
+user, providing an additional defensive layer against accidental information
+disclosure.
+
+---
+
+## Integration Changes
+
+### `routers/scan.py`
+
+Week 6 integrates the Output Validator and Action Audit Logger into the
+existing FastAPI pipeline.
+
+Updated processing sequence:
+
+1. Permission Validation
+2. Risk Scoring
+3. PII Scrubbing
+4. Threat Logging
+5. Dynamic Data Masking
+6. Secret Protection
+7. Output Consistency Validation
+8. Action Audit Logging
+9. Safe Response Delivery
+
+---
+
+## Testing
+
+### Output Validator
+
+```bash
+python -m pytest tests/test_output_validator.py -v
+```
+
+Result:
+
+- **12 / 12 tests passed**
+
+The test suite validates:
+
+- Guide worked examples
+- Structural invariants
+- Context update behaviour
+- Catch-rate reporting
+
+---
+
+### End-to-End SEL Integration
+
+```bash
+python -m pytest tests/test_sel_end_to_end.py -v
+```
+
+Result:
+
+- **5 / 5 tests passed**
+
+Validated:
+
+- Allowed tool calls
+- Denied tool calls
+- Permission enforcement
+- Audit logging
+- Security policy integration
+
+---
+
+### Full Backend Validation
+
+```bash
+python -m pytest tests/ -v
+```
+
+Result:
+
+- **99 / 99 tests passed**
+
+Verified:
+
+- Pattern Engine
+- ML Classifier
+- Semantic Engine
+- Risk Scorer
+- Dynamic Data Masking
+- Secret Protection
+- Output Validator
+- Security Enforcement Layer
+- FastAPI integration
+
+---
+
+## Manual Verification
+
+Interactive testing performed through Swagger UI.
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Verified:
+
+- `/scan/input`
+- `/scan/output`
+- `/scan/document`
+
+Confirmed:
+
+- Semantic consistency scoring
+- High-risk pattern detection
+- Structured validation responses
+- End-to-end backend integration
+
+---
+
+## Output Validator Evaluation
+
+Week 6 includes an adversarial evaluation consisting of ten simulated LLM
+responses designed to assess the effectiveness of the Output Validator.
+
+Evaluation summary:
+
+| Metric            |    Result |
+| ----------------- | --------: |
+| Test Cases        |        10 |
+| Responses Flagged |         7 |
+| Catch Rate        | **70.0%** |
+
+The evaluation demonstrates that the validator successfully detects explicit
+sensitive disclosures and instruction leakage while intentionally avoiding
+false positives caused by harmless topic drift through its semantic-plus-pattern
+AND-rule.
+
+---
+
+## Week 6 Deliverables
+
+- ✅ Output Consistency Validator implemented
+- ✅ Semantic response validation completed
+- ✅ High-risk pattern detection integrated
+- ✅ Action Audit Logger implemented
+- ✅ `/scan/output` endpoint completed
+- ✅ SEL end-to-end integration completed
+- ✅ Output Validator test suite completed
+- ✅ End-to-end SEL tests completed
+- ✅ Swagger endpoint validated
+- ✅ 99/99 backend tests passed
+- ✅ Adversarial evaluation completed (70% catch rate)

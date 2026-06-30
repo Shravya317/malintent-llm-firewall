@@ -1,8 +1,8 @@
 # MalIntent LLM Firewall
 
-# Project Runbook (Weeks 1–5)
+# Project Runbook (Weeks 1–6)
 
-This document contains everything required to execute, test, verify, and demonstrate the MalIntent project through Week 5.
+This document contains everything required to execute, test, verify, and demonstrate the MalIntent project through Week 6.
 
 ---
 
@@ -14,14 +14,15 @@ This document contains everything required to execute, test, verify, and demonst
 4. Week 3 Runbook
 5. Week 4 Runbook
 6. Week 5 Runbook
-7. Model Information
-8. API Endpoints
-9. Common Configuration Keys
-10. Sample API Payloads
-11. Edge Case Testing
-12. Git Commands
-13. Common Problems
-14. Demo Checklist
+7. Week 6 Runbook
+8. Model Information
+9. API Endpoints
+10. Common Configuration Keys
+11. Sample API Payloads
+12. Edge Case Testing
+13. Git Commands
+14. Common Problems
+15. Demo Checklist
 
 ---
 
@@ -46,6 +47,9 @@ This script automatically runs:
 - Week 5 – Secret Protection Tests
 - Week 5 – Dynamic Data Masking Tests
 - Week 5 – Pipeline Profiler
+- Week 6 – Output Validator Tests
+- Week 6 – Output Validator Catch Rate
+- Week 6 – SEL End-to-End Tests
 
 ---
 
@@ -720,6 +724,162 @@ Automatically executes:
 
 ---
 
+# Week 6 Runbook
+
+## Step 1 — Activate Virtual Environment
+
+```powershell
+venv\Scripts\activate
+```
+
+Expected:
+
+```text
+(venv) PS ...\backend>
+```
+
+---
+
+## Step 2 — Run Output Validator Tests
+
+```powershell
+python -m pytest tests/test_output_validator.py -v
+```
+
+Expected:
+
+```text
+12/12 tests passed.
+```
+
+These tests verify:
+
+- Semantic similarity validation
+- High-risk pattern detection
+- AND-rule enforcement
+- Runtime context updates
+- Output consistency decisions
+
+---
+
+## Step 3 — Print Adversarial Catch Rate
+
+```powershell
+python -m pytest tests/test_output_validator.py::test_print_catch_rate_summary -v -s
+```
+
+Expected:
+
+- 10 adversarial cases printed
+- PASS / FLAGGED decisions shown
+- Catch-rate summary displayed
+
+Current result:
+
+```text
+7 / 10 adversarial responses detected
+70% catch rate
+```
+
+The conservative AND-rule intentionally minimizes false positives, which is why the catch rate is not higher — a response is only flagged when it is both semantically distant from the system context and contains a high-risk pattern, so on-topic, benign responses are not penalised.
+
+---
+
+## Step 4 — Run SEL End-to-End Tests
+
+```powershell
+python -m pytest tests/test_sel_end_to_end.py -v
+```
+
+Expected:
+
+```text
+5/5 tests passed.
+```
+
+These tests verify:
+
+- Tool Access Controller
+- Permission Validator
+- Action Audit Logger
+- Audit logging
+- Permitted decisions
+- Denied decisions
+
+---
+
+## Step 5 — Manual Runtime Verification
+
+```powershell
+uvicorn main:app --reload
+```
+
+Swagger:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Verify:
+
+```text
+POST /api/v1/scan/output
+```
+
+Test with:
+
+- A safe banking response.
+- An adversarial response.
+
+Confirm the API returns:
+
+- `consistent`
+- `similarity_score`
+- `flag_reason`
+- `high_risk_patterns_found`
+
+---
+
+## Week 6 Features
+
+- Output Consistency Validator
+- Semantic Similarity Validation
+- High-Risk Pattern Detection
+- Runtime Context Updates
+- Action Audit Logger
+- End-to-End SEL Orchestration
+- Adversarial Evaluation Suite
+
+---
+
+## Week 6 Deliverables
+
+Completed:
+
+- Output Validator
+- Action Audit Logger
+- scan/output endpoint
+- Output Validation Tests
+- SEL End-to-End Tests
+- Adversarial Evaluation
+- Runtime Verification Completed
+
+---
+
+## Week 6 One Command
+
+```powershell
+.\run_tests.ps1
+```
+
+Automatically executes:
+
+1. Output Validator Tests
+2. Catch Rate Summary
+3. SEL End-to-End Tests
+
+---
+
 # API Endpoints
 
 ## POST
@@ -745,9 +905,9 @@ Components:
 
 ### /api/v1/scan/output
 
-Output Consistency Validator.
+Fully implemented Output Consistency Validator.
 
-(Currently implemented as a Week 4 stub.)
+Performs semantic consistency checking, high-risk pattern detection, AND-rule validation, and returns structured output validation results before LLM responses are delivered.
 
 ---
 
@@ -1032,6 +1192,18 @@ Check that startup warm-up has actually executed before profiling begins, and co
 
 ---
 
+## Output Validator Tests Fail
+
+Confirm that `sentence-transformers` is installed in the active virtual environment and that the `all-MiniLM-L6-v2` model has downloaded successfully. Verify the configured similarity threshold has not been altered, and check that the high-risk regex patterns in `output_validator.py` still match the fixtures used by the test suite.
+
+---
+
+## SEL End-to-End Tests Fail
+
+Confirm that the SQLite database has been created and is writable, and that the `ActionLog` model is registered correctly. Verify `process_tool_call()` is reachable from the test path, and that the Action Audit Logger is properly integrated so that allow/deny decisions are actually being recorded.
+
+---
+
 # Demo Checklist
 
 ✓ Virtual Environment Activated
@@ -1061,7 +1233,13 @@ Check that startup warm-up has actually executed before profiling begins, and co
 ✓ p95 latency below 100 ms
 ✓ Singleton verified
 ✓ Startup warm-up verified
+✓ Output Validator Tests Passed
+✓ Adversarial Catch Rate Generated
+✓ Output Validation Endpoint Verified
+✓ Action Audit Logger Verified
+✓ SEL End-to-End Tests Passed
+✓ Runtime Output Validation Verified
 
 ---
 
-**Last Updated:** Week 5 Complete
+**Last Updated:** Week 6 Complete

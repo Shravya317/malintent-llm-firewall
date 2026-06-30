@@ -9,6 +9,16 @@ FastAPI uses these schemas for:
 IMPORTANT: The ScanInputResponse and StatsResponse shapes are the integration
 contract for the Sunday sync (Jul 6).  Any field rename after that point is a
 breaking change that requires a message to Shravya before merging.
+
+Week 6 change
+-------------
+ScanOutputResponse gains a new field: high_risk_patterns_found. This is
+ADDITIVE ONLY — every existing field (consistent, similarity_score,
+flag_reason) keeps its exact name and type, so nothing already built against
+this schema breaks. The new field surfaces OutputValidator's pattern-match
+detail (personal data / config disclosure / out-of-scope instruction matches)
+for the Threat Analysis forensics page, defaulting to an empty list so any
+caller that doesn't read it is unaffected.
 """
 
 from __future__ import annotations
@@ -68,16 +78,22 @@ class ScanInputResponse(BaseModel):
 # ── SCAN / OUTPUT ─────────────────────────────────────────────────────────────
 
 class ScanOutputRequest(BaseModel):
-    """Request body for POST /api/v1/scan/output (full implementation in Week 7)."""
+    """Request body for POST /api/v1/scan/output."""
     llm_response:   str
     system_context: str = Field(..., description="What the LLM is supposed to do")
 
 
 class ScanOutputResponse(BaseModel):
-    """Response body for POST /api/v1/scan/output."""
-    consistent:       bool
-    similarity_score: float
-    flag_reason:      Optional[str]
+    """
+    Response body for POST /api/v1/scan/output.
+
+    high_risk_patterns_found is new in Week 6 — additive only, defaults to an
+    empty list, does not affect any existing field. See module docstring.
+    """
+    consistent:                bool
+    similarity_score:          float
+    flag_reason:                Optional[str]
+    high_risk_patterns_found:  List[str] = Field(default_factory=list)
 
 
 # ── SCAN / DOCUMENT ───────────────────────────────────────────────────────────
