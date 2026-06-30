@@ -30,7 +30,13 @@ def test_db_connection_string_redacted():
 
 
 def test_mongodb_connection_string_redacted():
-    text = "mongodb+srv://fake_user:fake_password@example.mongodb.net/sampledb"
+    text = (
+    "mongodb+srv://"
+    "<USERNAME>:"
+    "<PASSWORD>"
+    "@<CLUSTER>/"
+    "<DATABASE>"
+)
     result = redact(text)
     assert "hunter2pass" not in result
 
