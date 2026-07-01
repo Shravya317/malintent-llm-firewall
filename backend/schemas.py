@@ -19,6 +19,16 @@ this schema breaks. The new field surfaces OutputValidator's pattern-match
 detail (personal data / config disclosure / out-of-scope instruction matches)
 for the Threat Analysis forensics page, defaulting to an empty list so any
 caller that doesn't read it is unaffected.
+
+Week 6 change (2)
+------------------
+ThreatDistributionItem.pct changed from int to float. This IS a contract
+change — flag to Shravya before merging. Reason: whole-number rounding was
+losing precision on the doughnut chart (e.g. many small categories all
+rounding to the same integer, or percentages not summing to 100). Frontend
+TypeScript type should move from `pct: number` (already fine, TS has no
+int/float distinction) but any client-side logic that assumed whole numbers
+(e.g. display formatting) should be checked.
 """
 
 from __future__ import annotations
@@ -126,6 +136,16 @@ class ThreatLogEntry(BaseModel):
     latency_ms:       Optional[float]
     privacy_mode:     str
 
+    # Week 5 frontend forensic dashboard fields
+    # These are additive only. They may be None until later weeks populate
+    # them with real values.
+
+    prompt_full: Optional[str] = None
+    target_model: Optional[str] = None
+    source_ip: Optional[str] = None
+    client_app: Optional[str] = None
+    explanation: Optional[str] = None
+
     # Pydantic v2 — allows .model_validate(orm_instance)
     model_config = {"from_attributes": True}
 
@@ -138,6 +158,17 @@ class HourlyBucket(BaseModel):
     total:         int
     blocked:       int
 
+class ThreatDistributionItem(BaseModel):
+    """
+    One slice of the Threat Distribution doughnut chart.
+
+    label : attack category shown in the legend
+    pct   : percentage of total threats (float — see Week 6 change (2) above)
+    color : frontend colour used for the chart
+    """
+    label: str
+    pct: float
+    color: str
 
 class StatsResponse(BaseModel):
     """
@@ -151,8 +182,9 @@ class StatsResponse(BaseModel):
     total_flagged:   int
     total_allowed:   int
     avg_risk_score:  float
-    avg_latency_ms:  float           # populated fully in Week 7; 0.0 for now
+    avg_latency_ms:  float
     hourly_trend:    List[HourlyBucket] = Field(default_factory=list)
+    threat_distribution: List[ThreatDistributionItem] = Field(default_factory=list)
 
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
