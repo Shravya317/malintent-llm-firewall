@@ -93,7 +93,6 @@ class ActionLog(Base):
     # Reference back to the originating firewall log entry
     threat_log_id   = Column(Integer,      nullable=True)    # FK to ThreatLog.id (loose)
 
-
 class Configuration(Base):
     """
     Encrypted key-value config store for all deployment settings.

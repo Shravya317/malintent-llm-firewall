@@ -1,44 +1,214 @@
 """
-database.py — SQLAlchemy engine and session factory.
+backend/app/database.py
+=======================
+Week 7 revision: single PostgreSQL engine across dev (local Docker) and prod (Supabase).
+SQLite / SQLCipher removed entirely.
 
-Uses SQLite in development (malintent.db in the backend/ directory).
-The engine is configured with check_same_thread=False, which is required when
-using SQLite with FastAPI's async request handling (different threads may hold
-the same connection). This is safe here because SQLAlchemy's session factory
-handles thread-local session management internally.
+Environment variables required
+-------------------------------
+DATABASE_URL   - SQLAlchemy-compatible Postgres URL.
+                 Dev:  postgresql://malintent:<password>@localhost:5432/malintent
+                 Prod: Supabase Transaction Pooler URL (port 6543)
+PG_CRYPTO_KEY  - 32-byte hex secret for pgcrypto field-level encryption on the
+                 configuration table. Completely separate from the Week 4 FERNET_KEY.
 
-In production this file is swapped for a PostgreSQL+pgcrypto configuration;
-the application code above this layer does not change.
+Encryption layers
+-----------------
+Layer 1 (app-layer):   Week 4 Fernet symmetric encryption via config.py/crud.py.
+Layer 2 (DB-layer):    pgcrypto pgp_sym_encrypt / pgp_sym_decrypt on the
+                       configuration.value_encrypted bytea column (this file).
+
+Both layers must be in place for a breach of the database file to be useful to
+an attacker — they would need the PG_CRYPTO_KEY AND the FERNET_KEY, both of
+which are environment-only secrets that never touch disk.
 """
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
 import os
+import logging
+from contextlib import contextmanager
 
-# Allow the database URL to be overridden by environment variable for production.
-DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./malintent.db")
+from sqlalchemy import create_engine, text, event
+from sqlalchemy.orm import sessionmaker, Session
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Environment configuration
+# ---------------------------------------------------------------------------
+
+DATABASE_URL: str = os.environ["DATABASE_URL"]
+"""
+Full Postgres connection URL.
+Dev example:  postgresql://malintent:password@localhost:5432/malintent
+Prod example: postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
+"""
+
+PG_CRYPTO_KEY: str = os.environ["PG_CRYPTO_KEY"]
+"""
+Key used by pgcrypto's pgp_sym_encrypt / pgp_sym_decrypt for field-level
+column encryption on the configuration table.
+Generate once with: python -c "import secrets; print(secrets.token_hex(32))"
+Never reuse the dev key in production.
+"""
+
+# ---------------------------------------------------------------------------
+# SQLAlchemy engine
+# ---------------------------------------------------------------------------
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False},  # required for SQLite with FastAPI
+    # pool_pre_ping reconnects transparently after Supabase connection pooler
+    # drops idle connections (common on the free tier).
+    pool_pre_ping=True,
+    pool_size=5,
+    max_overflow=10,
+    # Echo SQL only in DEBUG mode to avoid leaking query content to logs in prod.
+    echo=os.getenv("SQLALCHEMY_ECHO", "false").lower() == "true",
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
 
 
-class Base(DeclarativeBase):
-    """Declarative base — all ORM models inherit from this."""
-    pass
-
+# ---------------------------------------------------------------------------
+# FastAPI dependency
+# ---------------------------------------------------------------------------
 
 def get_db():
     """
-    FastAPI dependency — yields a scoped database session and closes it
-    after the request completes, whether it succeeded or raised an exception.
-    Usage: db: Session = Depends(get_db)
+    FastAPI dependency that yields a SQLAlchemy session and guarantees cleanup.
+
+    Usage in a route:
+        @router.get("/example")
+        def example(db: Session = Depends(get_db)):
+            ...
     """
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+
+@contextmanager
+def get_db_context():
+    """
+    Context-manager version for use outside FastAPI (scripts, tests, etc.).
+
+    Usage:
+        with get_db_context() as db:
+            db.execute(...)
+    """
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+# ---------------------------------------------------------------------------
+# pgcrypto field-level encryption helpers
+# ---------------------------------------------------------------------------
+
+def encrypt_field(session: Session, plaintext: str) -> bytes:
+    """
+    Encrypt a plaintext string with pgcrypto's pgp_sym_encrypt using PG_CRYPTO_KEY.
+
+    Returns the ciphertext as a bytes object suitable for storage in a
+    LargeBinary (bytea) column.
+
+    This call executes inside the caller's session/transaction — the caller
+    is responsible for committing or rolling back.
+
+    Example
+    -------
+    >>> ciphertext = encrypt_field(db, "sk-openai-secret-key")
+    >>> config_row.value_encrypted = ciphertext
+    >>> db.commit()
+    """
+    result = session.execute(
+        text("SELECT pgp_sym_encrypt(:val, :key)"),
+        {"val": plaintext, "key": PG_CRYPTO_KEY},
+    )
+    return result.scalar()
+
+
+def decrypt_field(session: Session, ciphertext: bytes) -> str:
+    """
+    Decrypt a pgcrypto-encrypted bytea value using PG_CRYPTO_KEY.
+
+    Raises a sqlalchemy.exc.DBAPIError (wrapping a Postgres ERROR) if the
+    key is wrong or the ciphertext is corrupt — this is the intended behaviour
+    and is what proves the encryption is active in verification tests.
+
+    Example
+    -------
+    >>> plaintext = decrypt_field(db, config_row.value_encrypted)
+    """
+    result = session.execute(
+        text("SELECT pgp_sym_decrypt(:val, :key)"),
+        {"val": ciphertext, "key": PG_CRYPTO_KEY},
+    )
+    return result.scalar()
+
+
+def verify_pgcrypto(session: Session) -> bool:
+    """
+    Smoke-test that the pgcrypto extension is installed and that a round-trip
+    encrypt → decrypt returns the original value.
+
+    Call this at application startup to fail fast if the migration has not
+    been applied to this database.
+
+    Returns True on success, raises RuntimeError on failure.
+    """
+    try:
+        result = session.execute(
+            text(
+                "SELECT pgp_sym_decrypt("
+                "  pgp_sym_encrypt('malintent-pgcrypto-ok', 'probe-key'),"
+                "  'probe-key'"
+                ") AS round_trip"
+            )
+        )
+        value = result.scalar()
+        if value != "malintent-pgcrypto-ok":
+            raise RuntimeError(
+                f"pgcrypto round-trip mismatch: got {value!r}"
+            )
+        logger.info("pgcrypto verification: OK")
+        return True
+    except Exception as exc:
+        raise RuntimeError(
+            "pgcrypto is not available on this database. "
+            "Run migrations/007_enable_pgcrypto.sql and try again."
+        ) from exc
+
+
+# ---------------------------------------------------------------------------
+# Startup helper (called from main.py lifespan)
+# ---------------------------------------------------------------------------
+
+def init_db() -> None:
+    """
+    Import all models so that Base.metadata is populated, then create any
+    missing tables.  In production the migration files are the authoritative
+    schema source; create_all() is a safety net for the dev container's
+    first boot.
+    """
+    # Local import to avoid circular imports at module load time.
+    from models import Base  # noqa: F401 — side-effect: registers all models
+
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables verified / created.")
+
+    # Verify pgcrypto is available before accepting traffic.
+    with get_db_context() as db:
+        verify_pgcrypto(db)

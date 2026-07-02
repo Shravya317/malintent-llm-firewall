@@ -1,0 +1,99 @@
+# =============================================================================
+# docker-compose.yml
+# =============================================================================
+# Orchestrates two services for LOCAL development:
+#   backend  — FastAPI + ML model (mirrors the Render production container)
+#   db       — postgres:16 (mirrors the Supabase production schema)
+#
+# Production database (Supabase) is EXTERNAL — not in this compose file.
+# To use the Render + Supabase production stack, set DATABASE_URL in .env to
+# the Supabase connection string before running docker compose up.
+#
+# Usage
+# -----
+#   cp backend/.env.example backend/.env   # fill in your values
+#   docker compose up --build              # first boot builds the image
+#   docker compose up                      # subsequent boots (faster)
+#   docker compose exec backend pytest tests/ -v  # run full test suite
+#   docker compose down                    # stop and remove containers
+#   docker compose down -v                 # also remove the pgdata volume
+#
+# Environment variables (from .env at the repo root or backend/.env)
+# ------------------------------------------------------------------
+#   POSTGRES_PASSWORD   — password for the local malintent postgres user
+#   FERNET_KEY          — Week 4 app-layer config encryption key
+#   PG_CRYPTO_KEY       — pgcrypto field-level encryption key (Week 7)
+#   LLM_API_KEY         — your LLM provider API key (Groq / OpenAI)
+#   CORS_ALLOWED_ORIGINS — comma-separated list of allowed frontend origins
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # backend — FastAPI application + ML detection engine
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Pass HuggingFace token at build time so it doesn't end up in the image.
+        HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
+    image: malintent-backend:local
+    container_name: malintent_backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Points at the local postgres:16 service defined below.
+      DATABASE_URL: postgresql://malintent:${POSTGRES_PASSWORD}@db:5432/malintent
+      FERNET_KEY: ${FERNET_KEY}
+      PG_CRYPTO_KEY: ${PG_CRYPTO_KEY}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      # Set to "true" to print SQLAlchemy queries to stdout during development.
+      SQLALCHEMY_ECHO: ${SQLALCHEMY_ECHO:-false}
+    depends_on:
+      db:
+        # Wait until Postgres is actually accepting connections, not just started.
+        condition: service_healthy
+    restart: unless-stopped
+    # Mount source code for hot-reload during development.
+    # Remove this volume in a production-like local test to match the Render image.
+    volumes:
+      - .:/app
+    # Override CMD to use --reload for development hot-reloading.
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ---------------------------------------------------------------------------
+  # db — local postgres:16 (mirrors Supabase production schema)
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: malintent_postgres
+    environment:
+      POSTGRES_USER: malintent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: malintent
+    healthcheck:
+      # pg_isready checks that the server is accepting connections.
+      test: ["CMD-SHELL", "pg_isready -U malintent -d malintent"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    volumes:
+      # Named volume persists data across docker compose down / up cycles.
+      - pgdata:/var/lib/postgresql/data
+      # Auto-run the pgcrypto migration on first container initialisation.
+      # postgres:16 runs any .sql file in /docker-entrypoint-initdb.d/ on first boot.
+      - ./migrations/007_enable_pgcrypto.sql:/docker-entrypoint-initdb.d/007_enable_pgcrypto.sql:ro
+    ports:
+      # Expose port 5432 to the host so you can run psql / pytest from outside Docker.
+      - "5432:5432"
+    restart: unless-stopped
+
+# =============================================================================
+# Named volumes
+# =============================================================================
+volumes:
+  pgdata:
+    name: malintent_pgdata

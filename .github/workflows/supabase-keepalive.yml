@@ -1,0 +1,69 @@
+# =============================================================================
+# .github/workflows/supabase-keepalive.yml
+# =============================================================================
+# Week 7 — Day 4.
+#
+# Prevents the Supabase free project from pausing due to 7 days of no HTTP
+# traffic.  Runs a lightweight GET against the REST API every 3 days.
+#
+# Setup
+# -----
+# Add two GitHub repository secrets (Settings → Secrets → Actions):
+#
+#   SUPABASE_PROJECT_URL   — your project URL, e.g.
+#                            https://abcdefghijklmn.supabase.co
+#   SUPABASE_ANON_KEY      — the anon/public API key from
+#                            Supabase Dashboard → Settings → API → Project API keys
+#
+# Both values are read-only public-safe keys (the anon key only grants access
+# to data that RLS policies allow — no service-role key is used here).
+#
+# Triggering manually
+# -------------------
+# Go to Actions → "Supabase Keep-Alive" → "Run workflow" to trigger on demand
+# (useful for verifying the action works after first setup).
+# =============================================================================
+
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Run every 3 days at 12:00 UTC (well within the 7-day pause window).
+    # Cron format: minute hour day-of-month month day-of-week
+    - cron: "0 12 */3 * *"
+
+  # Allow manual trigger from the GitHub Actions UI.
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Supabase REST API
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping Supabase project to prevent auto-pause
+        run: |
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET \
+            "${{ secrets.SUPABASE_PROJECT_URL }}/rest/v1/configuration?select=key_name&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            --max-time 30)
+
+          echo "HTTP status: $HTTP_STATUS"
+
+          # Accept 200 (data returned) or 406 (no rows / RLS denied — still proves
+          # the project is awake and the REST API is responding).
+          if [[ "$HTTP_STATUS" == "200" || "$HTTP_STATUS" == "406" ]]; then
+            echo "✅ Supabase project is active (HTTP $HTTP_STATUS)."
+          else
+            echo "❌ Unexpected HTTP status: $HTTP_STATUS"
+            echo "Check SUPABASE_PROJECT_URL and SUPABASE_ANON_KEY secrets."
+            exit 1
+          fi
+
+      - name: Log keep-alive timestamp
+        run: |
+          echo "Keep-alive ping sent at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Next scheduled ping in 3 days."

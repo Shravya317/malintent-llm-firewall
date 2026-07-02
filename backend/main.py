@@ -56,7 +56,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from database import Base, engine
+from database import init_db
 from routers import scan, logs, stats, config as config_router
 
 # ── LOGGING ──────────────────────────────────────────────────────────────────
@@ -91,7 +91,7 @@ async def lifespan(app: FastAPI):
          which as a side effect loads PromptGuard-86M into memory exactly once.
       3. Yield — server now accepts traffic with everything already warm.
     """
-    Base.metadata.create_all(bind=engine)
+    init_db()
     logger.info("Database tables created / verified.")
 
     warmup_start = time.perf_counter()
