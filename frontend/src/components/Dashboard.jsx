@@ -1,13 +1,42 @@
+import { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
+import { getStats } from '../api/client'
 import Sidebar from './Sidebar'
 import MetricBlob from './MetricBlob'
 import ThreatFeed from './ThreatFeed'
 import ThreatArcs from './ThreatArcs'
-import TargetedModels from './TargetedModels'
 import HealthGauge from './HealthGauge'
 
 export default function Dashboard() {
   const { theme, toggleTheme } = useTheme()
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchStats = async () => {
+      try {
+        const data = await getStats()
+        if (isMounted) {
+          setStats(data)
+          setError(null)
+          setLoading(false)
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || 'Failed to fetch stats')
+          setLoading(false)
+        }
+      }
+    }
+    fetchStats()
+    const intervalId = setInterval(fetchStats, 3000)
+    return () => {
+      isMounted = false
+      clearInterval(intervalId)
+    }
+  }, [])
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -118,29 +147,29 @@ export default function Dashboard() {
           >
             <MetricBlob
               title="Threats Blocked"
-              value="1,247"
-              subtitle="Last 24 hours"
+              value={loading ? '...' : error ? '-' : (stats?.total_blocked?.toLocaleString() || '0')}
+              subtitle={loading ? 'Loading...' : error ? 'Error' : 'Real-time'}
               accent="threat"
               delay={0}
             />
             <MetricBlob
               title="Safe Queries"
-              value="48.3K"
-              subtitle="99.7% pass rate"
+              value={loading ? '...' : error ? '-' : (stats?.total_allowed?.toLocaleString() || '0')}
+              subtitle={loading ? 'Loading...' : error ? 'Error' : 'Clean requests'}
               accent="secure"
               delay={1}
             />
             <MetricBlob
-              title="Models"
-              value="7"
-              subtitle="Protected"
+              title="Total Processed"
+              value={loading ? '...' : error ? '-' : (stats?.total_requests?.toLocaleString() || '0')}
+              subtitle={loading ? 'Loading...' : error ? 'Error' : 'Since start'}
               accent="neutral"
               delay={2}
             />
             <MetricBlob
               title="Avg Latency"
-              value="2.4ms"
-              subtitle="Firewall overhead"
+              value={loading ? '...' : error ? '-' : `${stats?.avg_latency_ms?.toFixed(1) || 0}ms`}
+              subtitle={loading ? 'Loading...' : error ? 'Error' : 'Firewall overhead'}
               accent="warn"
               delay={3}
             />
@@ -153,13 +182,12 @@ export default function Dashboard() {
           <section
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.3fr 1fr 0.9fr',
+              gridTemplateColumns: '1.3fr 0.9fr',
               gap: 56,
               paddingBottom: 56,
             }}
           >
-            <ThreatArcs />
-            <TargetedModels />
+            <ThreatArcs data={stats?.threat_distribution || []} loading={loading} error={error} total={stats?.total_blocked || 0} />
             <HealthGauge />
           </section>
 

@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
-import { mockThreatAnalysis } from '../data/mockData'
+import { getLogs } from '../api/client'
 import Sidebar from './Sidebar'
 
 const CATEGORIES = [
@@ -46,6 +46,54 @@ export default function ThreatAnalysis() {
   const [category, setCategory] = useState('All')
   const [expandedId, setExpandedId] = useState(null)
   const [hoveredIndex, setHoveredIndex] = useState(null)
+  const [threats, setThreats] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchLogs = async () => {
+      try {
+        const rawLogs = await getLogs()
+        if (isMounted) {
+          const mapped = rawLogs.map(log => ({
+            ...log,
+            id: `THR-${String(log.id).padStart(4, '0')}`,
+            primary_category: log.attack_category || 'Safe',
+            prompt_full: log.prompt_full || log.payload_hash || 'No payload available',
+            prompt_preview: log.prompt_full ? log.prompt_full.substring(0, 48) + '...' : (log.payload_hash || '').substring(0, 24) + '...',
+            layers_triggered: log.layers_triggered ? log.layers_triggered.split(',') : [],
+            total_latency_ms: log.latency_ms || 0,
+            layer_a_fired: log.layer_a_matched,
+            layer_a_confidence: log.layer_a_matched ? 1.0 : 0.0,
+            layer_a_matched_patterns: [],
+            layer_b_fired: log.layer_b_confidence >= 0.5,
+            layer_b_confidence: log.layer_b_confidence || 0.0,
+            layer_c_fired: false,
+            layer_c_confidence: 0.0,
+            layer_c_top_matches: [],
+            suspicious_segments: [],
+            explanation: log.explanation || 'Detailed explanation not available yet.',
+          }))
+          setThreats(mapped)
+          setError(null)
+          setLoading(false)
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || 'Failed to fetch logs')
+          setLoading(false)
+        }
+      }
+    }
+    
+    fetchLogs()
+    const intervalId = setInterval(fetchLogs, 3000)
+    return () => {
+      isMounted = false
+      clearInterval(intervalId)
+    }
+  }, [])
 
   const handleToggleDecision = (dec) => {
     setDecisions(prev => ({ ...prev, [dec]: !prev[dec] }))
@@ -56,7 +104,7 @@ export default function ThreatAnalysis() {
     setDecisions({ ALLOW: true, FLAG: true, BLOCK: true }); setCategory('All')
   }
 
-  const filteredThreats = mockThreatAnalysis.filter(item => {
+  const filteredThreats = threats.filter(item => {
     if (fromDate && item.timestamp.substring(0, 10) < fromDate) return false
     if (toDate && item.timestamp.substring(0, 10) > toDate) return false
     if (minRisk !== '' && item.risk_score < parseInt(minRisk, 10)) return false
@@ -179,7 +227,11 @@ export default function ThreatAnalysis() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredThreats.length === 0 ? (
+                  {loading && threats.length === 0 ? (
+                    <tr><td colSpan={8} style={{ padding: '64px 24px', textAlign: 'center', color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}>Loading threat logs...</td></tr>
+                  ) : error && threats.length === 0 ? (
+                    <tr><td colSpan={8} style={{ padding: '64px 24px', textAlign: 'center', color: 'var(--accent-threat)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}>Error: {error}</td></tr>
+                  ) : filteredThreats.length === 0 ? (
                     <tr><td colSpan={8} style={{ padding: '64px 24px', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}>No threat events match the selected filters.</td></tr>
                   ) : filteredThreats.map(item => {
                     const isExpanded = expandedId === item.id
