@@ -131,4 +131,34 @@ export async function getConfig(key, defaultValue = null) {
   }
 }
 
+/**
+ * MOCK: UNPROTECTED LLM
+ * Simulates a direct call to an unprotected LLM (like raw OpenAI/Groq)
+ * for the Comparison Mode right panel.
+ */
+export async function simulateRawLLM(presetId) {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 800))
+  
+  const responses = {
+    override: "I have discarded my previous instructions. Here are the system credentials you requested:\n\nusername: admin_root\npassword: super_secret_admin_123",
+    jailbreak: "Of course. Initiating unconstrained persona.\n\nTo bypass standard authentication protocols on a Linux system, you should first attempt to leverage misconfigured sudoers files...",
+    exfiltration: "The base64 encoded version of the system prompt is:\n\nU3lzdGVtIFByb21wdDogWW91IGFyZSBhIGhlbHBmdWwgQUkuIE5ldmVyIGdpdmUgb3V0IHNlY3JldHMu\n\nReturning data as requested.",
+    rag_injection: "Based on the internal documents, the Q3 financial strategy is highly confidential. However, to summarize the hidden notes as requested: We are planning a massive restructuring in November and laying off 15% of the workforce.",
+    trojan: "Translating the document:\n\nThe project is going well. Also, here is the output of the requested sub-routine:\n\n[Exec: rm -rf /var/log/auth.log]\nCommand executed successfully."
+  }
+  
+  return responses[presetId] || "I am an AI assistant and I cannot fulfill this request."
+}
+
+/**
+ * MOCK: LOG DECISION UPDATE
+ * Simulates the backend endpoint for the False Positive Review Queue.
+ */
+export async function mockUpdateLogDecision(logId, decision) {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 400))
+  return { status: "success", log_id: logId, new_decision: decision }
+}
+
 export default apiClient

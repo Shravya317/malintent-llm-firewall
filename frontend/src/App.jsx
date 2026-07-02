@@ -2,6 +2,8 @@ import { Routes, Route } from 'react-router-dom'
 import Dashboard from './components/Dashboard'
 import ThreatAnalysis from './components/ThreatAnalysis'
 import Configuration from './components/Configuration'
+import ComparisonMode from './components/ComparisonMode'
+import FalsePositiveQueue from './components/FalsePositiveQueue'
 
 export default function App() {
   return (
@@ -9,6 +11,8 @@ export default function App() {
       <Route path="/" element={<Dashboard />} />
       <Route path="/threats" element={<ThreatAnalysis />} />
       <Route path="/settings" element={<Configuration />} />
+      <Route path="/comparison" element={<ComparisonMode />} />
+      <Route path="/queue" element={<FalsePositiveQueue />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>
   )

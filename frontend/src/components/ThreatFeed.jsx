@@ -145,7 +145,17 @@ export default function ThreatFeed() {
       {/* Rows — no backgrounds, pure typographic structure */}
       <div>
         {loading && threats.length === 0 ? (
-          <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-faint)' }}>Loading threat logs...</div>
+          [...Array(5)].map((_, i) => (
+            <div key={`skel-${i}`} style={{ display: 'grid', gridTemplateColumns: '56px 72px 1fr 140px 2fr 80px 72px', padding: '10px 0', borderBottom: '1px solid var(--border-faint)', alignItems: 'center' }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--border-subtle)', display: 'inline-block', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+              <div style={{ height: 10, width: 40, background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+              <div style={{ height: 10, width: '60%', background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+              <div style={{ height: 10, width: '40%', background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+              <div style={{ height: 10, width: '80%', background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+              <div style={{ height: 10, width: 40, background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+              <div style={{ height: 10, width: 40, background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+            </div>
+          ))
         ) : error && threats.length === 0 ? (
           <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--accent-threat)' }}>Error: {error}</div>
         ) : filtered.length === 0 ? (

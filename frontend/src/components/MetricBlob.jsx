@@ -30,56 +30,62 @@ export default function MetricBlob({
         transition: 'opacity 0.5s ease, transform 0.5s ease',
       }}
     >
-      {/* Label */}
-      <p
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.65rem',
-          fontWeight: 500,
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          color: 'var(--text-faint)',
-          margin: '0 0 8px',
-        }}
+      <div 
+        style={{ transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'default' }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
       >
-        {title}
-      </p>
-
-      {/* Massive number — THE structural element */}
-      <p
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(2.8rem, 5vw, 4.5rem)',
-          fontWeight: 700,
-          lineHeight: 0.9,
-          letterSpacing: '-0.04em',
-          color: 'var(--text-primary)',
-          margin: 0,
-        }}
-      >
-        {value}
-      </p>
-
-      {/* Accent line + subtitle */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-        <div
+        {/* Label */}
+        <p
           style={{
-            width: 16,
-            height: 2,
-            background: color,
-            borderRadius: 1,
-          }}
-        />
-        <span
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: '0.75rem',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.65rem',
             fontWeight: 500,
-            color: 'var(--text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            color: 'var(--text-faint)',
+            margin: '0 0 8px',
           }}
         >
-          {subtitle}
-        </span>
+          {title}
+        </p>
+
+        {/* Massive number — THE structural element */}
+        <p
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(2.8rem, 5vw, 4.5rem)',
+            fontWeight: 700,
+            lineHeight: 0.9,
+            letterSpacing: '-0.04em',
+            color: 'var(--text-primary)',
+            margin: 0,
+          }}
+        >
+          {value}
+        </p>
+
+        {/* Accent line + subtitle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+          <div
+            style={{
+              width: 16,
+              height: 2,
+              background: color,
+              borderRadius: 1,
+            }}
+          />
+          <span
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              color: 'var(--text-muted)',
+            }}
+          >
+            {subtitle}
+          </span>
+        </div>
       </div>
     </div>
   )

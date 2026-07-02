@@ -5,6 +5,8 @@ const navItems = [
   { label: 'Dashboard', path: '/' },
   { label: 'Live Feed', path: '/feed' },
   { label: 'Threats', path: '/threats' },
+  { label: 'Comparison Mode', path: '/comparison' },
+  { label: 'Review Queue', path: '/queue' },
   { label: 'Reports', path: '/reports' },
   { label: 'Alerts', path: '/alerts' },
   { label: 'Settings', path: '/settings' },
