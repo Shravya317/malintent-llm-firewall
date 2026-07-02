@@ -1,5 +1,5 @@
 """
-backend/app/database.py
+backend/database.py
 =======================
 Week 7 revision: single PostgreSQL engine across dev (local Docker) and prod (Supabase).
 SQLite / SQLCipher removed entirely.
@@ -28,52 +28,37 @@ import logging
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine, text, event
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# SQLAlchemy declarative base — all ORM models (models.py) inherit from this.
+# Must be defined here (not in models.py) to avoid circular imports:
+#   database.py defines Base  ->  models.py imports Base  ->  database.init_db()
+#   imports models to populate Base.metadata.
+# ---------------------------------------------------------------------------
+Base = declarative_base()
 
 # ---------------------------------------------------------------------------
 # Environment configuration
 # ---------------------------------------------------------------------------
 
-import urllib.parse
-
 _raw_db_url: str = os.environ.get("DATABASE_URL", "")
-
-# --- Debug: log what Render actually injected (sanitized) ---
-logger.warning("DATABASE_URL length: %d", len(_raw_db_url))
-logger.warning("DATABASE_URL repr (first 30 chars): %r", _raw_db_url[:30])
-try:
-    _parsed = urllib.parse.urlparse(_raw_db_url)
-    logger.warning(
-        "DATABASE_URL parsed -> scheme=%r, host=%r, port=%r, path=%r, user=%r, password_len=%d",
-        _parsed.scheme, _parsed.hostname, _parsed.port, _parsed.path,
-        _parsed.username, len(_parsed.password or ""),
-    )
-except Exception as _e:
-    logger.warning("DATABASE_URL could not be parsed by urllib: %s", _e)
-# --- End debug ---
 
 if not _raw_db_url:
     raise RuntimeError(
         "DATABASE_URL environment variable is empty or not set. "
-        "Set it in Render → Environment → Environment Variables."
+        "Set it in Render -> Environment -> Environment Variables."
     )
+
+# Guard against accidental "DATABASE_URL=postgresql://..." in the value
+# (Render env var value should NOT include the key name).
+if _raw_db_url.startswith("DATABASE_URL="):
+    _raw_db_url = _raw_db_url[len("DATABASE_URL="):]
 
 # Fix Render/Supabase postgres:// -> postgresql:// for SQLAlchemy 1.4+
 _raw_db_url = _raw_db_url.replace("postgres://", "postgresql://", 1)
-
-# Re-encode password to handle special chars (Supabase passwords often contain
-# characters like [, ], +, @, # etc. that break SQLAlchemy's URL parser).
-try:
-    _parsed = urllib.parse.urlparse(_raw_db_url)
-    if _parsed.password:
-        _safe_password = urllib.parse.quote(_parsed.password, safe="")
-        _raw_db_url = _raw_db_url.replace(
-            f":{_parsed.password}@", f":{_safe_password}@", 1
-        )
-except Exception:
-    pass  # fall through and let create_engine give the real error
 
 DATABASE_URL: str = _raw_db_url
 """
@@ -201,7 +186,7 @@ def decrypt_field(session: Session, ciphertext: bytes) -> str:
 def verify_pgcrypto(session: Session) -> bool:
     """
     Smoke-test that the pgcrypto extension is installed and that a round-trip
-    encrypt → decrypt returns the original value.
+    encrypt -> decrypt returns the original value.
 
     Call this at application startup to fail fast if the migration has not
     been applied to this database.
