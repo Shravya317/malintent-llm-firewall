@@ -7,6 +7,7 @@ const navItems = [
   { label: 'Threats', path: '/threats' },
   { label: 'Comparison Mode', path: '/comparison' },
   { label: 'Review Queue', path: '/queue' },
+  { label: 'Document Scanner', path: '/scanner' },
   { label: 'Reports', path: '/reports' },
   { label: 'Alerts', path: '/alerts' },
   { label: 'Settings', path: '/settings' },
