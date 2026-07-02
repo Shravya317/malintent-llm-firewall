@@ -212,3 +212,24 @@ class ConfigGetResponse(BaseModel):
     """
     key:   str
     value: str   # decrypted plaintext — ciphertext is never returned to callers
+
+# ── HUMAN REVIEW QUEUE ────────────────────────────────────────────────────────
+
+class LogDecisionUpdateRequest(BaseModel):
+    """
+    Request body for PUT /api/v1/logs/{log_id}/decision.
+    Used by the False Positive Review Queue to submit the final
+    human review decision.
+    """
+    human_decision: str = Field(
+        ...,
+        pattern="^(ALLOW|BLOCK|FLAG)$"
+    )
+
+class LogDecisionUpdateResponse(BaseModel):
+    """
+    Response body for PUT /api/v1/logs/{log_id}/decision.
+    """
+    status: str
+    log_id: int
+    decision: str

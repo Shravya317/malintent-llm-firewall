@@ -17,13 +17,17 @@ from __future__ import annotations
 import logging
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models import ThreatLog
-from schemas import ThreatLogEntry
+from schemas import (
+    ThreatLogEntry,
+    LogDecisionUpdateRequest,
+    LogDecisionUpdateResponse,
+)
 
 logger = logging.getLogger("malintent.logs")
 router = APIRouter()
@@ -64,3 +68,51 @@ async def get_logs(
     logger.debug("Returning %d log entries (decision=%s)", len(entries), decision)
 
     return [ThreatLogEntry.model_validate(entry) for entry in entries]
+
+
+@router.put("/logs/{log_id}/decision", response_model=LogDecisionUpdateResponse)
+async def update_log_decision(
+    log_id: int,
+    request: LogDecisionUpdateRequest,
+    db: Session = Depends(get_db),
+) -> LogDecisionUpdateResponse:
+    """
+    Human review endpoint used by the False Positive Review Queue.
+
+    Allows an analyst to override the firewall's original decision after
+    manual review.
+
+    Valid decisions:
+      - ALLOW
+      - FLAG
+      - BLOCK
+    """
+
+    log_entry = (
+        db.query(ThreatLog)
+        .filter(ThreatLog.id == log_id)
+        .first()
+    )
+
+    if log_entry is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"ThreatLog entry {log_id} not found.",
+        )
+
+    log_entry.decision = request.human_decision
+
+    db.commit()
+    db.refresh(log_entry)
+
+    logger.info(
+        "Human review updated ThreatLog %s → %s",
+        log_id,
+        request.human_decision,
+    )
+
+    return LogDecisionUpdateResponse(
+        status="updated",
+        log_id=log_entry.id,
+        decision=log_entry.decision,
+    )
