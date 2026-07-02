@@ -30,6 +30,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir --target=/install -r requirements.txt
 
+# Make the packages just installed into /install importable by THIS
+# builder-stage Python interpreter too (pip --target does not add /install
+# to the default search path, which is why `python -c "import transformers"`
+# below was failing with ModuleNotFoundError even though pip succeeded).
+ENV PYTHONPATH=/install
+
 # ---------------------------------------------------------------------------
 # Download PromptGuard-86M weights at build time.
 # The HUGGINGFACE_TOKEN build arg is injected by your CI/CD or local build
@@ -93,4 +99,7 @@ EXPOSE ${PORT}
 # ---------------------------------------------------------------------------
 # Entrypoint
 # ---------------------------------------------------------------------------
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+# NOTE: main.py lives directly in backend/ (repo root of this build context),
+# NOT inside an app/ subfolder. The original "app.main:app" would fail with
+# ModuleNotFoundError: No module named 'app' immediately after container start.
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
