@@ -36,7 +36,9 @@ logger = logging.getLogger(__name__)
 # Environment configuration
 # ---------------------------------------------------------------------------
 
-DATABASE_URL: str = os.environ["DATABASE_URL"]
+DATABASE_URL: str = os.environ["DATABASE_URL"].replace(
+    "postgres://", "postgresql://", 1
+)
 """
 Full Postgres connection URL.
 Dev example:  postgresql://malintent:password@localhost:5432/malintent
