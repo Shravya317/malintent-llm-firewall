@@ -102,4 +102,4 @@ EXPOSE ${PORT}
 # NOTE: main.py lives directly in backend/ (repo root of this build context),
 # NOT inside an app/ subfolder. The original "app.main:app" would fail with
 # ModuleNotFoundError: No module named 'app' immediately after container start.
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "python -m uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
