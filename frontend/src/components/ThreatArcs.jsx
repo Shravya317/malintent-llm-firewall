@@ -1,12 +1,5 @@
 /* Clean concentric arcs — no floating, no box container */
-export default function ThreatArcs() {
-  const data = [
-    { label: 'Prompt Injection', pct: 42, color: 'var(--accent-threat)' },
-    { label: 'Jailbreak', pct: 28, color: '#F97316' },
-    { label: 'Data Exfiltration', pct: 18, color: 'var(--accent-warn)' },
-    { label: 'Other', pct: 12, color: 'var(--color-slate-blue-400)' },
-  ]
-
+export default function ThreatArcs({ data = [], loading = false, error = null, total = 0 }) {
   const size = 180
   const center = size / 2
   const startAngle = -90
@@ -38,50 +31,75 @@ export default function ThreatArcs() {
       </h3>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {data.map((item, i) => {
-            const radius = 78 - i * 17
-            const sweep = (item.pct / 100) * 360
-            return (
-              <path
-                key={item.label}
-                d={arcPath(radius, startAngle, startAngle + sweep)}
-                fill="none"
-                stroke={item.color}
-                strokeWidth={8}
-                strokeLinecap="round"
-                opacity={0.8}
-              />
-            )
-          })}
-          <text
-            x={center} y={center - 4} textAnchor="middle"
-            style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, fill: 'var(--text-primary)' }}
-          >
-            1,247
-          </text>
-          <text
-            x={center} y={center + 14} textAnchor="middle"
-            style={{ fontFamily: 'var(--font-mono)', fontSize: '0.45rem', fill: 'var(--text-faint)', letterSpacing: '0.1em' }}
-          >
-            TOTAL THREATS
-          </text>
-        </svg>
+        {loading ? (
+          <div style={{ width: size, height: size, borderRadius: '50%', background: 'var(--bg-surface)', border: '2px dashed var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>Loading...</span>
+          </div>
+        ) : error ? (
+           <div style={{ width: size, height: size, borderRadius: '50%', background: 'var(--bg-surface)', border: '2px dashed var(--accent-threat)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--accent-threat)' }}>Error loading chart</span>
+          </div>
+        ) : data.length === 0 ? (
+          <div style={{ width: size, height: size, borderRadius: '50%', background: 'var(--bg-surface)', border: '2px dashed var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>No threats yet</span>
+          </div>
+        ) : (
+          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+            {data.map((item, i) => {
+              const radius = 78 - i * 17
+              const sweep = (item.pct / 100) * 360
+              // Prevent rendering arc with 0 sweep (NaN issues)
+              if (sweep <= 0) return null
+              return (
+                <path
+                  key={item.label}
+                  d={arcPath(radius, startAngle, startAngle + sweep)}
+                  fill="none"
+                  stroke={item.color}
+                  strokeWidth={8}
+                  strokeLinecap="round"
+                  opacity={0.8}
+                />
+              )
+            })}
+            <text
+              x={center} y={center - 4} textAnchor="middle"
+              style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, fill: 'var(--text-primary)' }}
+            >
+              {total.toLocaleString()}
+            </text>
+            <text
+              x={center} y={center + 14} textAnchor="middle"
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.45rem', fill: 'var(--text-faint)', letterSpacing: '0.1em' }}
+            >
+              TOTAL THREATS
+            </text>
+          </svg>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {data.map(item => (
-            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span
-                style={{ width: 8, height: 2, background: item.color, borderRadius: 1, display: 'block' }}
-              />
-              <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                {item.label}
-              </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-faint)', marginLeft: 'auto' }}>
-                {item.pct}%
-              </span>
-            </div>
-          ))}
+          {loading ? (
+             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>Waiting for data...</span>
+          ) : error ? (
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--accent-threat)' }}>{error}</span>
+          ) : data.length === 0 ? (
+             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>Waiting for first threat</span>
+          ) : (
+            data.map(item => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
+                  style={{ width: 8, height: 2, background: item.color, borderRadius: 1, display: 'block' }}
+                />
+                <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                  {item.label}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-faint)', marginLeft: 'auto' }}>
+                  {/* Round nicely for display */}
+                  {Math.round(item.pct)}%
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
