@@ -36,9 +36,46 @@ logger = logging.getLogger(__name__)
 # Environment configuration
 # ---------------------------------------------------------------------------
 
-DATABASE_URL: str = os.environ["DATABASE_URL"].replace(
-    "postgres://", "postgresql://", 1
-)
+import urllib.parse
+
+_raw_db_url: str = os.environ.get("DATABASE_URL", "")
+
+# --- Debug: log what Render actually injected (sanitized) ---
+logger.warning("DATABASE_URL length: %d", len(_raw_db_url))
+logger.warning("DATABASE_URL repr (first 30 chars): %r", _raw_db_url[:30])
+try:
+    _parsed = urllib.parse.urlparse(_raw_db_url)
+    logger.warning(
+        "DATABASE_URL parsed -> scheme=%r, host=%r, port=%r, path=%r, user=%r, password_len=%d",
+        _parsed.scheme, _parsed.hostname, _parsed.port, _parsed.path,
+        _parsed.username, len(_parsed.password or ""),
+    )
+except Exception as _e:
+    logger.warning("DATABASE_URL could not be parsed by urllib: %s", _e)
+# --- End debug ---
+
+if not _raw_db_url:
+    raise RuntimeError(
+        "DATABASE_URL environment variable is empty or not set. "
+        "Set it in Render → Environment → Environment Variables."
+    )
+
+# Fix Render/Supabase postgres:// -> postgresql:// for SQLAlchemy 1.4+
+_raw_db_url = _raw_db_url.replace("postgres://", "postgresql://", 1)
+
+# Re-encode password to handle special chars (Supabase passwords often contain
+# characters like [, ], +, @, # etc. that break SQLAlchemy's URL parser).
+try:
+    _parsed = urllib.parse.urlparse(_raw_db_url)
+    if _parsed.password:
+        _safe_password = urllib.parse.quote(_parsed.password, safe="")
+        _raw_db_url = _raw_db_url.replace(
+            f":{_parsed.password}@", f":{_safe_password}@", 1
+        )
+except Exception:
+    pass  # fall through and let create_engine give the real error
+
+DATABASE_URL: str = _raw_db_url
 """
 Full Postgres connection URL.
 Dev example:  postgresql://malintent:password@localhost:5432/malintent
