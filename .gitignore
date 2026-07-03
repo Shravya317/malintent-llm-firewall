@@ -60,3 +60,11 @@ profiling/
 # ── Logs ──────────────────────────────────────────────────────────────────────
 *.log
 logs/
+
+# Benchmark outputs
+backend/docs/*.csv
+backend/docs/*.html
+
+# Docker
+*.pid
+

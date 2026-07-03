@@ -18,7 +18,32 @@ Design
   the Live Threat Feed shows activity across the chart's time axis, not a
   single burst at seeding time.
 • All 7 OWASP LLM Top-10 attack categories represented proportionally.
-• Includes plausible layer scores, latency values, and user role distribution.
+• Includes plausible layer signals, latency values, and user role distribution.
+
+Schema note
+-----------
+This script targets the CURRENT ThreatLog ORM model (models.py):
+
+    id, timestamp, payload_hash, payload_length, scrubbed_text,
+    risk_score, decision, attack_category, layers_triggered,
+    layer_a_matched, layer_b_confidence, user_id, session_role,
+    privacy_mode, latency_ms
+
+Notably:
+  - There is no dedicated "Layer C score" column on ThreatLog. A layer-C
+    signal is still simulated internally (to keep the composite risk-score
+    weighting realistic, matching risk_scorer.py's A=0.25 / B=0.55 / C=0.20
+    split) but it is not persisted, since the schema has no column for it.
+  - layer_a_matched is a Boolean — derived from whether Layer A appears in
+    the triggered-layers set for the event.
+  - layer_b_confidence is a Float — stored directly as Layer B's simulated
+    confidence score.
+  - scrubbed_text is left NULL for all seed rows, since seed data is
+    generated in Tokenised Logging mode (privacy_mode="tokenised"), which
+    never stores a scrubbed summary.
+  - user_id is populated with an opaque, non-PII seed session token (never
+    a real name), consistent with ThreatLog.user_id's "opaque session
+    token" contract.
 
 Usage
 -----
@@ -40,7 +65,7 @@ Verification
 ------------
 psql $DATABASE_URL -c "
 SELECT decision, COUNT(*) as n
-FROM   threat_logs
+FROM   threat_log
 GROUP BY decision
 ORDER BY n DESC;
 "
@@ -83,7 +108,9 @@ DECISIONS_WEIGHTED = (
     + ["BLOCK"] * 25
 )
 
-USER_ROLES = ["Customer"] * 60 + ["Employee"] * 30 + ["Admin"] * 10
+# ThreatLog.session_role — matches the "admin / employee / customer" contract
+# documented on the model.
+USER_ROLES = ["customer"] * 60 + ["employee"] * 30 + ["admin"] * 10
 
 # Realistic prompt lengths in characters
 PROMPT_LENGTH_RANGES = {
@@ -100,7 +127,10 @@ LATENCY_RANGES = {
     "BLOCK": (70, 100),
 }
 
-# Plausible layer score ranges per decision
+# Plausible layer score ranges per decision. "a"/"b"/"c" are simulated
+# per-layer signals used to build a realistic composite risk score; only
+# the Layer A (matched) and Layer B (confidence) signals map onto actual
+# ThreatLog columns.
 LAYER_SCORES = {
     "ALLOW": {
         "a": (0.00, 0.15),
@@ -135,6 +165,15 @@ def _make_payload_hash(seed_index: int) -> str:
     return "seed-" + hashlib.sha256(raw.encode()).hexdigest()[:59]  # 64 chars total
 
 
+def _make_user_id(seed_index: int) -> str:
+    """
+    Generate an opaque, non-PII seed session token for ThreatLog.user_id.
+    Never a real name — just a stable-looking synthetic session token.
+    """
+    raw = f"seed-user-{seed_index}-{os.urandom(4).hex()}"
+    return "seed-usr-" + hashlib.sha256(raw.encode()).hexdigest()[:16]
+
+
 def _build_triggered_layers(decision: str) -> list:
     if decision == "ALLOW":
         return []
@@ -152,9 +191,11 @@ def _build_event(index: int, decision: str, now: datetime) -> dict:
     lb = _rand_float(*scores["b"])
     lc = _rand_float(*scores["c"])
 
-    # Composite score mirrors risk_scorer.py weighting (A=0.25, B=0.55, C=0.20)
+    # Composite score mirrors risk_scorer.py weighting (A=0.25, B=0.55, C=0.20).
+    # Layer C is only used here to keep this weighting realistic — it is not
+    # persisted, since ThreatLog has no Layer C column.
     composite = la * 0.25 + lb * 0.55 + lc * 0.20
-    risk_score = int(composite * 100)
+    risk_score = round(composite * 100, 2)
 
     # Clamp to expected ranges
     if decision == "ALLOW" and risk_score >= 30:
@@ -170,20 +211,23 @@ def _build_event(index: int, decision: str, now: datetime) -> dict:
     length_lo, length_hi = PROMPT_LENGTH_RANGES[decision]
     lat_lo, lat_hi = LATENCY_RANGES[decision]
 
+    triggered_layers = _build_triggered_layers(decision)
+
     return {
-        "timestamp":        now - timedelta(hours=random.uniform(0, 168)),
-        "payload_hash":     _make_payload_hash(index),
-        "risk_score":       risk_score,
-        "decision":         decision,
-        "attack_category":  category,
-        "triggered_layers": _build_triggered_layers(decision),
-        "layer_a_score":    la,
-        "layer_b_score":    lb,
-        "layer_c_score":    lc,
-        "user_role":        random.choice(USER_ROLES),
-        "payload_length":   random.randint(length_lo, length_hi),
-        "prompt_summary":   None,  # Tokenized Logging mode: no summary stored
-        "latency_ms":       random.randint(lat_lo, lat_hi),
+        "timestamp":          now - timedelta(hours=random.uniform(0, 168)),
+        "payload_hash":       _make_payload_hash(index),
+        "payload_length":     random.randint(length_lo, length_hi),
+        "scrubbed_text":      None,  # Tokenised Logging mode: no summary stored
+        "risk_score":         risk_score,
+        "decision":           decision,
+        "attack_category":    category,
+        "layers_triggered":   ",".join(triggered_layers),
+        "layer_a_matched":    "A" in triggered_layers,
+        "layer_b_confidence": lb,
+        "user_id":            _make_user_id(index),
+        "session_role":       random.choice(USER_ROLES),
+        "privacy_mode":       "tokenised",
+        "latency_ms":         random.randint(lat_lo, lat_hi),
     }
 
 
@@ -297,7 +341,7 @@ def main() -> None:
         logger.info(
             "Done. Run this to verify:\n"
             "  psql $DATABASE_URL -c "
-            "\"SELECT decision, COUNT(*) FROM threat_logs GROUP BY decision;\""
+            "\"SELECT decision, COUNT(*) FROM threat_log GROUP BY decision;\""
         )
 
 

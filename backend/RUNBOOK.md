@@ -1,8 +1,8 @@
 # MalIntent LLM Firewall
 
-# Project Runbook (Weeks 1–6)
+# Project Runbook (Weeks 1–7)
 
-This document contains everything required to execute, test, verify, and demonstrate the MalIntent project through Week 6.
+This document contains everything required to execute, test, verify, and demonstrate the MalIntent project through Week 7.
 
 ---
 
@@ -15,14 +15,23 @@ This document contains everything required to execute, test, verify, and demonst
 5. Week 4 Runbook
 6. Week 5 Runbook
 7. Week 6 Runbook
-8. Model Information
-9. API Endpoints
-10. Common Configuration Keys
-11. Sample API Payloads
-12. Edge Case Testing
-13. Git Commands
-14. Common Problems
-15. Demo Checklist
+8. Week 7 Runbook
+9. Production Deployment
+10. Docker
+11. PostgreSQL Migration
+12. Supabase
+13. Cloud Run
+14. Benchmark Evaluation
+15. Database Encryption
+16. Database Seeding
+17. Model Information
+18. API Endpoints
+19. Common Configuration Keys
+20. Sample API Payloads
+21. Edge Case Testing
+22. Git Commands
+23. Common Problems
+24. Demo Checklist
 
 ---
 
@@ -50,6 +59,9 @@ This script automatically runs:
 - Week 6 – Output Validator Tests
 - Week 6 – Output Validator Catch Rate
 - Week 6 – SEL End-to-End Tests
+- Week 7 – Week 7 Tests
+- Week 7 – Ablation Benchmark
+- Week 7 – Demo Event Seeding
 
 ---
 
@@ -74,6 +86,62 @@ Swagger UI:
 ```
 http://127.0.0.1:8000/docs
 ```
+
+---
+
+## Week 7 Quick Start Commands
+
+### Run Week 7 Tests
+
+```powershell
+python -m pytest tests/test_week7.py -v
+```
+
+Expected output:
+
+```text
+All tests passed.
+```
+
+These tests verify the production deployment stack, database encryption, Supabase connectivity, and end-to-end pipeline integrity under production conditions.
+
+---
+
+### Run Ablation Benchmark
+
+```powershell
+python scripts/run_ablation_benchmark.py
+```
+
+Expected output:
+
+- Ablation benchmark executes across all three pipeline layers.
+- In-distribution corpus evaluated.
+- Out-of-distribution benchmarks evaluated.
+- CSV reports written to the outputs directory.
+
+Verify the following CSV files are generated:
+
+```text
+ablation_results_corpus1.csv
+ood_jailbreak.csv
+ood_notinject.csv
+ood_gandalf.csv
+```
+
+---
+
+### Seed Production Database
+
+```powershell
+python scripts/seed_demo_events.py
+```
+
+Expected output:
+
+- 200 synthetic threat log entries inserted into the production Supabase PostgreSQL database.
+- Entries cover ALLOW, FLAG, and BLOCK decisions.
+- Entries span a realistic distribution of attack types, session roles, and risk scores.
 
 ---
 
@@ -880,6 +948,577 @@ Automatically executes:
 
 ---
 
+# Week 7 Runbook
+
+## Step 1 — Activate Virtual Environment
+
+```powershell
+cd backend
+venv\Scripts\activate
+```
+
+Expected:
+
+```text
+(venv) PS ...\backend>
+```
+
+---
+
+## Step 2 — Run Week 7 Tests
+
+```powershell
+python -m pytest tests/test_week7.py -v
+```
+
+Expected:
+
+```text
+All tests passed.
+```
+
+These tests verify:
+
+- Production database connectivity via Supabase
+- PostgreSQL migration correctness
+- Database encryption via pgcrypto
+- Supabase Transaction Pooler connection
+- Docker container integrity
+- Cloud Run endpoint availability
+- Benchmark CSV output correctness
+- Seed script execution
+- End-to-end pipeline integrity under production conditions
+
+---
+
+## Step 3 — Run Ablation Benchmark
+
+```powershell
+python scripts/run_ablation_benchmark.py
+```
+
+Expected:
+
+- Ablation benchmark executes across all three pipeline layers.
+- Layer A only, Layer A+B, and Layer A+B+C configurations evaluated in isolation.
+- In-distribution corpus (corpus1) evaluated.
+- Out-of-distribution benchmarks evaluated.
+- Per-layer precision, recall, F1, and accuracy metrics computed.
+- CSV reports written to the outputs directory.
+
+Verify the following output files exist after the script completes:
+
+```text
+ablation_results_corpus1.csv
+ood_jailbreak.csv
+ood_notinject.csv
+ood_gandalf.csv
+```
+
+If any CSV is missing, re-run the script with verbose logging enabled and verify that the benchmark corpus files are present in the expected input directory.
+
+---
+
+## Step 4 — Supabase Encryption Verification
+
+Open a psql session connected to your Supabase database using the Direct URL.
+
+### Verify pgcrypto Extension
+
+```sql
+SELECT * FROM pg_extension WHERE extname = 'pgcrypto';
+```
+
+Expected:
+
+- One row returned confirming pgcrypto is installed.
+
+---
+
+### Verify Encrypted Insert
+
+```sql
+INSERT INTO encryption_test (payload)
+VALUES (pgp_sym_encrypt('hello-malintent', current_setting('app.pg_crypto_key')));
+```
+
+Expected:
+
+- INSERT 0 1
+
+---
+
+### Verify Encrypted Bytes
+
+```sql
+SELECT payload FROM encryption_test ORDER BY id DESC LIMIT 1;
+```
+
+Expected:
+
+- Raw encrypted bytes displayed — not plaintext.
+
+---
+
+### Wrong Key Verification
+
+```sql
+SELECT pgp_sym_decrypt(payload::bytea, 'wrong-key')
+FROM encryption_test
+ORDER BY id DESC LIMIT 1;
+```
+
+Expected:
+
+- Error returned.
+- Decryption fails because the wrong key was supplied.
+
+---
+
+### Correct Key Verification
+
+```sql
+SELECT pgp_sym_decrypt(payload::bytea, current_setting('app.pg_crypto_key'))
+FROM encryption_test
+ORDER BY id DESC LIMIT 1;
+```
+
+Expected:
+
+```text
+hello-malintent
+```
+
+- Plaintext recovered successfully using the correct key.
+
+---
+
+### Delete Verification Row
+
+```sql
+DELETE FROM encryption_test
+WHERE id = (SELECT MAX(id) FROM encryption_test);
+```
+
+Expected:
+
+- DELETE 1
+
+---
+
+## Step 5 — Seed Production Database
+
+```powershell
+python scripts/seed_demo_events.py
+```
+
+Expected:
+
+- 200 synthetic threat log entries inserted into the production Supabase PostgreSQL database.
+- Entries cover ALLOW, FLAG, and BLOCK decisions.
+- Entries span a realistic distribution of attack types, session roles, and risk scores.
+- Seed completes without error.
+
+---
+
+## Step 6 — Verify Seeded Data
+
+Connect to your Supabase database using psql or the Supabase SQL editor and run:
+
+```sql
+SELECT decision,
+       COUNT(*)
+FROM threat_log
+GROUP BY decision
+ORDER BY decision;
+```
+
+Expected approximate result:
+
+```text
+ decision | count
+----------+-------
+ ALLOW    |   140
+ BLOCK    |    25
+ FLAG     |    35
+(3 rows)
+```
+
+Exact counts may vary slightly depending on seed randomness, but the overall distribution should reflect a realistic firewall traffic profile with ALLOW as the dominant decision.
+
+---
+
+## Step 7 — Cloud Run Verification
+
+### Production URL
+
+```text
+https://malintent-backend-261681342014.asia-south1.run.app
+```
+
+### Swagger UI
+
+```text
+https://malintent-backend-261681342014.asia-south1.run.app/docs
+```
+
+### OpenAPI JSON
+
+```text
+https://malintent-backend-261681342014.asia-south1.run.app/openapi.json
+```
+
+Open Swagger UI and verify:
+
+- All API endpoints are listed and accessible.
+- POST /api/v1/scan/input accepts a prompt and returns a decision.
+- POST /api/v1/scan/output accepts a response and returns consistency results.
+- GET /api/v1/logs returns threat log entries from the production database.
+- GET /api/v1/stats returns dashboard statistics from the production database.
+- The production backend responds within acceptable latency bounds.
+
+---
+
+## Week 7 Features
+
+### Production Deployment
+
+- Dockerised backend container
+- Google Cloud Run deployment
+- Supabase PostgreSQL production database
+- Transaction Pooler for connection efficiency
+- Direct URL for migration operations
+- Environment variable management via Cloud Run secrets
+
+### Database Encryption
+
+- pgcrypto extension enabled on Supabase
+- Symmetric encryption via pgp_sym_encrypt / pgp_sym_decrypt
+- PG_CRYPTO_KEY injected via environment variable
+- Encrypted payload storage verified end-to-end
+- Wrong-key rejection verified
+
+### Benchmark Evaluation
+
+- Full ablation study across Layer A, Layer B, and Layer C
+- In-distribution corpus evaluation
+- Out-of-distribution evaluation on JailbreakBench, NotInject, and Gandalf
+- CSV report generation for all benchmark results
+
+### Database Seeding
+
+- 200 synthetic threat log entries
+- Realistic ALLOW / FLAG / BLOCK distribution
+- Covers diverse attack types, session roles, and risk scores
+- Idempotent seed script for repeatable demo preparation
+
+---
+
+## Week 7 Deliverables
+
+Completed:
+
+- Docker Container Built and Verified
+- Cloud Run Deployment Live
+- Supabase PostgreSQL Migration Completed
+- pgcrypto Encryption Verified
+- Database Seeded
+- Ablation Benchmark Executed
+- CSV Reports Generated
+- Week 7 Tests Passed
+- Production Swagger Verified
+- Production Backend Verified
+
+---
+
+## Week 7 One Command
+
+```powershell
+.\run_tests.ps1
+```
+
+Automatically executes:
+
+1. Week 7 Tests
+2. Ablation Benchmark
+3. Demo Event Seeding
+
+---
+
+# Production Deployment
+
+## Overview
+
+The MalIntent backend is deployed to Google Cloud Run as a containerised FastAPI application backed by a Supabase-managed PostgreSQL database. All sensitive configuration values are injected at runtime via environment variables managed through Cloud Run secrets.
+
+---
+
+## Docker
+
+### Build the Docker Image
+
+```powershell
+docker build -t malintent-backend .
+```
+
+Expected:
+
+- All layers build successfully.
+- No missing dependencies.
+- Final image produced.
+
+### Run Locally with Docker
+
+```powershell
+docker run -p 8000:8000 \
+  -e DATABASE_URL=$DATABASE_URL \
+  -e FERNET_KEY=$FERNET_KEY \
+  -e PG_CRYPTO_KEY=$PG_CRYPTO_KEY \
+  -e HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
+  malintent-backend
+```
+
+Expected:
+
+```text
+INFO: Uvicorn running on http://0.0.0.0:8000
+INFO: Application startup complete.
+```
+
+### Tag and Push to Google Artifact Registry
+
+```powershell
+docker tag malintent-backend gcr.io/YOUR_PROJECT_ID/malintent-backend
+docker push gcr.io/YOUR_PROJECT_ID/malintent-backend
+```
+
+---
+
+## Cloud Run
+
+### Deploy to Cloud Run
+
+```powershell
+gcloud run deploy malintent-backend \
+  --image gcr.io/YOUR_PROJECT_ID/malintent-backend \
+  --region asia-south1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --set-env-vars DATABASE_URL=$DATABASE_URL \
+  --set-env-vars FERNET_KEY=$FERNET_KEY \
+  --set-env-vars PG_CRYPTO_KEY=$PG_CRYPTO_KEY \
+  --set-env-vars HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
+  --set-env-vars SUPABASE_DIRECT_URL=$SUPABASE_DIRECT_URL \
+  --set-env-vars SUPABASE_TRANSACTION_POOLER_URL=$SUPABASE_TRANSACTION_POOLER_URL
+```
+
+### Production URL
+
+```text
+https://malintent-backend-261681342014.asia-south1.run.app
+```
+
+### Swagger UI
+
+```text
+https://malintent-backend-261681342014.asia-south1.run.app/docs
+```
+
+### OpenAPI JSON
+
+```text
+https://malintent-backend-261681342014.asia-south1.run.app/openapi.json
+```
+
+---
+
+## PostgreSQL Migration
+
+Database migrations are run against the Supabase Direct URL, which bypasses the connection pooler and is required for DDL operations such as CREATE TABLE, ALTER TABLE, and extension management.
+
+### Run Migrations
+
+```powershell
+DATABASE_URL=$SUPABASE_DIRECT_URL alembic upgrade head
+```
+
+Expected:
+
+- All pending migrations applied.
+- threat_log table created or updated.
+- action_log table created or updated.
+- encryption_test table created or updated.
+- pgcrypto extension confirmed active.
+
+---
+
+## Supabase
+
+### Connection Modes
+
+Supabase provides two connection URLs:
+
+**Transaction Pooler URL**
+
+Used by the running application for all standard read/write operations. Routes connections through PgBouncer in transaction mode for efficient connection management under concurrent load.
+
+```text
+SUPABASE_TRANSACTION_POOLER_URL
+```
+
+**Direct URL**
+
+Used for database migrations and DDL operations that require a persistent session-level connection. Do not use the Transaction Pooler URL for migrations.
+
+```text
+SUPABASE_DIRECT_URL
+```
+
+---
+
+## Environment Variables
+
+The following environment variables must be set for the production deployment to function correctly:
+
+```text
+DATABASE_URL
+```
+
+The active database connection string used by the FastAPI application at runtime. Should point to the Transaction Pooler URL for production deployments.
+
+```text
+SUPABASE_DIRECT_URL
+```
+
+The direct Supabase connection string used for running Alembic migrations. Bypasses PgBouncer.
+
+```text
+SUPABASE_TRANSACTION_POOLER_URL
+```
+
+The PgBouncer-managed connection string used for all application-level database operations in production.
+
+```text
+FERNET_KEY
+```
+
+The symmetric Fernet key used by the configuration encryption layer to encrypt and decrypt stored configuration values such as API keys and system context.
+
+```text
+PG_CRYPTO_KEY
+```
+
+The symmetric key used by the pgcrypto layer inside PostgreSQL for pgp_sym_encrypt and pgp_sym_decrypt operations on sensitive fields stored in the database.
+
+```text
+HUGGINGFACE_TOKEN
+```
+
+The HuggingFace API token required to download the base PromptGuard model weights during the Docker image build or container startup, if the model is not bundled directly into the image.
+
+---
+
+## Benchmark Evaluation
+
+The ablation benchmark evaluates the contribution of each pipeline layer independently and in combination.
+
+### Benchmark Script
+
+```powershell
+python scripts/run_ablation_benchmark.py
+```
+
+### Configurations Evaluated
+
+- Layer A only — Pattern Engine
+- Layer A + Layer B — Pattern Engine + ML Classifier
+- Layer A + Layer B + Layer C — Full Pipeline
+
+### Corpora Evaluated
+
+- corpus1 — In-distribution training-adjacent corpus
+- JailbreakBench — Out-of-distribution jailbreak dataset
+- NotInject — Out-of-distribution benign prompt dataset
+- Gandalf — Out-of-distribution adversarial benchmark
+
+### Output Files
+
+```text
+ablation_results_corpus1.csv
+ood_jailbreak.csv
+ood_notinject.csv
+ood_gandalf.csv
+```
+
+Each CSV contains per-configuration precision, recall, F1, and accuracy metrics for the evaluated corpus.
+
+---
+
+## Database Encryption
+
+The MalIntent production database uses pgcrypto for symmetric encryption of sensitive fields stored in PostgreSQL via Supabase.
+
+### Enable pgcrypto
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+```
+
+### Encrypt a Value
+
+```sql
+SELECT pgp_sym_encrypt('plaintext-value', current_setting('app.pg_crypto_key'));
+```
+
+### Decrypt a Value
+
+```sql
+SELECT pgp_sym_decrypt(encrypted_column::bytea, current_setting('app.pg_crypto_key'))
+FROM your_table
+WHERE id = 1;
+```
+
+### Set the Key for the Session
+
+```sql
+SET app.pg_crypto_key = 'your-secret-key';
+```
+
+In production, `PG_CRYPTO_KEY` is injected as a Cloud Run environment variable and set on the database session at connection time.
+
+---
+
+## Database Seeding
+
+The seed script populates the production Supabase PostgreSQL database with realistic synthetic threat log entries for demonstration purposes.
+
+### Run the Seed Script
+
+```powershell
+python scripts/seed_demo_events.py
+```
+
+### Expected Distribution
+
+```text
+ALLOW  ≈ 140 entries
+FLAG   ≈ 35 entries
+BLOCK  ≈ 25 entries
+Total  ≈ 200 entries
+```
+
+### Verify Seeded Data
+
+```sql
+SELECT decision,
+       COUNT(*)
+FROM threat_log
+GROUP BY decision
+ORDER BY decision;
+```
+
+---
+
 # API Endpoints
 
 ## POST
@@ -1204,6 +1843,68 @@ Confirm that the SQLite database has been created and is writable, and that the 
 
 ---
 
+## Supabase Connection Failed
+
+Verify that the `DATABASE_URL` environment variable is set correctly and points to a valid Supabase connection string. Confirm the Supabase project is active and not paused due to inactivity. For migration operations, ensure you are using `SUPABASE_DIRECT_URL` rather than the Transaction Pooler URL, as DDL operations require a persistent session-level connection. Check that the IP address of the connecting machine is not blocked by Supabase network restrictions.
+
+---
+
+## Cloud Run Deployment Failed
+
+Check the Cloud Run deployment logs via the Google Cloud Console or by running:
+
+```powershell
+gcloud run services describe malintent-backend --region asia-south1
+```
+
+Verify that all required environment variables are set correctly in the Cloud Run service configuration. Confirm the Docker image was pushed successfully to Google Artifact Registry before deploying. If the container fails to start, check that the `HUGGINGFACE_TOKEN` is valid and that the model download completes successfully during container startup.
+
+---
+
+## Docker Build Failed
+
+Verify that the Dockerfile is present in the backend directory and that all referenced files and dependencies exist. Confirm that the base Python image version is compatible with all installed packages. If a pip install step fails, check that the package name and version are correct and available on PyPI. Re-run with `--no-cache` to rule out stale layer issues:
+
+```powershell
+docker build --no-cache -t malintent-backend .
+```
+
+---
+
+## Benchmark CSV Missing
+
+Verify that the benchmark script completed without error by checking for any exception output in the terminal. Confirm that the output directory exists and is writable. Re-run the benchmark script with verbose output enabled and check that the input corpus files are present in the expected locations. If the script exits early due to a missing corpus file, the corresponding CSV will not be written.
+
+---
+
+## Seed Script Failed
+
+Confirm that `DATABASE_URL` is set and points to the correct Supabase production database. Verify that the `threat_log` table exists and that the schema matches what the seed script expects. If the seed script fails with a unique constraint violation, the table may already contain entries from a previous run — truncate the table before re-seeding if a clean slate is required:
+
+```sql
+TRUNCATE TABLE threat_log;
+```
+
+---
+
+## pgcrypto Missing
+
+Connect to the Supabase database using psql with the Direct URL and run:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+```
+
+If the extension cannot be created, verify that your Supabase project plan supports pgcrypto. The extension is available on all Supabase paid plans and on the free tier. If the command fails with a permission error, ensure you are connecting as the `postgres` superuser role via the Direct URL.
+
+---
+
+## Encryption Verification Failed
+
+If the pgp_sym_decrypt call returns an error rather than the expected plaintext, verify that `PG_CRYPTO_KEY` is set identically in both the environment where data was encrypted and the environment where decryption is being attempted. Even a single character difference in the key will cause decryption to fail. Confirm that the session-level key setting (`SET app.pg_crypto_key`) is being applied before the decrypt call. If you are testing via psql, run `SET app.pg_crypto_key = 'your-key';` manually before executing the decrypt query.
+
+---
+
 # Demo Checklist
 
 ✓ Virtual Environment Activated
@@ -1239,7 +1940,20 @@ Confirm that the SQLite database has been created and is writable, and that the 
 ✓ Action Audit Logger Verified
 ✓ SEL End-to-End Tests Passed
 ✓ Runtime Output Validation Verified
+✓ Docker Image Built and Verified
+✓ PostgreSQL Migration Completed
+✓ Supabase Connection Verified
+✓ pgcrypto Extension Verified
+✓ Database Encryption Verified (Insert, Decrypt, Wrong Key Rejection)
+✓ Cloud Run Deployment Live
+✓ Production Swagger Verified
+✓ Production Backend Verified
+✓ Ablation Benchmark Completed
+✓ CSV Reports Generated (corpus1, jailbreak, notinject, gandalf)
+✓ Database Seeded (200 entries)
+✓ Seeded Data Distribution Verified (ALLOW / FLAG / BLOCK)
+✓ Week 7 Tests Passed
 
 ---
 
-**Last Updated:** Week 6 Complete
+**Last Updated:** Week 7 Complete

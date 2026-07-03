@@ -886,3 +886,284 @@ AND-rule.
 - ✅ Swagger endpoint validated
 - ✅ 99/99 backend tests passed
 - ✅ Adversarial evaluation completed (70% catch rate)
+
+---
+
+# Week 7 – PostgreSQL Migration, Production Deployment & Benchmark Evaluation
+
+## Production Deployment
+
+### Backend API (Google Cloud Run)
+
+**Production URL**
+
+https://malintent-backend-261681342014.asia-south1.run.app
+
+**Interactive Swagger UI**
+
+https://malintent-backend-261681342014.asia-south1.run.app/docs
+
+**OpenAPI Specification**
+
+https://malintent-backend-261681342014.asia-south1.run.app/openapi.json
+
+> **Developer Note**
+>
+> This is the current production deployment of the MalIntent backend.
+> If the backend is ever redeployed as a new Cloud Run service,
+> update this URL throughout the project documentation before creating
+> a release.
+
+---
+
+## What's Built
+
+Week 7 upgrades MalIntent from a local development environment to a
+production-ready deployment using **PostgreSQL**, **Supabase**, **Google Cloud
+Run**, and **Docker**.
+
+This week also introduces PostgreSQL field-level encryption using
+**pgcrypto**, reproducible benchmark evaluation, and automated production
+database seeding for dashboard demonstrations.
+
+---
+
+## PostgreSQL Migration
+
+### `database.py`
+
+The backend database layer has been migrated from SQLite to PostgreSQL.
+
+Features include:
+
+- SQLAlchemy PostgreSQL engine
+- Connection pooling
+- Automatic database initialization
+- Environment-driven configuration
+- Production-ready session management
+
+The application now supports both local Docker development and production
+deployment using Supabase PostgreSQL.
+
+---
+
+## Database Encryption
+
+### PostgreSQL `pgcrypto`
+
+Week 7 introduces PostgreSQL field-level encryption using the
+`pgcrypto` extension.
+
+Sensitive configuration values are encrypted before storage and can only
+be decrypted using the configured `PG_CRYPTO_KEY`.
+
+Verification included:
+
+- Encrypted database storage
+- Successful decryption using the correct key
+- Failed decryption using an incorrect key
+- Database cleanup verification
+
+Application-level Fernet encryption introduced in Week 4 remains fully
+integrated alongside PostgreSQL encryption.
+
+---
+
+## Docker Environment
+
+Week 7 introduces a complete Docker development environment.
+
+New components include:
+
+- Dockerfile
+- Docker Compose
+- PostgreSQL 16 container
+- Automatic pgcrypto initialization
+- Environment-based configuration
+
+The backend can now be reproduced consistently across different development
+machines.
+
+---
+
+## Production Deployment
+
+The backend is deployed using **Google Cloud Run** with
+**Supabase PostgreSQL** as the production database.
+
+Deployment features include:
+
+- Containerised FastAPI backend
+- Google Cloud Run hosting
+- Supabase Transaction Pooler connectivity
+- Environment-variable based configuration
+- Docker container deployment
+- Production-ready PostgreSQL infrastructure
+
+### Production Architecture
+
+```text
+                Client
+                   │
+                   ▼
+      Google Cloud Run (FastAPI)
+                   │
+                   ▼
+         Supabase PostgreSQL
+                   │
+                   ▼
+ ThreatLog • Configuration • ActionLog
+```
+
+### Available API Endpoints
+
+| Endpoint                | Purpose                       |
+| ----------------------- | ----------------------------- |
+| `/`                     | API status                    |
+| `/docs`                 | Interactive Swagger UI        |
+| `/openapi.json`         | OpenAPI specification         |
+| `/api/v1/scan/input`    | Prompt injection scanning     |
+| `/api/v1/scan/output`   | Output consistency validation |
+| `/api/v1/scan/document` | Document scanner              |
+| `/api/v1/logs`          | Threat log retrieval          |
+| `/api/v1/stats`         | Dashboard statistics          |
+
+### Production Environment Variables
+
+Google Cloud Run is configured using:
+
+- `DATABASE_URL`
+- `SUPABASE_DIRECT_URL`
+- `SUPABASE_TRANSACTION_POOLER_URL`
+- `PG_CRYPTO_KEY`
+- `FERNET_KEY`
+- `HUGGINGFACE_TOKEN`
+- `CORS_ALLOWED_ORIGINS`
+
+The production backend connects to Supabase using the Transaction Pooler,
+while administrative verification and database maintenance use the Direct
+PostgreSQL connection.
+
+---
+
+## Out-of-Distribution Benchmark Evaluation
+
+### `scripts/run_ablation_benchmark.py`
+
+Week 7 introduces a reproducible benchmark framework for evaluating the
+complete MalIntent detection pipeline.
+
+Evaluation supports:
+
+- Internal validation corpus
+- External Out-of-Distribution benchmark datasets
+- Layer-by-layer ablation analysis
+- Automatic CSV report generation
+
+Generated benchmark reports include:
+
+- `ablation_results_corpus1.csv`
+- `ood_jailbreak.csv`
+- `ood_notinject.csv`
+- `ood_gandalf.csv`
+
+---
+
+## External OOD Benchmarks
+
+The PromptGuard semantic classifier was evaluated on three independent
+benchmark datasets that were never used during model training.
+
+| Dataset                     | Purpose                                        |
+| --------------------------- | ---------------------------------------------- |
+| Jailbreak Classification    | Unseen jailbreak prompt detection              |
+| NotInject                   | False-positive evaluation using benign prompts |
+| Gandalf Ignore Instructions | Instruction override robustness                |
+
+The benchmark demonstrates strong generalisation beyond the original
+training distribution.
+
+---
+
+## Demo Database Seeding
+
+### `scripts/seed_demo_events.py`
+
+Week 7 introduces an automated database seeding utility for frontend
+demonstrations.
+
+Features include:
+
+- Idempotent execution
+- Configurable event count
+- Realistic threat distributions
+- Seven-day timestamp distribution
+- Dashboard-ready threat history
+
+A total of **200 simulated threat events** are inserted into the production
+database.
+
+Observed distribution:
+
+| Decision | Count |
+| -------- | ----: |
+| ALLOW    |   139 |
+| FLAG     |    32 |
+| BLOCK    |    29 |
+
+---
+
+## Database Verification
+
+Production verification included:
+
+- PostgreSQL connectivity
+- pgcrypto availability
+- Encryption validation
+- Wrong-key decryption verification
+- Correct-key decryption verification
+- Production seed verification
+
+All verification steps completed successfully.
+
+---
+
+## Testing
+
+Week 7 validation included:
+
+```bash
+python scripts/run_ablation_benchmark.py
+
+python scripts/seed_demo_events.py
+```
+
+Additional verification:
+
+- PostgreSQL migration
+- pgcrypto extension
+- Supabase connectivity
+- Google Cloud Run deployment
+- Benchmark CSV generation
+- Production database seeding
+- Encryption verification
+
+---
+
+## Week 7 Deliverables
+
+- ✅ SQLite migrated to PostgreSQL
+- ✅ Supabase PostgreSQL integration completed
+- ✅ Google Cloud Run production deployment completed
+- ✅ Docker development environment implemented
+- ✅ PostgreSQL pgcrypto encryption enabled
+- ✅ Production encryption verification completed
+- ✅ Benchmark evaluation framework implemented
+- ✅ Internal corpus evaluation completed
+- ✅ External OOD benchmark evaluation completed
+- ✅ Benchmark CSV reports generated
+- ✅ Production database seeded with 200 demo events
+- ✅ Production backend verified
+- ✅ Week 7 implementation completed
+
+---

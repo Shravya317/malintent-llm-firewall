@@ -12,7 +12,18 @@ A lightweight multi-layer security framework designed to detect, classify, and p
 ✅ Week 4 Completed – FastAPI Backend + SEL Skeleton + Breach-Resilient Storage
 ✅ Week 5 Completed – Security Enforcement Layer (Dynamic Data Masking + Secret Protection Engine) + Pipeline Optimisation
 ✅ Week 6 Completed – Output Consistency Validation + Action Audit Logging
-🚧 Weeks 7–9 Remaining
+✅ Week 7 Completed – PostgreSQL Migration, Supabase Integration, Google Cloud Run Deployment, Docker Support, pgcrypto Encryption & Benchmark Evaluation
+🚧 Weeks 8–9 Remaining
+
+## Live Deployment
+
+### Backend API
+
+https://malintent-backend-261681342014.asia-south1.run.app
+
+### Interactive API Documentation
+
+https://malintent-backend-261681342014.asia-south1.run.app/docs
 
 ---
 
@@ -107,7 +118,7 @@ MalIntent is designed under the adversarial assumption that the firewall server 
 
 **2. Log Tokenization** — The ThreatLog stores only a SHA-256 hash of the prompt alongside metadata (risk score, decision, attack category, triggered layers, payload length, timestamp). The hash is one-way; the raw prompt is never persisted. This is the recommended mode for DPDPA/GDPR-regulated deployments.
 
-**3. Database Encryption at Rest** — SQLite encrypted with SQLCipher (AES-256) in development; PostgreSQL with `pgcrypto` field-level encryption in production. Encryption keys are loaded exclusively from environment variables at startup — never written to source code, config files, or the database itself.
+**3. Database Encryption at Rest** — MalIntent uses PostgreSQL with `pgcrypto` field-level encryption for sensitive configuration values together with application-level Fernet encryption. Encryption keys are loaded exclusively from environment variables and are never written to source code, configuration files, or the database.
 
 **4. Config and Secrets Encryption** — All values in the Configuration table (system context, custom rules, API keys, deployment settings) are encrypted at the application layer using Fernet symmetric encryption (`cryptography` library) before being written to the database. Values are decrypted in memory at runtime only and are never logged or persisted in plaintext.
 
@@ -180,6 +191,50 @@ Both corpora draw from the same 7 source datasets but serve entirely different r
 - ROC & Precision-Recall analysis
 - Layer-by-layer ablation study (Layer A only → A+B → A+B+C)
 - Automatic report generation
+
+### Production Infrastructure
+
+Week 7 upgrades MalIntent from a local development environment to a
+production-ready deployment architecture.
+
+Implemented features include:
+
+- PostgreSQL migration from SQLite
+- Supabase PostgreSQL production database
+- Google Cloud Run deployment
+- Docker and Docker Compose support
+- PostgreSQL `pgcrypto` field-level encryption
+- Production environment configuration
+- Automated benchmark evaluation pipeline
+- Production demo database seeding
+
+Production deployment now uses:
+
+Google Cloud Run
+
+↓
+
+Supabase PostgreSQL
+
+↓
+
+FastAPI Backend
+
+↓
+
+MalIntent Detection Pipeline
+
+Database verification includes:
+
+- pgcrypto encryption validation
+- Correct-key decryption verification
+- Wrong-key decryption protection
+- Production connectivity verification
+- Dashboard demo event generation
+
+The benchmark framework now evaluates both the internal validation corpus
+and independent Out-of-Distribution benchmark datasets while automatically
+generating reproducible CSV reports.
 
 ---
 
@@ -329,15 +384,32 @@ Verified successfully:
 - Adversarial response evaluation
 - SEL end-to-end integration
 - 99/99 backend tests passed
+- PostgreSQL migration from SQLite
+- Supabase PostgreSQL integration
+- Google Cloud Run deployment
+- Docker development environment
+- Docker Compose support
+- PostgreSQL pgcrypto encryption
+- Production database verification
+- Database encryption validation
+- Automated benchmark framework
+- Internal corpus evaluation
+- External OOD benchmark evaluation
+- Benchmark CSV generation
+- Production database seeding (200 events)
+- Cloud deployment verification
 
 ---
 
 ## Upcoming
 
-- React frontend — core dashboard (Week 6)
-- Frontend remaining pages + demo features (Week 6)
-- Dockerisation and deployment (Week 7)
-- Document Scanner (Week 7)
-- Research paper completion (Week 8)
-- Demo video and final evaluation (Week 8)
-- Final polish, bug fixes, and submission (Week 9)
+- React dashboard refinement
+- Document Scanner implementation
+- Research paper completion
+- System evaluation and comparative analysis
+- Demo video preparation
+- Final project documentation
+- Final optimisation and bug fixes
+- Final project submission
+
+---
