@@ -61,7 +61,7 @@ services:
     volumes:
       - .:/app
     # Override CMD to use --reload for development hot-reloading.
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   # ---------------------------------------------------------------------------
   # db — local postgres:16 (mirrors Supabase production schema)
