@@ -32,6 +32,9 @@ Thumbs.db
 # ── Data files (large — not for git) ─────────────────────────────────────────
 *.csv
 !backend/notebooks/manual_annotation_combined_corpus.csv
+backend/data/jailbreak_classification.csv
+backend/data/notinject.csv
+backend/data/gandalf.csv
 
 # ── Model weights (too large for git) ────────────────────────────────────────
 *.safetensors
