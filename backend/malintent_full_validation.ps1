@@ -512,7 +512,7 @@ Write-Host "  cd ..\backend"
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host " Running Complete Backend Test Suite (Weeks 1–7)"
+Write-Host " Running Complete Backend Test Suite"
 Write-Host "========================================"
 
 python -m pytest tests/ -v
