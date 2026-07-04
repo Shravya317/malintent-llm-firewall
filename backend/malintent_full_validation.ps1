@@ -203,17 +203,6 @@ Write-Host "6. Confirm Action Audit Logger"
 Write-Host "   records tool decisions correctly."
 
 # -------------------------------------------------------
-# FULL BACKEND TEST SUITE
-# -------------------------------------------------------
-
-Write-Host ""
-Write-Host "========================================"
-Write-Host " Running Complete Backend Test Suite (Weeks 1–7)"
-Write-Host "========================================"
-
-python -m pytest tests/ -v
-
-# -------------------------------------------------------
 # WEEK 7
 # -------------------------------------------------------
 
@@ -437,6 +426,17 @@ Write-Host "  docs/ood_jailbreak.csv"
 Write-Host "  docs/ood_notinject.csv"
 Write-Host "  docs/ood_gandalf.csv"
 
+# -------------------------------------------------------
+# FULL BACKEND TEST SUITE
+# -------------------------------------------------------
+
+Write-Host ""
+Write-Host "========================================"
+Write-Host " Running Complete Backend Test Suite (Weeks 1–7)"
+Write-Host "========================================"
+
+python -m pytest tests/ -v
+
 Write-Host ""
 Write-Host "======================================================="
 Write-Host " ALL AUTOMATED TESTS COMPLETED SUCCESSFULLY"
@@ -463,22 +463,6 @@ Write-Host "  https://malintent-backend-261681342014.asia-south1.run.app/docs"
 Write-Host ""
 Write-Host "OpenAPI URL:"
 Write-Host "  https://malintent-backend-261681342014.asia-south1.run.app/openapi.json"
-Write-Host ""
-Write-Host "======================================================="
-Write-Host " PROJECT STATUS"
-Write-Host "======================================================="
-Write-Host ""
-Write-Host "  Weeks 1-7 COMPLETE"
-Write-Host ""
-Write-Host "======================================================="
-Write-Host " READY FOR:"
-Write-Host "======================================================="
-Write-Host ""
-Write-Host "  GitHub Push"
-Write-Host "  Cloud Run Deployment"
-Write-Host "  Frontend Integration"
-Write-Host "  Research Paper"
-Write-Host "  Final Demonstration"
 Write-Host ""
 Write-Host "======================================================="
 Write-Host " MalIntent Validation Finished Successfully"
