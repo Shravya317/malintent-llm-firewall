@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Configure base URL with fallback to localhost:8000 for local development
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://malintent-backend-261681342014.asia-south1.run.app/api/v1'
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
