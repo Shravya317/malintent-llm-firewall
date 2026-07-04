@@ -1,0 +1,81 @@
+# Python
+
+**pycache**/
+_.py[cod]
+_.pyo
+
+# Virtual environments
+
+venv/
+.venv/
+
+# Git
+
+.git
+.gitignore
+
+# VS Code
+
+.vscode/
+
+# Environment variables
+
+.env
+.env.\*
+
+# Jupyter
+
+.ipynb_checkpoints/
+notebooks/
+
+# Tests
+
+tests/
+
+# Logs
+
+\*.log
+logs/
+
+# Build artifacts
+
+build/
+dist/
+\*.egg-info/
+
+# Cache
+
+.pytest_cache/
+.mypy_cache/
+
+# OS
+
+.DS_Store
+Thumbs.db
+
+# SQLite databases
+
+_.db
+_.sqlite
+\*.sqlite3
+
+# Documentation
+
+docs/
+paper/
+
+# Profiling
+
+profiling/
+
+# Docker Compose
+
+docker-compose.yml
+
+# Local scripts
+
+scripts/
+
+# PowerShell
+
+\*.ps1

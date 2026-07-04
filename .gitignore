@@ -41,6 +41,7 @@ Thumbs.db
 *.bin
 malintent_model_local/
 backend/malintent/malintent_model_local/
+backend/sentence_transformer_local/
 
 # ── Database files (Week 4 — SQLite dev DB, not for git) ─────────────────────
 *.db

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "malintent"
+version = "0.1.0"
+description = "Official Python SDK for the MalIntent LLM Prompt Injection Firewall"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Your Name" }
+]
+keywords = ["llm", "security", "prompt-injection", "firewall", "ai-security", "jailbreak-detection"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+    "Intended Audience :: Developers",
+]
+dependencies = [
+    "requests>=2.28.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/malintent-sdk"
+Repository = "https://github.com/YOUR_USERNAME/malintent-sdk"
+"Live API Docs" = "https://malintent-backend-261681342014.asia-south1.run.app/docs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["malintent"]
