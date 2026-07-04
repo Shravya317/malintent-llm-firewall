@@ -10,9 +10,16 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [
-    { name = "Your Name" }
+    { name = "Tusha", email = "tusharmishra0710@email.com" }
 ]
-keywords = ["llm", "security", "prompt-injection", "firewall", "ai-security", "jailbreak-detection"]
+keywords = [
+    "llm",
+    "security",
+    "prompt-injection",
+    "firewall",
+    "ai-security",
+    "jailbreak-detection"
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -25,9 +32,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/malintent-sdk"
-Repository = "https://github.com/YOUR_USERNAME/malintent-sdk"
-"Live API Docs" = "https://malintent-backend-261681342014.asia-south1.run.app/docs"
+Homepage = "https://github.com/tusharr-mishra/malintent-llm-firewall"
+Repository = "https://github.com/tusharr-mishra/malintent-llm-firewall"
+"Live API" = "https://malintent-backend-261681342014.asia-south1.run.app"
+"API Docs" = "https://malintent-backend-261681342014.asia-south1.run.app/docs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["malintent"]

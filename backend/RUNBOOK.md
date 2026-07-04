@@ -24,14 +24,15 @@ This document contains everything required to execute, test, verify, and demonst
 14. Benchmark Evaluation
 15. Database Encryption
 16. Database Seeding
-17. Model Information
-18. API Endpoints
-19. Common Configuration Keys
-20. Sample API Payloads
-21. Edge Case Testing
-22. Git Commands
-23. Common Problems
-24. Demo Checklist
+17. Python SDK
+18. Model Information
+19. API Endpoints
+20. Common Configuration Keys
+21. Sample API Payloads
+22. Edge Case Testing
+23. Git Commands
+24. Common Problems
+25. Demo Checklist
 
 ---
 
@@ -1179,6 +1180,90 @@ Open Swagger UI and verify:
 
 ---
 
+## Step 8 — Verify Python SDK
+
+Navigate to the SDK directory and activate its virtual environment:
+
+```powershell
+cd ..\sdk
+venv\Scripts\activate
+```
+
+### Install the SDK in Editable Mode
+
+```powershell
+pip install -e .
+```
+
+Expected:
+
+```text
+Successfully installed malintent-0.1.0
+```
+
+---
+
+### Run SDK Unit Tests
+
+```powershell
+python -m pytest tests/ -v
+```
+
+Expected:
+
+```text
+tests/test_client.py::test_scan_input_allow PASSED
+tests/test_client.py::test_scan_input_block_raises_when_requested PASSED
+tests/test_client.py::test_api_error_raised_on_non_2xx PASSED
+tests/test_client.py::test_get_logs_parses_list PASSED
+4 passed
+```
+
+---
+
+### Verify Clean Import
+
+```powershell
+python -c "from malintent import Client; print('SDK imported successfully')"
+```
+
+Expected:
+
+```text
+SDK imported successfully
+```
+
+---
+
+### Run Live Quickstart Against Cloud Run
+
+```powershell
+python examples/quickstart.py
+```
+
+Expected output (values will vary):
+
+```text
+[malicious] decision=BLOCK  risk_score=95.0  category=DI-001
+[benign]    decision=ALLOW  risk_score=5.0
+[output]    consistent=True similarity=0.098 flag_reason=None
+[logs]      fetched 5 recent entries
+[stats]     total_requests=XXX total_blocked=XXX
+```
+
+> **Note:** The first call after a Cloud Run cold start may take 30–90 seconds while the ML model loads. The SDK timeout is set to 120 s to accommodate this.
+
+---
+
+### Return to Backend Directory
+
+```powershell
+deactivate
+cd ..\backend
+```
+
+---
+
 ## Week 7 Features
 
 ### Production Deployment
@@ -1212,6 +1297,16 @@ Open Swagger UI and verify:
 - Covers diverse attack types, session roles, and risk scores
 - Idempotent seed script for repeatable demo preparation
 
+### Python SDK
+
+- Installable Python client package (`malintent-0.1.0`)
+- `Client` class wrapping all production API endpoints
+- `scan_input()`, `scan_output()`, `get_logs()`, `get_stats()` methods
+- Raises on non-2xx responses with typed `APIError`
+- 120 s timeout configured for Cloud Run cold-start tolerance
+- Unit test suite (4 tests, no network required)
+- Live quickstart example against deployed Cloud Run backend
+
 ---
 
 ## Week 7 Deliverables
@@ -1228,6 +1323,10 @@ Completed:
 - Week 7 Tests Passed
 - Production Swagger Verified
 - Production Backend Verified
+- SDK Installed and Verified
+- SDK Unit Tests Passed (4/4)
+- SDK Clean Import Verified
+- SDK Live Quickstart Verified Against Cloud Run
 
 ---
 
@@ -1516,6 +1615,72 @@ FROM threat_log
 GROUP BY decision
 ORDER BY decision;
 ```
+
+---
+
+## Python SDK
+
+The MalIntent Python SDK provides a typed client for interacting with the production API from any Python application.
+
+### Install the SDK
+
+```powershell
+cd ..\sdk
+venv\Scripts\activate
+pip install -e .
+```
+
+Expected:
+
+```text
+Successfully installed malintent-0.1.0
+```
+
+### Run SDK Unit Tests
+
+```powershell
+python -m pytest tests/ -v
+```
+
+Expected:
+
+```text
+tests/test_client.py::test_scan_input_allow PASSED
+tests/test_client.py::test_scan_input_block_raises_when_requested PASSED
+tests/test_client.py::test_api_error_raised_on_non_2xx PASSED
+tests/test_client.py::test_get_logs_parses_list PASSED
+4 passed
+```
+
+### Verify Clean Import
+
+```powershell
+python -c "from malintent import Client; print('SDK imported successfully')"
+```
+
+Expected:
+
+```text
+SDK imported successfully
+```
+
+### Run Live Quickstart
+
+```powershell
+python examples/quickstart.py
+```
+
+Expected output (values will vary):
+
+```text
+[malicious] decision=BLOCK  risk_score=95.0  category=DI-001
+[benign]    decision=ALLOW  risk_score=5.0
+[output]    consistent=True similarity=0.098 flag_reason=None
+[logs]      fetched 5 recent entries
+[stats]     total_requests=XXX total_blocked=XXX
+```
+
+> **Note:** The first call after a Cloud Run cold start may take 30–90 seconds while the ML model loads. The SDK timeout is set to 120 s to accommodate this.
 
 ---
 
@@ -1905,6 +2070,24 @@ If the pgp_sym_decrypt call returns an error rather than the expected plaintext,
 
 ---
 
+## SDK Import Failed
+
+Confirm the SDK is installed in the active virtual environment by running `pip install -e .` from the `sdk/` directory. Verify you have activated the correct virtual environment before importing. If the import still fails, check that all SDK dependencies are installed by running `pip install -r requirements.txt` from the `sdk/` directory.
+
+---
+
+## SDK Unit Tests Fail
+
+Confirm that the SDK is installed in editable mode (`pip install -e .`) and that the test fixtures in `tests/test_client.py` match the current `Client` API. Re-run with `-v` to identify which specific test is failing.
+
+---
+
+## SDK Live Quickstart Fails
+
+Verify that the Cloud Run backend is live and reachable at the production URL. Confirm the SDK timeout is set to at least 120 s to accommodate cold starts. If the quickstart times out on the first call, wait for the container to warm up and re-run — subsequent calls will be significantly faster.
+
+---
+
 # Demo Checklist
 
 ✓ Virtual Environment Activated
@@ -1953,6 +2136,10 @@ If the pgp_sym_decrypt call returns an error rather than the expected plaintext,
 ✓ Database Seeded (200 entries)
 ✓ Seeded Data Distribution Verified (ALLOW / FLAG / BLOCK)
 ✓ Week 7 Tests Passed
+✓ SDK Installed (malintent-0.1.0)
+✓ SDK Unit Tests Passed (4/4)
+✓ SDK Clean Import Verified
+✓ SDK Live Quickstart Verified Against Cloud Run
 
 ---
 
