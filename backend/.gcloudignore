@@ -47,11 +47,6 @@ Thumbs.db
 
 backend/.env
 
-# ── Model weights ──────────────────────────────────────────────────────────────────
-
-malintent_model_local/
-backend/malintent/malintent_model_local/
-
 # ── SQLite ──────────────────────────────────────────────────────────────────
 
 _.db
