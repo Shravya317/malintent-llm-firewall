@@ -11,6 +11,8 @@ const severityColor = {
 const statusLabel = {
   blocked: { text: 'Blocked', color: 'var(--accent-threat)' },
   flagged: { text: 'Flagged', color: 'var(--accent-warn)' },
+  block: { text: 'Blocked', color: 'var(--accent-threat)' },
+  flag: { text: 'Flagged', color: 'var(--accent-warn)' },
   monitored: { text: 'Monitored', color: 'var(--text-muted)' },
 }
 
