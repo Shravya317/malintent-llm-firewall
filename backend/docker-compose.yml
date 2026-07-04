@@ -87,8 +87,8 @@ services:
       # postgres:16 runs any .sql file in /docker-entrypoint-initdb.d/ on first boot.
       - ./migrations/007_enable_pgcrypto.sql:/docker-entrypoint-initdb.d/007_enable_pgcrypto.sql:ro
     ports:
-      # Expose port 5432 to the host so you can run psql / pytest from outside Docker.
-      - "5432:5432"
+      # Expose port 5433 to the host to avoid conflict with native Windows Postgres on 5432.
+      - "5433:5432"
     restart: unless-stopped
 
 # =============================================================================

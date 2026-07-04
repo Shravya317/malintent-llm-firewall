@@ -238,18 +238,18 @@ def main() -> None:
     print(f"[profile_pipeline] Profiling {len(prompts)} prompts...\n")
     timings = profile(prompts)
 
-    print("\n── PER-LAYER LATENCY BREAKDOWN ──\n")
+    print("\n-- PER-LAYER LATENCY BREAKDOWN --\n")
     print_table(timings)
 
     total_summary = summarise(timings["total_pipeline"])
-    print("\n── BUDGET CHECK ──\n")
+    print("\n-- BUDGET CHECK --\n")
     print(f"Target  : < 100ms on the p95 (Layer A ~2ms target, Layer B ~50ms target, Layer C ~20ms target)")
     print(f"Measured: p95={total_summary['p95']:.2f}ms  mean={total_summary['mean']:.2f}ms  max={total_summary['max']:.2f}ms")
 
     if total_summary["p95"] < 100.0:
-        print("\n✓ PASS — pipeline p95 latency is under the 100ms budget.")
+        print("\n[OK] PASS - pipeline p95 latency is under the 100ms budget.")
     else:
-        print("\n✗ OVER BUDGET — pipeline p95 latency exceeds 100ms.")
+        print("\n[FAIL] OVER BUDGET - pipeline p95 latency exceeds 100ms.")
         print("  Use the per-layer table above to identify the bottleneck layer,")
         print("  then check it against the 'Common Remaining Bottlenecks' table")
         print("  in the Week 5 guide (Day 2) before re-running this script.")

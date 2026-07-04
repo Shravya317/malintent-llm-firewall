@@ -15,17 +15,32 @@ Covers:
 All tests use the function-scoped `db` fixture from conftest.py — each test
 runs inside its own rolled-back transaction, so there is no state pollution
 between tests.
+
+Corrections made after Week 7 review
+-------------------------------------
+  - ThreatLog.layers_triggered is a comma-joined String column on the real
+    schema (models.py), not a JSON list — tests and seed-script assertions
+    below were updated to match (previously assumed "triggered_layers" as
+    a list, which does not exist on the model).
+  - verify_pgcrypto is imported from `database`, not `app.database` — this
+    project has no `app/` package.
+  - ActionLog assertions were updated to match the real column set
+    (decision: PERMITTED/DENIED, denial_reason, session_role, tool_called,
+    fields_masked). The model has no `outcome="ERROR"` concept, so the
+    former "error outcome" test was replaced with a denial_reason test
+    covering the same non-happy-path intent.
 """
 
 from __future__ import annotations
 
 import hashlib
+import json
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 import pytest
 from sqlalchemy import text
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from database import (
     PG_CRYPTO_KEY,
@@ -126,30 +141,28 @@ class TestConfigurationModel:
         A Configuration row written with encrypt_field must be readable with
         decrypt_field and return the original plaintext.
         """
-        recovered_value = decrypt_field(db, encrypted_config.value_encrypted)
+        recovered_value = decrypt_field(db, encrypted_config.encrypted_value)
         assert recovered_value == "sk-test-openai-key-abc123"
 
     def test_raw_column_is_not_plaintext(
         self, db: "Session", encrypted_config: Configuration
     ) -> None:
         """
-        The raw bytes stored in value_encrypted must not equal the UTF-8
+        The raw bytes stored in encrypted_value must not equal the UTF-8
         encoding of the plaintext — confirming the column never stores clear text.
         """
         plaintext_bytes = "sk-test-openai-key-abc123".encode("utf-8")
-        stored = bytes(encrypted_config.value_encrypted)
+        stored = bytes(encrypted_config.encrypted_value)
         assert stored != plaintext_bytes
         # And the plaintext must not appear as a substring in the ciphertext
         assert b"sk-test-openai-key-abc123" not in stored
 
     def test_key_name_is_unique(self, db: "Session") -> None:
-        """Duplicate key_name must be rejected by the UNIQUE constraint."""
-        from sqlalchemy.exc import IntegrityError
-
+        """Duplicate key must be rejected by the UNIQUE constraint."""
         ciphertext = encrypt_field(db, "value1")
         config1 = Configuration(
-            key_name="unique_key_test",
-            value_encrypted=ciphertext,
+            key="unique_key_test",
+            encrypted_value=ciphertext,
             updated_at=datetime.utcnow(),
         )
         db.add(config1)
@@ -157,8 +170,8 @@ class TestConfigurationModel:
 
         ciphertext2 = encrypt_field(db, "value2")
         config2 = Configuration(
-            key_name="unique_key_test",  # duplicate
-            value_encrypted=ciphertext2,
+            key="unique_key_test",  # duplicate
+            encrypted_value=ciphertext2,
             updated_at=datetime.utcnow(),
         )
         db.add(config2)
@@ -171,11 +184,11 @@ class TestConfigurationModel:
         """Updating a config value encrypts the new plaintext and overwrites."""
         new_value = "sk-rotated-key-xyz789"
         new_ciphertext = encrypt_field(db, new_value)
-        encrypted_config.value_encrypted = new_ciphertext
+        encrypted_config.encrypted_value = new_ciphertext
         encrypted_config.updated_at = datetime.utcnow()
         db.flush()
 
-        recovered = decrypt_field(db, encrypted_config.value_encrypted)
+        recovered = decrypt_field(db, encrypted_config.encrypted_value)
         assert recovered == new_value
 
 
@@ -223,10 +236,13 @@ class TestThreatLogModel:
         log = ThreatLog(
             timestamp=datetime.utcnow(),
             payload_hash=payload_hash,
+            payload_length=len(original_prompt),
             risk_score=92,
             decision="BLOCK",
             attack_category="direct_injection",
-            triggered_layers=["A", "B", "C"],
+            layers_triggered="A,B,C",
+            layer_a_matched=True,
+            layer_b_confidence=0.97,
         )
         db.add(log)
         db.flush()
@@ -236,13 +252,16 @@ class TestThreatLogModel:
         assert log.payload_hash == payload_hash
         assert original_prompt.encode() not in payload_hash.encode()
 
-    def test_triggered_layers_is_json_list(
+    def test_layers_triggered_is_comma_joined_string(
         self, db: "Session", sample_threat_log: ThreatLog
     ) -> None:
-        """triggered_layers must be stored and retrieved as a Python list."""
-        layers = sample_threat_log.triggered_layers
-        assert isinstance(layers, list)
-        assert all(l in ["A", "B", "C"] for l in layers)
+        """
+        layers_triggered is a comma-joined String column (models.py), e.g.
+        "A,B" or "A,B,C" — not a JSON list.
+        """
+        layers = sample_threat_log.layers_triggered
+        assert isinstance(layers, str)
+        assert all(l in ["A", "B", "C"] for l in layers.split(",") if l)
 
     def test_timestamp_is_utc_datetime(
         self, db: "Session", sample_threat_log: ThreatLog
@@ -257,6 +276,7 @@ class TestThreatLogModel:
             log = ThreatLog(
                 timestamp=datetime.utcnow(),
                 payload_hash=hashlib.sha256(decision.encode()).hexdigest(),
+                payload_length=10,
                 risk_score=50,
                 decision=decision,
             )
@@ -274,6 +294,7 @@ class TestThreatLogModel:
             log = ThreatLog(
                 timestamp=datetime.utcnow(),
                 payload_hash=hashlib.sha256(f"{decision}{score}".encode()).hexdigest(),
+                payload_length=10,
                 risk_score=score,
                 decision=decision,
             )
@@ -290,49 +311,48 @@ class TestActionLogModel:
     def test_action_log_permitted(
         self, db: "Session", sample_action_log: ActionLog
     ) -> None:
-        """A permitted action must have permission_granted=True and outcome=PERMITTED."""
-        assert sample_action_log.permission_granted is True
-        assert sample_action_log.outcome == "PERMITTED"
+        """A permitted action must have decision=PERMITTED."""
+        assert sample_action_log.decision == "PERMITTED"
 
     def test_action_log_denied(self, db: "Session") -> None:
-        """A denied action must have permission_granted=False and outcome=DENIED."""
+        """A denied action must have decision=DENIED."""
         action = ActionLog(
             timestamp=datetime.utcnow(),
-            user_role="Customer",
-            tool_name="database_query",
-            query_executed="SELECT * FROM users",  # not permitted for Customer
-            permission_granted=False,
-            outcome="DENIED",
+            session_role="customer",
+            tool_called="database_query",
+            query_executed="SELECT * FROM users",  # not permitted for customer
+            decision="DENIED",
         )
         db.add(action)
         db.flush()
-        assert action.permission_granted is False
-        assert action.outcome == "DENIED"
+        assert action.decision == "DENIED"
 
     def test_masked_fields_stored_as_json(
         self, db: "Session", sample_action_log: ActionLog
     ) -> None:
-        """masked_fields must be stored and retrieved as a Python list of dicts."""
-        fields = sample_action_log.masked_fields
+        """
+        fields_masked is a Text column storing a JSON-encoded list of dicts —
+        it must round-trip through json.loads() as a list of dicts.
+        """
+        fields = json.loads(sample_action_log.fields_masked)
         assert isinstance(fields, list)
         assert len(fields) > 0
         assert "field" in fields[0]
         assert "rule" in fields[0]
 
-    def test_error_outcome(self, db: "Session") -> None:
-        """An ERROR outcome must store error_detail without raw PII."""
+    def test_denial_reason_stored(self, db: "Session") -> None:
+        """A DENIED action must be able to store a human-readable denial_reason."""
         action = ActionLog(
             timestamp=datetime.utcnow(),
-            user_role="Employee",
-            tool_name="api_call",
-            permission_granted=True,
-            outcome="ERROR",
-            error_detail="ConnectionError: upstream timeout after 30s",
+            session_role="employee",
+            tool_called="api_call",
+            decision="DENIED",
+            denial_reason="ConnectionError: upstream timeout after 30s",
         )
         db.add(action)
         db.flush()
-        assert action.outcome == "ERROR"
-        assert "ConnectionError" in action.error_detail
+        assert action.decision == "DENIED"
+        assert "ConnectionError" in action.denial_reason
 
 
 # =============================================================================
@@ -378,20 +398,26 @@ class TestSeedScript:
         assert set(ATTACK_CATEGORIES) == expected
 
     def test_build_event_allow_has_no_category(self) -> None:
-        """ALLOW events must have attack_category=None."""
+        """
+        ALLOW events must have attack_category=None and an empty
+        layers_triggered string (models.py column, comma-joined).
+        """
         from scripts.seed_demo_events import _build_event
 
         event = _build_event(0, "ALLOW", datetime.utcnow())
         assert event["attack_category"] is None
-        assert event["triggered_layers"] == []
+        assert event["layers_triggered"] == ""
 
     def test_build_event_block_has_category(self) -> None:
-        """BLOCK events must have an attack_category."""
+        """
+        BLOCK events must have an attack_category, and layers_triggered
+        (a comma-joined string) must list at least 2 layers.
+        """
         from scripts.seed_demo_events import _build_event
 
         event = _build_event(0, "BLOCK", datetime.utcnow())
         assert event["attack_category"] is not None
-        assert len(event["triggered_layers"]) >= 2  # BLOCK triggers ≥2 layers
+        assert len(event["layers_triggered"].split(",")) >= 2  # BLOCK triggers ≥2 layers
 
     def test_build_event_risk_score_in_range(self) -> None:
         """Risk scores must fall within the correct range for each decision."""
@@ -425,7 +451,6 @@ class TestVerifyPgCrypto:
         self, db: "Session"
     ) -> None:
         """verify_pgcrypto must return True when pgcrypto is installed."""
-        from app.database import verify_pgcrypto
         assert verify_pgcrypto(db) is True
 
     def test_verify_pgcrypto_detects_extension(self, db: "Session") -> None:

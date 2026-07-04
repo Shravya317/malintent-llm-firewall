@@ -7,27 +7,6 @@
 #   venv\Scripts\activate
 #   .\malintent_full_validation.ps1
 #
-# If PowerShell blocks execution:
-#
-#   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-#   .\malintent_full_validation.ps1
-#
-# =======================================================
-#
-# SECURITY NOTE (Week 7 additions):
-# The Week 7 manual-verification block below references your
-# Supabase DATABASE_URL and PG_CRYPTO_KEY. Two placeholders are
-# used in this script instead of the raw secret values:
-#
-#   <YOUR_DATABASE_URL>   -> your full Supabase pooler connection string
-#   <YOUR_PG_CRYPTO_KEY>  -> your production pgcrypto key
-#
-# Fill these in locally (or better, export them as environment
-# variables and reference $env:DATABASE_URL / $env:PG_CRYPTO_KEY)
-# before running Step 8/Step 6 by hand. Do NOT commit a version
-# of this file with real credentials filled in to GitHub or any
-# shared repository.
-#
 # =======================================================
 
 Write-Host ""
@@ -41,6 +20,71 @@ Write-Host ""
 # -------------------------------------------------------
 
 venv\Scripts\activate
+
+# -------------------------------------------------------
+# Test environment setup (LOCAL Docker Postgres - isolated from prod)
+# -------------------------------------------------------
+
+
+Write-Host "Setting up isolated local test database..."
+
+$pgPassword = $null
+if (Test-Path ".env") {
+    Get-Content ".env" | ForEach-Object {
+        if ($_ -match "^\s*POSTGRES_PASSWORD\s*=\s*(.+)$") {
+            $pgPassword = $matches[1].Trim()
+        }
+    }
+}
+if (-not $pgPassword) {
+    Write-Host "ERROR: POSTGRES_PASSWORD not found in .env -- cannot start local test DB." -ForegroundColor Red
+    exit 1
+}
+
+$env:DATABASE_URL  = "postgresql://malintent:$pgPassword@127.0.0.1:5433/malintent"
+$env:PG_CRYPTO_KEY = "local-test-key-not-for-production-0000000000"
+$env:PYTHONPATH    = "."
+
+Write-Host "Verifying Docker is running..."
+docker info > $null 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: Docker is not running. Please start Docker Desktop before running tests." -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Starting test database container..."
+docker compose up db -d
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: Failed to start docker container." -ForegroundColor Red
+    exit 1
+}
+Write-Host "Waiting for Postgres to start up..."
+$ready = $false
+for ($i=0; $i -lt 15; $i++) {
+    $status = docker compose exec db pg_isready -U malintent -d malintent 2>&1
+    if ($status -match "accepting connections") {
+        $ready = $true
+        break
+    }
+    Start-Sleep -Seconds 2
+}
+
+Write-Host "Testing database connection to ensure credentials match..."
+$connTest = docker compose exec -e PGPASSWORD=$pgPassword db psql -U malintent -d malintent -c "SELECT 1;" 2>&1
+if ($LASTEXITCODE -ne 0 -and $connTest -match "password authentication failed") {
+    Write-Host "Detected password mismatch in existing pgdata volume. Recreating volume..." -ForegroundColor Yellow
+    docker compose down -v
+    docker compose up db -d
+    
+    Write-Host "Waiting for Postgres to be ready after volume reset..."
+    for ($i=0; $i -lt 15; $i++) {
+        $status = docker compose exec db pg_isready -U malintent -d malintent 2>&1
+        if ($status -match "accepting connections") {
+            break
+        }
+        Start-Sleep -Seconds 2
+    }
+}
 
 # -------------------------------------------------------
 # WEEK 1
@@ -68,20 +112,6 @@ Write-Host ""
 Write-Host "Running ML Classifier Smoke Test..."
 python malintent/ml_classifier.py
 
-Write-Host ""
-Write-Host "Week 2 Note:"
-Write-Host "The standalone PromptGuard smoke test may report a few"
-Write-Host "expected differences depending on the locally exported"
-Write-Host "model weights and confidence threshold."
-Write-Host "The authoritative validation is the full pipeline"
-Write-Host "(Week 3), which should achieve the expected accuracy."
-
-Write-Host ""
-Write-Host "Week 2 Reminder:"
-Write-Host "PromptGuard-86M training, dataset preparation,"
-Write-Host "OOD evaluation and fine-tuning are performed"
-Write-Host "on the NVIDIA DGX A100 server and are not"
-Write-Host "executed by this local script."
 
 # -------------------------------------------------------
 # WEEK 3
@@ -138,24 +168,6 @@ Write-Host ""
 Write-Host "Running Pipeline Profiler..."
 python scripts/profile_pipeline.py
 
-Write-Host ""
-Write-Host "Week 5 Reminder:"
-Write-Host "To verify full Week 5 integration:"
-Write-Host "1. Start FastAPI using:"
-Write-Host "   uvicorn main:app --reload"
-Write-Host ""
-Write-Host "2. Open Swagger UI:"
-Write-Host "   http://127.0.0.1:8000/docs"
-Write-Host ""
-Write-Host "3. Execute multiple POST requests to:"
-Write-Host "   /api/v1/scan/input"
-Write-Host ""
-Write-Host "4. Verify the terminal does NOT print:"
-Write-Host "   MLClassifier loaded"
-Write-Host "   more than once."
-Write-Host ""
-Write-Host "5. Verify pipeline startup warm-up"
-Write-Host "   completed successfully."
 
 # -------------------------------------------------------
 # WEEK 6
@@ -178,29 +190,6 @@ Write-Host ""
 Write-Host "Running SEL End-to-End Tests..."
 python -m pytest tests/test_sel_end_to_end.py -v
 
-Write-Host ""
-Write-Host "Week 6 Reminder:"
-Write-Host "To verify full Week 6 integration:"
-Write-Host "1. Start FastAPI using:"
-Write-Host "   uvicorn main:app --reload"
-Write-Host ""
-Write-Host "2. Open Swagger UI:"
-Write-Host "   http://127.0.0.1:8000/docs"
-Write-Host ""
-Write-Host "3. Execute POST request:"
-Write-Host "   /api/v1/scan/output"
-Write-Host ""
-Write-Host "4. Verify the response contains:"
-Write-Host "   consistent"
-Write-Host "   similarity_score"
-Write-Host "   flag_reason"
-Write-Host "   high_risk_patterns_found"
-Write-Host ""
-Write-Host "5. Confirm adversarial catch-rate table"
-Write-Host "   is printed successfully."
-Write-Host ""
-Write-Host "6. Confirm Action Audit Logger"
-Write-Host "   records tool decisions correctly."
 
 # -------------------------------------------------------
 # WEEK 7
@@ -222,7 +211,7 @@ python -m pytest tests/test_week7.py -v
 
 Write-Host ""
 Write-Host "Running Ablation Benchmark..."
-python scripts/run_ablation_benchmark.py
+python scripts/run_ablation_benchmark.py --dataset notebooks/manual_annotation_combined_corpus --output docs/ablation_results_corpus1.csv
 
 Write-Host ""
 Write-Host "======================================================="
@@ -233,8 +222,13 @@ Write-Host ""
 Write-Host "----------------------------------"
 Write-Host "Week 7 Manual Verification"
 Write-Host "----------------------------------"
-
 Write-Host ""
+Write-Host "NOTE: The steps below intentionally use YOUR REAL production"
+Write-Host "Supabase credentials from backend/.env. They are manual and"
+Write-Host "read-only/insert-then-delete by design -- unlike the automated"
+Write-Host "suite above, nothing here runs drop_all() on your database."
+Write-Host ""
+
 Write-Host "========================================"
 Write-Host "PostgreSQL / Supabase Verification"
 Write-Host "========================================"
@@ -242,9 +236,9 @@ Write-Host "========================================"
 Write-Host ""
 Write-Host "Step 1"
 Write-Host ""
-Write-Host "Open psql:"
+Write-Host "Open psql (use your SUPABASE_DIRECT_URL from .env):"
 Write-Host ""
-Write-Host '  psql "YOUR_SUPABASE_DIRECT_URL"'
+Write-Host '  psql "$env:SUPABASE_DIRECT_URL"'
 
 Write-Host ""
 Write-Host "Step 2"
@@ -320,16 +314,14 @@ Write-Host "Step 6"
 Write-Host ""
 Write-Host "Correct key verification"
 Write-Host ""
+Write-Host "  Use the PG_CRYPTO_KEY value from your backend\.env file:"
+Write-Host ""
 Write-Host "  SELECT pgp_sym_decrypt("
 Write-Host "  encrypted_value::bytea,"
-Write-Host "  '<YOUR_PG_CRYPTO_KEY>'"
+Write-Host "  '<paste PG_CRYPTO_KEY from .env here, do not commit it>'"
 Write-Host "  )"
 Write-Host "  FROM configuration"
 Write-Host "  WHERE key='test_api_key';"
-Write-Host ""
-Write-Host "  NOTE: replace <YOUR_PG_CRYPTO_KEY> with your actual"
-Write-Host "  PG_CRYPTO_KEY value locally. Do not hardcode the real"
-Write-Host "  key into this script if it will be committed to Git."
 Write-Host ""
 Write-Host "Expected:"
 Write-Host ""
@@ -355,12 +347,20 @@ Write-Host "Step 8"
 Write-Host ""
 Write-Host "Seed production database"
 Write-Host ""
-Write-Host "  set ""DATABASE_URL=<YOUR_DATABASE_URL>"" && set ""PG_CRYPTO_KEY=<YOUR_PG_CRYPTO_KEY>"" && set PYTHONPATH=. && python scripts\seed_demo_events.py"
+Write-Host "  Run this from PowerShell - it reads DATABASE_URL / PG_CRYPTO_KEY"
+Write-Host "  straight out of your existing backend\.env, no need to retype them:"
 Write-Host ""
-Write-Host "  NOTE: replace <YOUR_DATABASE_URL> and <YOUR_PG_CRYPTO_KEY>"
-Write-Host "  with your actual Supabase pooler connection string and"
-Write-Host "  crypto key locally before running this command. Do not"
-Write-Host "  commit real credentials to Git/GitHub."
+Write-Host '  Get-Content .env | ForEach-Object {'
+Write-Host '    if ($_ -match "^\s*([^#][^=]*)=(.*)$") {'
+Write-Host '      [System.Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim())'
+Write-Host '    }'
+Write-Host '  }'
+Write-Host '  python scripts\seed_demo_events.py'
+Write-Host ""
+Write-Host "  This targets production on purpose (per your existing setup where"
+Write-Host "  Supabase doubles as the dev database) -- just don't run the"
+Write-Host "  automated pytest suite above with these same vars still exported,"
+Write-Host "  since that suite calls drop_all()."
 
 Write-Host ""
 Write-Host "----------------------------------"
@@ -370,7 +370,7 @@ Write-Host "Step 9"
 Write-Host ""
 Write-Host "Verify seeded records"
 Write-Host ""
-Write-Host '  psql "YOUR_SUPABASE_DIRECT_URL"'
+Write-Host '  psql "$env:SUPABASE_DIRECT_URL"'
 Write-Host ""
 Write-Host "Run:"
 Write-Host ""
@@ -473,7 +473,7 @@ Write-Host "Step 15"
 Write-Host ""
 Write-Host "Verify clean import:"
 Write-Host ""
-Write-Host "  python -c ""from malintent import Client; print('SDK imported successfully')"""
+Write-Host '  python -c "from malintent import Client; print(''SDK imported successfully'')"'
 Write-Host ""
 Write-Host "Expected:"
 Write-Host ""
@@ -514,6 +514,7 @@ Write-Host ""
 Write-Host "========================================"
 Write-Host " Running Complete Backend Test Suite"
 Write-Host "========================================"
+Write-Host "(still against the local test DB set up at the top of this script)"
 
 python -m pytest tests/ -v
 

@@ -336,12 +336,12 @@ if __name__ == "__main__":
         ("What payment methods do you accept?",                                 False),
     ]
 
-    print("\n── LAYER C SMOKE TEST ──\n")
+    print("\n-- LAYER C SMOKE TEST --\n")
     all_pass = True
     for text, expect_fired in test_cases:
         result = engine.search(text)
         ok     = result.fired == expect_fired
-        status = "✓" if ok else "✗ WRONG"
+        status = "[OK]" if ok else "[FAIL]"
         if not ok:
             all_pass = False
         top = result.top_matches[0] if result.top_matches else None
@@ -351,7 +351,7 @@ if __name__ == "__main__":
             f"{result.latency_ms:5.1f}ms | '{text[:60]}'"
         )
         if top:
-            print(f"   └─ top match: '{top.phrase[:70]}' ({top.category})")
+            print(f"   \\- top match: '{top.phrase[:70]}' ({top.category})")
 
-    print(f"\n{'ALL TESTS PASSED ✓' if all_pass else 'SOME TESTS FAILED — adjust threshold or enrich phrases'}")
+    print(f"\n{'ALL TESTS PASSED [OK]' if all_pass else 'SOME TESTS FAILED - adjust threshold or enrich phrases'}")
     print(f"(threshold={engine.threshold})")

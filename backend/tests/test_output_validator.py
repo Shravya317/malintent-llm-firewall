@@ -218,7 +218,7 @@ def test_print_catch_rate_summary(validator, capsys):
     ]
 
     caught = 0
-    print("\n\n── OUTPUT VALIDATOR — 10-CASE ADVERSARIAL CATCH-RATE TABLE ──\n")
+    print("\n\n-- OUTPUT VALIDATOR - 10-CASE ADVERSARIAL CATCH-RATE TABLE --\n")
     print(f"{'#':<3} {'case':<32} {'sim':>6}  {'decision':<9} patterns")
     print("-" * 90)
     for i, (case_id, response_text, kind) in enumerate(all_cases, start=1):

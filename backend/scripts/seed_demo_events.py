@@ -202,7 +202,7 @@ def _build_event(index: int, decision: str, now: datetime) -> dict:
         risk_score = random.randint(0, 29)
     elif decision == "FLAG" and not (30 <= risk_score <= 70):
         risk_score = random.randint(30, 70)
-    elif decision == "BLOCK" and risk_score <= 70:
+    elif decision == "BLOCK" and risk_score < 71:
         risk_score = random.randint(71, 100)
 
     category = (
