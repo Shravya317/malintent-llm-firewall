@@ -12,8 +12,7 @@ This file:
 To start the server (from the backend/ directory):
     uvicorn main:app --reload
 
-Swagger UI is auto-generated at: http://localhost:8000/docs
-ReDoc UI is available at:        http://localhost:8000/redoc
+Custom API Docs at: http://localhost:8000/docs  (replaces default Swagger UI)
 
 CORS: Shravya's Vite React dev server runs on localhost:5173 by default.
 Both :5173 and :3000 are allowed.  Confirm her port at Sunday's sync and add
@@ -38,6 +37,14 @@ already resident in memory."  Restart the server and watch the logs: you
 should see the model-load line and a single warm-up confirmation BEFORE the
 "Database tables created / verified. Server is ready." line, and you should
 never see a second model-load line no matter how many requests follow.
+
+Week 8 change — custom API docs page
+--------------------------------------
+Default Swagger UI replaced with a custom branded docs page served from
+static/docs.html.  The page uses Space Grotesk + Syne + JetBrains Mono fonts,
+matches the dashboard dark theme, and pulls live stats from /api/v1/stats
+automatically on load.  docs_url and redoc_url are set to None to disable
+FastAPI's auto-generated pages; /docs is now a custom FileResponse route.
 """
 
 from __future__ import annotations
@@ -52,6 +59,8 @@ load_dotenv()  # looks for backend/.env by default when run from backend/
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -119,6 +128,8 @@ async def lifespan(app: FastAPI):
 
 
 # ── APP INSTANCE ─────────────────────────────────────────────────────────────
+# docs_url and redoc_url are disabled — /docs is served as a custom
+# FileResponse from static/docs.html (see route below).
 
 app = FastAPI(
     title="MalIntent API",
@@ -129,11 +140,28 @@ app = FastAPI(
         "and a Secure Execution Layer with permission validation, tool "
         "whitelisting, dynamic PII masking, and secret redaction."
     ),
-    version="0.5.0",    # bumped each week
+    version="0.5.0",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/swagger",
+    redoc_url=None,
 )
+
+
+# ── STATIC FILES + CUSTOM DOCS ────────────────────────────────────────────────
+# Serves backend/static/ at /static — required for any assets the docs page
+# references.  The /docs route returns the custom HTML page directly.
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.get("/docs", include_in_schema=False)
+async def custom_docs():
+    """
+    Custom branded API documentation page.
+    Replaces FastAPI's default Swagger UI with a dark-themed, font-rich
+    page served from static/docs.html.
+    """
+    return FileResponse("static/docs.html")
 
 
 # ── MIDDLEWARE: CORS ──────────────────────────────────────────────────────────

@@ -390,6 +390,12 @@ Interactive API testing performed through Swagger UI.
 http://127.0.0.1:8000/docs
 ```
 
+Interactive Custom Landing Page for API testing as per the UI.
+
+```text
+http://localhost:8000/docs
+```
+
 Verified endpoints:
 
 - Scan Input
@@ -406,7 +412,7 @@ Verified endpoints:
 
 - ✅ FastAPI backend completed
 - ✅ REST API implemented
-- ✅ Swagger UI integrated
+- ✅ Swagger UI integrated along with a custom page for the UI experience
 - ✅ SQLAlchemy database integration
 - ✅ Encrypted configuration management
 - ✅ Fernet-based secret storage
@@ -838,6 +844,12 @@ Interactive testing performed through Swagger UI.
 http://127.0.0.1:8000/docs
 ```
 
+Interactive Custom Landing Page for API testing as per the UI.
+
+```text
+http://localhost:8000/docs
+```
+
 Verified:
 
 - `/scan/input`
@@ -900,6 +912,10 @@ AND-rule.
 https://malintent-backend-261681342014.asia-south1.run.app
 
 **Interactive Swagger UI**
+
+https://malintent-backend-261681342014.asia-south1.run.app/docs
+
+**Interactive Custom Page integrated with Swagger UI for better UI**
 
 https://malintent-backend-261681342014.asia-south1.run.app/docs
 

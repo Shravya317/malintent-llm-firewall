@@ -88,6 +88,12 @@ Swagger UI:
 http://127.0.0.1:8000/docs
 ```
 
+Interactive Custom Landing Page for API testing as per the UI:
+
+```
+http://localhost:8000/docs
+```
+
 ---
 
 ## Week 7 Quick Start Commands
@@ -555,6 +561,12 @@ Open your browser and visit:
 http://127.0.0.1:8000/docs
 ```
 
+or
+
+```text
+http://localhost:8000/docs
+```
+
 ---
 
 ## Week 4 Backend Tests
@@ -709,6 +721,12 @@ Swagger:
 
 ```text
 http://127.0.0.1:8000/docs
+```
+
+Interactive Custom Landing Page for API testing:
+
+```text
+http://localhost:8000/docs
 ```
 
 Verify:
@@ -1163,6 +1181,10 @@ https://malintent-backend-261681342014.asia-south1.run.app
 https://malintent-backend-261681342014.asia-south1.run.app/docs
 ```
 
+### Interactive Custom Page integrated with Swagger UI for better UI
+
+https://malintent-backend-261681342014.asia-south1.run.app/docs
+
 ### OpenAPI JSON
 
 ```text
@@ -1422,6 +1444,10 @@ https://malintent-backend-261681342014.asia-south1.run.app
 ```text
 https://malintent-backend-261681342014.asia-south1.run.app/docs
 ```
+
+### Interactive Custom Page integrated with Swagger UI for better UI
+
+https://malintent-backend-261681342014.asia-south1.run.app/docs
 
 ### OpenAPI JSON
 
@@ -1910,7 +1936,7 @@ uvicorn main:app --reload
 Then open:
 
 ```text
-http://127.0.0.1:8000/docs
+http://127.0.0.1:8000/docs or http://localhost:8000/docs
 ```
 
 ---
@@ -2100,7 +2126,7 @@ Verify that the Cloud Run backend is live and reachable at the production URL. C
 ✓ Risk Scorer Tested
 ✓ Integration Tests Passed (200/200)
 ✓ Backend Running
-✓ Swagger Opens
+✓ Swagger and custom page amalgamated with Swagger opens
 ✓ Week 4 Backend Tests Passed (5/5)
 ✓ Safe Prompt Verified
 ✓ Attack Prompt Verified
