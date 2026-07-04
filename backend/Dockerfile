@@ -52,6 +52,7 @@ ENV PYTHONPATH=/install
 #
 COPY malintent_model_local /model-cache
 
+COPY sentence_transformer_local /app/sentence_transformer_local
 
 
 # =============================================================================

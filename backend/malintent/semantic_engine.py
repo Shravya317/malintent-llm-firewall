@@ -141,8 +141,11 @@ class SemanticEngine:
         self.threshold = threshold
 
         # Load the sentence-transformer model ONCE — never recreate per call
-        print(f"[SemanticEngine] Loading model '{self.MODEL_NAME}'...")
-        self.model = SentenceTransformer(self.MODEL_NAME)
+        import os
+        _local = os.path.join(self._BASE_DIR, "..", "sentence_transformer_local")
+        _model_source = _local if os.path.isdir(_local) else self.MODEL_NAME
+        print(f"[SemanticEngine] Loading model from '{_model_source}'...")
+        self.model = SentenceTransformer(_model_source)
         print(f"[SemanticEngine] Model loaded.")
 
         # Load phrase metadata — needed to attach text + category to each FAISS result
