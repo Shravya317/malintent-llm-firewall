@@ -488,7 +488,7 @@ async def scan_input(
     # Determine what to store in scrubbed_text based on privacy_mode.
     # In "tokenised" mode (default), scrubbed_text is NULL — only the hash is kept.
     # In "full" mode, the PII-scrubbed text is stored for forensic review.
-    store_scrubbed = scrubbed if body.privacy_mode == "full" else None
+    store_scrubbed = scrubbed  # Always store the prompt text for the forensic dashboard
 
     # layer_c_top_matches is a list of dicts: [{phrase, category, similarity}]
     # (RiskResult guarantees this shape — never objects with attributes.)

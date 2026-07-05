@@ -67,7 +67,12 @@ async def get_logs(
 
     logger.debug("Returning %d log entries (decision=%s)", len(entries), decision)
 
-    return [ThreatLogEntry.model_validate(entry) for entry in entries]
+    result = []
+    for entry in entries:
+        dto = ThreatLogEntry.model_validate(entry)
+        dto.prompt_full = entry.scrubbed_text  # Map the stored prompt to the frontend contract
+        result.append(dto)
+    return result
 
 
 @router.put("/logs/{log_id}/decision", response_model=LogDecisionUpdateResponse)
