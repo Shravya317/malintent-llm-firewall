@@ -22,7 +22,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import ThreatLog
+from models import ThreatLog, ActionLog
 from schemas import (
     ThreatLogEntry,
     LogDecisionUpdateRequest,
@@ -116,3 +116,39 @@ async def update_log_decision(
         log_id=log_entry.id,
         decision=log_entry.decision,
     )
+
+@router.get("/action_logs")
+async def get_action_logs(
+    limit:    int          = Query(50,   ge=1,    le=200,  description="Max entries to return"),
+    offset:   int          = Query(0,    ge=0,             description="Pagination offset"),
+    db:       Session      = Depends(get_db),
+):
+    """
+    Return paginated ActionLog entries for the SEL Audit page.
+    """
+    query = db.query(ActionLog)
+
+    entries = (
+        query
+        .order_by(desc(ActionLog.timestamp))
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    # Return dicts directly for simplicity since schemas.py might not have ActionLogEntry yet
+    return [
+        {
+            "id": entry.id,
+            "timestamp": entry.timestamp,
+            "user_id": entry.user_id,
+            "session_role": entry.session_role,
+            "tool_called": entry.tool_called,
+            "query_executed": entry.query_executed,
+            "fields_masked": entry.fields_masked,
+            "decision": entry.decision,
+            "denial_reason": entry.denial_reason,
+            "threat_log_id": entry.threat_log_id
+        }
+        for entry in entries
+    ]

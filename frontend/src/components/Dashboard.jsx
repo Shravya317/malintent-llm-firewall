@@ -6,6 +6,9 @@ import MetricBlob from './MetricBlob'
 import ThreatFeed from './ThreatFeed'
 import ThreatArcs from './ThreatArcs'
 import HealthGauge from './HealthGauge'
+import TopAttackers from './TopAttackers'
+import LayerAnalytics from './LayerAnalytics'
+import ThreatHeatmap from './ThreatHeatmap'
 
 export default function Dashboard() {
   const { theme, toggleTheme } = useTheme()
@@ -160,9 +163,9 @@ export default function Dashboard() {
               delay={1}
             />
             <MetricBlob
-              title="Total Processed"
-              value={loading ? '...' : error ? '-' : (stats?.total_requests?.toLocaleString() || '0')}
-              subtitle={loading ? 'Loading...' : error ? 'Error' : 'Since start'}
+              title="Block Rate (%)"
+              value={loading ? '...' : error ? '-' : (stats?.total_requests ? ((stats.total_blocked / stats.total_requests) * 100).toFixed(1) + '%' : '0%')}
+              subtitle={loading ? 'Loading...' : error ? 'Error' : 'Threats caught'}
               accent="neutral"
               delay={2}
             />
@@ -189,6 +192,20 @@ export default function Dashboard() {
           >
             <ThreatArcs data={stats?.threat_distribution || []} loading={loading} error={error} total={stats?.total_blocked || 0} />
             <HealthGauge />
+          </section>
+
+          {/* New Dashboard Enhancements */}
+          <section
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1.5fr',
+              gap: 40,
+              paddingBottom: 56,
+            }}
+          >
+            <LayerAnalytics />
+            <TopAttackers />
+            <ThreatHeatmap />
           </section>
 
           {/* Thin separator */}

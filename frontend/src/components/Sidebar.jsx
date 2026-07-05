@@ -3,14 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 const navItems = [
   { label: 'Dashboard', path: '/' },
-  { label: 'Live Feed', path: '/feed' },
   { label: 'Threats', path: '/threats' },
   { label: 'Comparison Mode', path: '/comparison' },
   { label: 'Review Queue', path: '/queue' },
   { label: 'Document Scanner', path: '/scanner' },
-  { label: 'Reports', path: '/reports' },
-  { label: 'Alerts', path: '/alerts' },
-  { label: 'Settings', path: '/settings' },
+  { label: 'Action Logs', path: '/action-logs' },
+  { label: 'Output Guard', path: '/output-guard' },
+  { label: 'Integration SDK', path: '/sdk' },
+  { label: 'System Settings', path: '/settings' },
 ]
 
 export default function Sidebar() {

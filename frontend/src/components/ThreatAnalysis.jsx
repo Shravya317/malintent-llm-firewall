@@ -30,9 +30,7 @@ const PATTERN_PREFIXES = {
 
 function parsePatternId(id) {
   const prefix = id.substring(0, 2)
-  const num = parseInt(id.substring(3), 10)
-  const name = PATTERN_PREFIXES[prefix] || prefix
-  return `${name} — Pattern ${num}`
+  return PATTERN_PREFIXES[prefix] || prefix
 }
 
 export default function ThreatAnalysis() {
@@ -114,7 +112,7 @@ export default function ThreatAnalysis() {
     return true
   })
 
-  const renderHighlightedPrompt = (promptText, segments) => {
+  const renderHighlightedPrompt = (promptText, segments, categoryStr) => {
     if (!segments || segments.length === 0) return <span>{promptText}</span>
     let parts = [{ text: promptText, isMatch: false }]
     segments.forEach((seg, segIdx) => {
@@ -137,9 +135,10 @@ export default function ThreatAnalysis() {
         <mark key={i}
           onMouseEnter={() => setHoveredIndex(part.index)}
           onMouseLeave={() => setHoveredIndex(null)}
-          style={{ background: 'rgba(229,57,53,0.18)', color: 'var(--accent-threat)', borderBottom: '2px solid var(--accent-threat)', cursor: 'help', position: 'relative', padding: '2px 4px', borderRadius: 4 }}
+          style={{ background: 'rgba(229,57,53,0.18)', color: 'var(--accent-threat)', borderBottom: '2px solid var(--accent-threat)', fontWeight: 'bold', textDecoration: 'underline', cursor: 'help', position: 'relative', padding: '2px 4px', borderRadius: 4 }}
         >
           {part.text}
+          <span style={{ marginLeft: 6, background: 'var(--accent-threat)', color: 'var(--bg-base)', padding: '2px 6px', borderRadius: 12, fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', verticalAlign: 'middle', textDecoration: 'none', display: 'inline-block' }}>{categoryStr}</span>
           {isHovered && (
             <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 10, padding: '14px 18px', background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', borderRadius: 8, boxShadow: '0 16px 40px rgba(0,0,0,0.85)', width: 320, zIndex: 100, fontFamily: 'var(--font-sans)', fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--text-primary)', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>
               <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Suspicious Segment Analysis</div>
@@ -220,7 +219,7 @@ export default function ThreatAnalysis() {
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
-                    {['Risk', 'Decision', 'Attack Category', 'Prompt Preview', 'Layers Triggered', 'Latency', 'Target Asset & Origin'].map(h => (
+                    {['Risk', 'Decision', 'Attack Category', 'Prompt Preview', 'Layers Triggered', 'Latency', 'Origin IP & Timestamp'].map(h => (
                       <th key={h} style={{ padding: '20px 20px', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{h}</th>
                     ))}
                     <th style={{ padding: '20px 24px', width: 48 }}></th>
@@ -259,10 +258,9 @@ export default function ThreatAnalysis() {
                           <td style={{ padding: '20px 20px', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-primary)', fontWeight: 500 }}>{item.primary_category}</td>
                           <td style={{ padding: '20px 20px', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: 340, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.5 }}>{preview}</td>
                           <td style={{ padding: '20px 20px', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>{item.layers_triggered.join(', ') || '—'}</td>
-                          <td style={{ padding: '20px 20px', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>{item.total_latency_ms ? `${item.total_latency_ms}ms` : '—'}</td>
+                          <td style={{ padding: '20px 20px', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>{item.total_latency_ms ? `${item.total_latency_ms.toFixed(2)}ms` : '—'}</td>
                           <td style={{ padding: '16px 20px' }}>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}>{item.target_model || 'Claude 3.5 Sonnet'}</div>
-                            <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: 2 }}>{item.client_app || 'Internal RAG Bot'} · {item.source_ip || '192.168.1.42'}</div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}>{item.source_ip || '192.168.1.42'}</div>
                             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
                           </td>
                           <td style={{ padding: '20px 24px', textAlign: 'right', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '1.1rem' }}>{isExpanded ? '▾' : '▸'}</td>
@@ -277,8 +275,8 @@ export default function ThreatAnalysis() {
                                 <div style={{ padding: '20px 32px', background: 'var(--bg-base)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
                                     <div>
-                                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Target Asset</div>
-                                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600 }}>{item.target_model || 'Claude 3.5 Sonnet'}</div>
+                                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Timestamp</div>
+                                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600 }}>{new Date(item.timestamp).toLocaleString()}</div>
                                     </div>
                                     <div style={{ width: 1, height: 28, background: 'var(--border-faint)' }} />
                                     <div>
@@ -293,7 +291,7 @@ export default function ThreatAnalysis() {
                                     <div style={{ width: 1, height: 28, background: 'var(--border-faint)' }} />
                                     <div>
                                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Payload Signature</div>
-                                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-threat)' }}>{item.payload_type || 'Direct Override / Persona'}</div>
+                                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: item.primary_category === 'Safe' ? 'var(--accent-secure)' : 'var(--accent-threat)', fontWeight: 600 }}>{item.primary_category === 'Safe' ? 'Safe / No Threat' : item.primary_category.replace(/_/g, ' ')}</div>
                                     </div>
                                   </div>
                                   <div>
@@ -308,8 +306,8 @@ export default function ThreatAnalysis() {
                                   {/* PANEL 1: Prompt Analysis */}
                                   <div>
                                     <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 20px', borderBottom: '1px solid var(--border-faint)', paddingBottom: 10, fontWeight: 600 }}>Prompt Analysis</h3>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', lineHeight: 2.0, color: 'var(--text-primary)', background: 'rgba(15, 18, 28, 0.6)', padding: 28, borderRadius: 12, border: '1px solid var(--border-subtle)', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.2)' }}>
-                                      {renderHighlightedPrompt(item.prompt_full, item.suspicious_segments)}
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', lineHeight: 2.0, color: 'var(--text-primary)', background: 'rgba(15, 18, 28, 0.6)', padding: 28, borderRadius: 12, border: '1px solid var(--border-subtle)', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.2)', whiteSpace: 'pre-wrap' }}>
+                                      {renderHighlightedPrompt(item.prompt_full, item.suspicious_segments, item.primary_category)}
                                     </div>
                                     <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.78rem', color: 'var(--text-muted)', margin: '16px 0 0', fontStyle: 'italic' }}>* Hover over highlighted segments to view detailed forensic explanations.</p>
                                   </div>

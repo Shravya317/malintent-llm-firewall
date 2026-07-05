@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MalIntent — Team Split v2 (Tushar & Shravya)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --tushar:       #1a5fb4;
+    --tushar-light: #ddeeff;
+    --tushar-mid:   #3584e4;
+    --tushar-dark:  #0f3d73;
+    --shravya:      #0f7050;
+    --shravya-light:#d6f5e8;
+    --shravya-mid:  #1aa87a;
+    --shravya-dark: #094d37;
+    --shared:       #7c4b00;
+    --shared-light: #fef3d8;
+    --shared-mid:   #c07a10;
+    --bg:           #f5f7fa;
+    --surface:      #ffffff;
+    --border:       #dee3ea;
+    --border-light: #eaecf0;
+    --text:         #1c2431;
+    --text-mid:     #4a5568;
+    --text-dim:     #6b7a8d;
+    --radius:       10px;
+    --sans:         'Inter', system-ui, sans-serif;
+    --mono:         'JetBrains Mono', 'Fira Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+    padding: 32px 24px 64px;
+  }
+
+  /* ── Page header ─────────────────────────────────────────── */
+  .page-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px 24px;
+    margin-bottom: 24px;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .page-header .subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  /* ── Legend ──────────────────────────────────────────────── */
+  .legend {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .leg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+  }
+  .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-t      { background: var(--tushar); }
+  .dot-s      { background: var(--shravya); }
+  .dot-shared { background: var(--shared); }
+
+  /* ── Changes notice ──────────────────────────────────────── */
+  .changes-notice {
+    background: var(--shared-light);
+    border: 1px solid #e8c980;
+    border-left: 4px solid var(--shared-mid);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: #4a2d04;
+    line-height: 1.7;
+  }
+  .changes-notice strong { font-weight: 600; color: #3d2200; }
+
+  /* ── Week card ───────────────────────────────────────────── */
+  .week {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .week-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 22px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border-light);
+    flex-wrap: wrap;
+  }
+  .week-num {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: #edf0f5;
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .week-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    min-width: 160px;
+  }
+  .week-dates {
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--text-dim);
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  /* ── Two-column body ─────────────────────────────────────── */
+  .week-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .col {
+    padding: 22px 24px 20px;
+  }
+  .col:first-child {
+    border-right: 1px solid var(--border-light);
+  }
+
+  /* ── Column header ───────────────────────────────────────── */
+  .col-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    line-height: 1.4;
+  }
+  .who {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .who-t { background: var(--tushar-light); color: var(--tushar-dark); border: 1px solid #b6d4f5; }
+  .who-s { background: var(--shravya-light); color: var(--shravya-dark); border: 1px solid #a0dfc3; }
+
+  /* ── Task item ───────────────────────────────────────────── */
+  .task {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 11px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-mid);
+    align-items: flex-start;
+  }
+  .task::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .col:first-child .task::before { background: var(--tushar-mid); }
+  .col:last-child  .task::before { background: var(--shravya-mid); }
+
+  .task strong { font-weight: 600; color: var(--text); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    background: #eef2f8;
+    color: #2d4a7a;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid #d5dff0;
+  }
+
+  /* ── New tag ─────────────────────────────────────────────── */
+  .new-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 5px;
+    white-space: nowrap;
+  }
+
+  /* ── Deliverable box ─────────────────────────────────────── */
+  .deliverable {
+    margin-top: 16px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .del-t {
+    background: #eef6ff;
+    color: #0c447c;
+    border-left: 3px solid var(--tushar);
+    border: 1px solid #c3dbf5;
+    border-left-width: 3px;
+  }
+  .del-s {
+    background: #edfaf3;
+    color: #085041;
+    border-left: 3px solid var(--shravya);
+    border: 1px solid #a0dfc3;
+    border-left-width: 3px;
+  }
+  .del-label {
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+    opacity: 0.7;
+  }
+
+  /* ── Sync row ────────────────────────────────────────────── */
+  .sync-row {
+    padding: 13px 22px;
+    background: var(--shared-light);
+    border-top: 1px solid #e8c980;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12.5px;
+    color: #5c3806;
+    line-height: 1.6;
+  }
+  .sync-row strong { font-weight: 600; color: #3d2200; }
+  .sync-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Ownership summary ───────────────────────────────────── */
+  .ownership { margin-top: 40px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .own-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .own-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .own-card-header {
+    padding: 13px 18px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .own-card-header-t { background: var(--tushar); color: #ddeeff; }
+  .own-card-header-s { background: var(--shravya); color: #d6f5e8; }
+  .own-list { padding: 8px 18px 14px; }
+  .own-item {
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-mid);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .own-item:last-child { border-bottom: none; }
+  .own-item::before {
+    content: '→';
+    color: var(--text-dim);
+    flex-shrink: 0;
+    font-size: 12px;
+    margin-top: 1px;
+  }
+
+  /* ── Ground rules ────────────────────────────────────────── */
+  .rules-section { margin-top: 36px; }
+  .principle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-mid);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .principle strong { font-weight: 600; color: var(--text); }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 820px) {
+    body { padding: 16px 12px 48px; }
+    .week-body { grid-template-columns: 1fr; }
+    .col:first-child { border-right: none; border-bottom: 1px solid var(--border-light); }
+    .own-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ PAGE HEADER -->
+<div class="page-header">
+  <h1>MalIntent — Team Work Split</h1>
+  <div class="subtitle">Updated 9-week breakdown · May 4 – July 5, 2026</div>
+  <div class="legend">
+    <div class="leg"><div class="dot dot-t"></div>Tushar — ML, Backend &amp; Security</div>
+    <div class="leg"><div class="dot dot-s"></div>Shravya — Frontend, Research &amp; Demo</div>
+    <div class="leg"><div class="dot dot-shared"></div>Sync point (both)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ CHANGES NOTICE -->
+<div class="changes-notice">
+  <strong>What changed from the previous split.</strong> The project documentation has been updated with several additions that need to be absorbed: (1) the ML model is now PromptGuard-86M (DeBERTa-based, fine-tuned on a 328k corpus), replacing DistilBERT — this requires a DGX A100 server, not Colab; (2) the Secure Execution Layer (SEL) is now a full 5-module system (Tool Access Controller, Dynamic Data Masking, Secret Protection Engine, Permission Validator, Action Audit Logger) — this is Tushar's biggest new responsibility; (3) the storage layer now has four breach-resilience mechanisms (PII scrubbing, log tokenisation, SQLCipher/pgcrypto, Fernet config encryption); (4) the Configuration page now has 4 tabs — the new ones are Privacy Mode toggle and Permission Roles; (5) the deadline shifts by two days, to July 5. One extra week (Week 9) has been added as a final polish and contingency buffer before submission.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 1 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 1</span>
+    <span class="week-title">Foundation — understand the problem, build the baseline</span>
+    <span class="week-dates">May 4–10</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Pattern Engine (Layer A) + Corpus 1</div>
+      <div class="task">Read OWASP LLM Top 10 in full. Understand all 7 injection categories — these are the taxonomy you'll use for every benchmark table in the paper.</div>
+      <div class="task">Open <code>dataset_exploration.ipynb</code>. Explore all 7 open-source datasets (HackAPrompt, WildJailbreak, JailbreakBench, DeepSet, Dolly-15k, Alpaca-Cleaned, OpenAssistant). Extract a 700-sample manually annotated validation corpus → <code>manual_annotation_combined_corpus.csv</code>. This is Corpus 1.</div>
+      <div class="task">Build <code>pattern_engine.py</code> — 47 regex patterns across 7 OWASP attack categories. Implement deterministic, confidence-weighted scoring.</div>
+      <div class="task">Write unit tests (<code>test_pattern_engine.py</code>) — 55 test cases (attacks + safe edge cases). Zero false positives on benign inputs is the quality bar.</div>
+      <div class="task">Set up GitHub repo, Python 3.11 env, folder structure: <code>malintent/</code>, <code>sel/</code>, <code>api/</code>, <code>tests/</code>.</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        pattern_engine.py + tests committed, all passing. 700-sample Corpus 1 CSV committed.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Research Reading + React Skeleton</div>
+      <div class="task">Read the OWASP LLM Top 10 (same doc as Tushar — shared vocabulary is essential for the paper and presentation).</div>
+      <div class="task">Read the HackAPrompt competition paper (arxiv 2306.05499) and the EchoLeak CVE-2025-32711 writeup — the latter is your opening hook in every presentation.</div>
+      <div class="task">Survey the 4 main open-source LLM firewall tools (LLM Guard, Rebuff, Vigil, LlamaFirewall) — note exactly what features each lacks. This is the gap analysis for the paper's Related Work section.</div>
+      <div class="task">Set up the Vite React project. Install: Tailwind CSS, React Router, Recharts, Axios, Lucide React. Configure the dark colour palette (<code>#0f1117</code> background, blue/red/yellow/green accent system).</div>
+      <div class="task">Create component stubs with placeholder content: Dashboard, ThreatFeed, MetricCard, Sidebar, ThreatAnalysis, ComparisonMode, Config, FalsePositiveQueue.</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        React app runs locally with all page stubs. Component structure committed. Literature gap-analysis notes doc shared with Tushar.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Sync (end of week):</strong> Align on the attack taxonomy — the same 7 OWASP categories will label every log entry, benchmark table, and dashboard chart. Tushar demos pattern_engine live on 10 attacks. Both agree on the exact JSON shape of <code>RiskResult</code> — this contract must not change without telling each other.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 2 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 2</span>
+    <span class="week-title">PromptGuard-86M training + dashboard UI</span>
+    <span class="week-dates">May 11–17</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Layer B — Fine-tune PromptGuard-86M <span class="new-tag">Updated</span></div>
+      <div class="task">Access the NVIDIA DGX A100 server. Set up JupyterLab environment. This is the hardest week technically — do not defer this.</div>
+      <div class="task">Open <code>malintent_promptguard_training.ipynb</code>. Download and merge ~328k samples from all 7 HuggingFace sources. Standardise, deduplicate, and class-balance (max 3:1 ratio). This is Corpus 2.</div>
+      <div class="task">Fine-tune <code>meta-llama/Prompt-Guard-86M</code> (DeBERTa-based) using <code>WeightedLossTrainer</code> for the class-imbalanced corpus. Target: ~99.96% F1. Document all hyperparameters.</div>
+      <div class="task">Evaluate on internal test split + 3 OOD benchmarks: Jailbreak Classification, NotInject, Gandalf. Save all metrics to <code>model_evaluation.md</code>.</div>
+      <div class="task">Save model weights. Back up to shared storage. Wrap model in <code>ml_classifier.py</code> exposing <code>predict(text) → (label, confidence)</code>.</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        Fine-tuned PromptGuard-86M weights saved. model_evaluation.md with full OOD benchmark metrics. ml_classifier.py committed.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Main Dashboard UI</div>
+      <div class="task">Build the 4 MetricCard components on mock data: Total Requests (blue, hourly trend sparkline), Threats Blocked (red, % of total), Avg Response Latency (green, ms), Threat Level (colour-coded LOW/MEDIUM/HIGH badge).</div>
+      <div class="task">Build the LiveThreatFeed component — scrolling list of last 50 requests, timestamp, truncated prompt, risk score badge (colour-coded 0–100), ALLOWED/FLAGGED/BLOCKED decision pill. New rows animate in from top.</div>
+      <div class="task">Build expandable row in ThreatFeed — clicking expands to show which layer triggered, what was detected, full risk breakdown.</div>
+      <div class="task">Build ThreatDistribution doughnut chart (Recharts) and TopAttackPatterns bar chart. Wire to static mock data.</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        Fully styled, pixel-perfect dashboard on mock data. Looks production-ready before a single API call is made.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Sync:</strong> Tushar shares F1 metrics from PromptGuard training. If F1 is below 0.95, stay on DGX and retrain before moving on — do not compromise the paper's core result. Shravya demos the dashboard UI. Confirm the <code>RiskResult</code> JSON the frontend expects still matches what Tushar's layers will produce.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 3 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 3</span>
+    <span class="week-title">FAISS semantic layer + threat analysis page</span>
+    <span class="week-dates">May 18–24</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Layer C + unified risk scorer</div>
+      <div class="task">Build <code>semantic_engine.py</code> — generate sentence-transformer embeddings for known attack phrases, build a FAISS index, expose <code>search(text) → (similarity_score, top_3_matches)</code>. The top-3 matches are what the frontend's forensics panel shows.</div>
+      <div class="task">Write <code>risk_scorer.py</code> — deterministic confidence-weighted aggregation of Layer A, B, C into a single <code>RiskResult</code>: score 0–100, decision (ALLOW/FLAG/BLOCK), triggered layers list, per-layer confidence, explanation string.</div>
+      <div class="task">Write integration tests: 100 attacks + 100 safe prompts through the full 3-layer pipeline. Measure accuracy AND latency: Layer A target ~2ms, Layer B ~50ms, Layer C ~20ms, total &lt;100ms.</div>
+      <div class="task">Document per-layer ablation results (A only → A+B → A+B+C) in a results table. This will be the paper's Table 1.</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        Complete malintent/ Python package. All tests passing. Total latency &lt;100ms confirmed. Ablation results table drafted.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Threat Analysis page + literature review</div>
+      <div class="task">Build the Threat Analysis full-width table — filterable by date range, risk score range, decision (ALLOW/FLAG/BLOCK), and attack category. All on mock data for now.</div>
+      <div class="task">Build the 3-panel expanded row view: left panel (prompt with suspicious segments highlighted in red, hover tooltip explaining why), centre panel (Layer A matched patterns, Layer B confidence bar, Layer C top-3 similarity scores), right panel (composite risk score as a speedometer gauge 0–100 with green/yellow/red zones).</div>
+      <div class="task">Write up the literature review: for each of the 4 tools (LLM Guard, Rebuff, Vigil, LlamaFirewall), document: what it does, what it misses, and exactly what MalIntent adds. This becomes the Background section of the paper.</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        Threat Analysis page complete on mock data. Literature review write-up (2 pages) committed to shared doc for Tushar.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Sync:</strong> Tushar demos the 3-layer pipeline live on 10 real attacks — both of you should understand what each layer does and why the score is what it is. Shravya confirms the <code>RiskResult</code> JSON (including the top-3 FAISS matches) maps correctly to the forensics panel's expected data shape. Fix contract mismatches now, not in Week 5.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 4 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 4</span>
+    <span class="week-title">FastAPI backend + storage security + SEL skeleton</span>
+    <span class="week-dates">May 25–31</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Backend + Breach-Resilient Storage + SEL Skeleton <span class="new-tag">New</span></div>
+      <div class="task">Build the FastAPI app with async endpoints: <code>POST /api/v1/scan/input</code>, <code>POST /api/v1/scan/output</code>, <code>POST /api/v1/scan/document</code>, <code>GET /api/v1/logs</code>, <code>GET /api/v1/stats</code>, <code>PUT /api/v1/config</code>. Add CORS middleware, rate limiting (slowapi), request logging.</div>
+      <div class="task">Set up SQLAlchemy + SQLite. Create 3 tables: <code>ThreatLog</code> (Firewall Log), <code>ActionLog</code> (SEL Action Log — separate from ThreatLog by design), <code>Configuration</code>.</div>
+      <div class="task"><strong>PII Scrubbing pipeline:</strong> integrate <code>presidio-analyzer</code> into the logging path. Before any prompt payload is written to ThreatLog, run it through the analyser and replace names, emails, phone numbers, Aadhaar/PAN/card numbers with tokens (<code>[EMAIL_REDACTED]</code>, <code>[AADHAAR_REDACTED]</code>, etc.). Write a unit test proving the raw PII string cannot be read from the stored log.</div>
+      <div class="task"><strong>Log Tokenisation:</strong> implement SHA-256 hashing of the prompt payload. The ThreatLog stores the hash (not the raw text), payload length, risk score, decision, attack category, triggered layers, and timestamp. Implement the Privacy Mode flag so the system stores either scrubbed text (Full Logging) or hash-only (Tokenised Logging). Write a test confirming the original prompt cannot be reconstructed from the hash.</div>
+      <div class="task"><strong>Config Encryption:</strong> encrypt all values in the Configuration table using Fernet symmetric encryption (<code>cryptography</code> library). Keys loaded from environment variables only — never written to source code or the DB. Write a test confirming the raw DB file contains no plaintext API keys or system context strings.</div>
+      <div class="task"><strong>SEL Skeleton:</strong> build <code>sel/tool_access_controller.py</code> (intercepts LLM tool calls, enforces a whitelist of permitted operations) and <code>sel/permission_validator.py</code> (reads session role + requested tool scope, makes a binary permit/deny decision — does not read the prompt). Wire both as FastAPI middleware on the <code>/api/v1/scan/input</code> endpoint.</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        Fully functional REST API. PII scrubbing, log tokenisation, and Fernet config encryption all unit-tested and passing. SEL skeleton (Tool Access Controller + Permission Validator) operational.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Configuration Page (4 tabs) + API client <span class="new-tag">Updated</span></div>
+      <div class="task">Build the Configuration page with all 4 tabs (this now has 4, not 3):</div>
+      <div class="task"><strong>Context Settings tab:</strong> textarea for system context description, dropdown for mode (Strict / Balanced / Developer / Custom), toggle for output validation on/off.</div>
+      <div class="task"><strong>Custom Rules tab:</strong> interface to add block/allow pattern pills. Each pill shows pattern text, type (block/allow), and a delete button.</div>
+      <div class="task"><strong>Privacy Mode tab</strong> <span class="new-tag">New</span>: a clearly labelled toggle between "Full Logging — stores anonymised prompt summaries for forensic review" and "Tokenised Logging — stores hash and metadata only. Maximum privacy." Include a short explanation of what each mode stores, so an admin understands the trade-off before toggling. Wire to Tushar's <code>PUT /api/v1/config</code> endpoint.</div>
+      <div class="task"><strong>Permission Roles tab</strong> <span class="new-tag">New</span>: display Admin / Employee / Customer as role cards. Each card shows which database tables, API endpoints, and filesystem paths that role may access. Each permission is a toggleable row. Admins can add/edit/remove roles. Changes take effect immediately (no server restart). Wire to config endpoint.</div>
+      <div class="task">Write the Axios API client module (<code>api/client.js</code>) — covers all 6 endpoints. Test it against Tushar's running local backend and resolve any shape or CORS mismatches.</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        Configuration page complete with all 4 tabs styled and wired. API client module committed and tested against live backend.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Sync — integration checkpoint:</strong> Shravya's API client hits Tushar's backend. Submit a test prompt via the Config page's "Test Connection" button. Verify CORS, authentication, and response shapes all work. Resolve any mismatches now before Week 5 wires the whole frontend.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 5 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 5</span>
+    <span class="week-title">Full frontend wiring + real data everywhere</span>
+    <span class="week-dates">Jun 1–7</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Backend stabilisation + performance + SEL modules <span class="new-tag">New</span></div>
+      <div class="task">Fix any bugs surfaced from Shravya's integration. This is your backend support week — respond to her blockers within the day.</div>
+      <div class="task">Optimise ML inference latency: model caching (PromptGuard-86M loaded once at startup, not per request). Profile each layer's contribution to latency. Total pipeline must be &lt;100ms.</div>
+      <div class="task"><strong>SEL — Dynamic Data Masking</strong> (<code>sel/dynamic_data_masking.py</code>): integrate <code>presidio-anonymizer</code> to mask PII fields in tool responses before they reach the LLM. Phone numbers → <code>98******45</code>, card numbers → <code>**** **** **** 1243</code>, emails → <code>tu****@gmail.com</code>. Masking must be deterministic (same entity → same masked form across a session). Test with synthetic tool response payloads.</div>
+      <div class="task"><strong>SEL — Secret Protection Engine</strong> (<code>sel/secret_protection_engine.py</code>): implement regex + entropy-based detection of API keys, bearer tokens, passwords, and DB connection strings in tool responses. Replace matches with <code>[SECRET REDACTED]</code>. Test with synthetic payloads containing mock credentials.</div>
+      <div class="task">Begin writing the System Architecture section of the research paper (~1.5–2 pages, with the full 5-stage pipeline diagram as a figure).</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        Backend stable at &lt;100ms. Dynamic Data Masking and Secret Protection Engine modules tested and committed. Architecture section draft in paper.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Wire all pages to live API</div>
+      <div class="task">Replace all mock data with live Axios calls across the Dashboard, LiveThreatFeed, and Threat Analysis pages. Every chart and metric must show real backend data.</div>
+      <div class="task">Implement real-time polling (3-second interval) on the LiveThreatFeed — new rows animate in from top. Do not use WebSockets; polling is the specified approach.</div>
+      <div class="task">Connect all chart components (<code>GET /api/v1/stats</code>) to live data. Verify the Threat Distribution doughnut and Top Attack Patterns bar chart update with real scans.</div>
+      <div class="task">Handle all three non-happy states across every page: loading skeleton (not a blank white box), error state (not a crash), and empty state (not a blank chart). These states are visible during every live demo.</div>
+      <div class="task">End-to-end smoke test: submit a prompt injection attack via the UI, watch it appear in the feed with the correct risk score, blocked status, and attack category.</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        End-to-end working product. Real prompts, real scores, real charts. All three non-happy states handled on every page.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Sync — full demo run-through:</strong> Both of you sit together and submit 5 attacks + 5 safe prompts via the UI. Watch them flow through the pipeline. Fix anything that would break the demo experience before Week 6 adds the harder features.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 6 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 6</span>
+    <span class="week-title">Comparison Mode + Output Validator + SEL completion</span>
+    <span class="week-dates">Jun 8–14</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Output Validator + SEL Action Logger <span class="new-tag">New</span></div>
+      <div class="task"><strong>Output Consistency Validator</strong> (<code>output_validator.py</code>): encode the developer-supplied system context description into a sentence-transformer vector at startup. After the LLM responds, encode the response vector and compute cosine similarity. A response that is semantically distant from the stated purpose AND contains high-risk patterns (personal data, system config disclosures, out-of-scope instructions) is flagged. Expose via <code>POST /api/v1/scan/output</code>.</div>
+      <div class="task">Craft 10 adversarial examples — prompts specifically designed to evade the input filter but still partially manipulate the output. Test what percentage the output validator catches. Document the number (this is the "Y%" in your abstract).</div>
+      <div class="task"><strong>SEL — Action Audit Logger</strong> (<code>sel/action_audit_logger.py</code>): wire the logger to record every SEL decision to the <code>ActionLog</code> table. Each record must capture: tool called, exact query/API call made, which fields were masked and by which rule, user ID, session role, timestamp, and final outcome (permitted/denied). Write a test verifying the log captures all required fields correctly.</div>
+      <div class="task">Verify the full SEL is end-to-end: a simulated injected prompt that tries to call an unpermitted tool should be stopped by the Tool Access Controller, and the ActionLog should record the denial with all fields populated.</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        Output Validator live and catching bypasses. All 5 SEL modules complete and tested. ActionLog recording correctly. Adversarial bypass catch-rate documented.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Comparison Mode + False Positive Queue</div>
+      <div class="task">Build the Comparison Mode split-screen page: left panel ("Protected by MalIntent") wired to Tushar's <code>/scan/input</code> API, right panel ("Unprotected LLM") making a direct API call to OpenAI/Groq with no filtering.</div>
+      <div class="task">Design the BLOCKED card on the left: red, shows detection reason, triggered layer, risk score, and attack category. The contrast with the raw LLM output on the right should be immediate and visceral.</div>
+      <div class="task">Pre-load 5 one-click demo presets in the input field (one per major attack category: direct override, jailbreak persona, data exfiltration, RAG injection, indirect Trojan). These should make demo flow effortless.</div>
+      <div class="task">Build the False Positive Review Queue page: table of all blocked/flagged requests, "Mark Safe" and "Confirm Threat" buttons per row. Decisions should be submittable to a backend endpoint Tushar exposes. Show a running accuracy-improvement counter.</div>
+      <div class="task">UI polish pass across all pages: micro-animations, loading skeletons, consistent spacing. Fix anything that looked rough during the Week 5 demo run-through.</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        Comparison Mode live and demo-ready with 5 presets. False Positive Queue page complete. UI polish pass done.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Sync — first full dress rehearsal:</strong> Run Comparison Mode together. Submit all 5 preset attacks. Watch the left side block and the right side comply. This is the most important demo moment — rehearse until it takes under 90 seconds and requires no explanation.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 7 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 7</span>
+    <span class="week-title">Docker, encrypted database, Render deployment</span>
+    <span class="week-dates">Jun 15–21</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Docker + Encrypted DB + Deployment + Experiments <span class="new-tag">Updated</span></div>
+      <div class="task"><strong>Database Encryption:</strong> add SQLCipher to the Docker development setup (AES-256 encryption of the SQLite file). Add pgcrypto to the PostgreSQL Docker production setup (field-level encryption). Verify by opening the raw database file with a hex editor — it must be unreadable without the key.</div>
+      <div class="task">Write <code>Dockerfile</code> for the FastAPI backend. Write <code>docker-compose.yml</code> orchestrating backend + ML model + database. Ensure the PromptGuard-86M model loads correctly inside the container — test locally with <code>docker-compose up</code>.</div>
+      <div class="task">Deploy to Render.com: connect GitHub repo, configure all environment variables (Fernet key, DB encryption key, LLM API keys). Get a public HTTPS URL.</div>
+      <div class="task">Run all benchmark experiments on the final deployed model: Layer A only → A+B → A+B+C on Corpus 1 (700 samples) and 3 OOD benchmarks. Record precision/recall/F1 per layer and per OWASP attack category. This is the paper's results table.</div>
+      <div class="task">Populate the database with 200 realistic simulated threat events (varied risk scores, attack categories, timestamps) so the dashboard looks active during demos.</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        Live deployment at a public Render URL. Encrypted Docker setup (SQLCipher dev, pgcrypto prod) verified. Full benchmark results table with all metrics filled in.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Production frontend + RAG Scanner UI + Demo env</div>
+      <div class="task">Point the frontend to the live Render.com URL. Test every page end-to-end in production — verify CORS headers, HTTPS, real latency numbers in the metric card.</div>
+      <div class="task">Build the RAG Document Pre-Scanner UI: a file upload interface where a user can upload a document; the frontend calls <code>POST /api/v1/scan/document</code> and shows either a green "Clean — no injections detected" or a red warning with the specific embedded instruction that was found. This is a separate page accessible from the sidebar.</div>
+      <div class="task">Verify the Permission Roles tab in Configuration is correctly reflecting the live SEL state — changing a role's permissions in the UI should take effect in the running system without a restart.</div>
+      <div class="task">Record the 3-minute demo video: open with the EchoLeak CVE stat → show Comparison Mode (inject 2 attacks, dramatic contrast) → show the dashboard threat feed updating → show Permission Roles tab → show Privacy Mode toggle → close with the live URL.</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        Frontend live on production URL. RAG Scanner page complete. 3-minute demo video recorded and uploaded.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Sync — second dress rehearsal on production:</strong> Run the full demo on the live Render URL, not localhost. Both of you should be able to run it independently. Time it. Fix any production-specific issues (CORS, slow cold starts, blank charts on first load).</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 8 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 8</span>
+    <span class="week-title">Research paper, presentation, final polish</span>
+    <span class="week-dates">Jun 22–28</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Research Paper (primary author)</div>
+      <div class="task">Write the full paper in IEEE double-column format (target 6–8 pages): Abstract (include the ~99.96% F1 figure and output validator catch-rate Y%), Introduction, Background and Related Work (use Shravya's gap analysis from Week 1), System Architecture, Experimental Evaluation, Results, Conclusion, References.</div>
+      <div class="task">Architecture section must include a dedicated subsection titled "Breach-Resilient Storage and Runtime Enforcement Architecture" covering: PII scrubbing pipeline, log tokenisation, SQLCipher/pgcrypto encryption design, Fernet config encryption, and the 5-module SEL design. This is Novel Contribution 4 and must be argued clearly.</div>
+      <div class="task">Results section: per-layer F1 ablation table, per-OWASP-category performance table, OOD benchmark comparison (all 3 benchmarks), and output validator effectiveness on adversarial examples. These are the four quantitative claims in the paper.</div>
+      <div class="task">Clean up the entire codebase: docstrings for every module, type hints, remove all debug prints. Final <code>README.md</code> with setup instructions, architecture diagram image, feature list, demo video link, and paper citation block.</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        Research paper draft (6–8 pages, IEEE format). Clean, fully documented codebase. README with all sections complete.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Presentation deck + landing page + final UI</div>
+      <div class="task">Build the presentation deck. Slide structure: (1) Hook — EchoLeak CVE, OWASP #1 stat; (2) The problem in plain English (the "new employee" analogy from the doc is perfect here); (3) Existing tools and their gaps; (4) MalIntent architecture diagram (5 stages); (5) Live demo slide with QR to the URL; (6) Results table; (7) Novel contributions (4 of them); (8) Startup angle — drop-in SDK, no Indian competitor; (9) Q&amp;A.</div>
+      <div class="task">Write the README's non-technical front-page summary: what MalIntent is in two sentences, key features as a clean list, screenshots of the 5 main pages, and a "Try it now" link.</div>
+      <div class="task">Final UI review pass: check every page for visual consistency, loading state gaps, layout breaks at 1280px and 1440px widths. Pay special attention to the Permission Roles tab and Privacy Mode toggle — these are the two new UI areas most likely to have rough edges.</div>
+      <div class="task">Prepare the live demo script: which 3 injection attacks to show (and why those 3 — pick for maximum contrast), exact sequence of steps, fallback plan if network fails (pre-recorded video backup from Week 7).</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        Final presentation slides. Polished UI across all pages. README front-page section. Demo script with fallback plan.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Sync — full presentation rehearsal:</strong> Present end-to-end as if to judges. Tushar owns the architecture + results explanation. Shravya owns the problem framing + live demo. Time it. Cross-review each other's written deliverables. Paper draft exchanged for review — Shravya reads for clarity, Tushar reads for technical accuracy.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ WEEK 9 -->
+<div class="week">
+  <div class="week-header">
+    <span class="week-num">Week 9</span>
+    <span class="week-title">Buffer, final fixes, and submission</span>
+    <span class="week-dates">Jun 29 – Jul 5</span>
+  </div>
+  <div class="week-body">
+    <div class="col">
+      <div class="col-header"><span class="who who-t">Tushar</span> Paper revisions + backend hardening</div>
+      <div class="task">Incorporate Shravya's clarity feedback and any technical reviewers' comments into the paper. Final proofread of all quantitative claims — every number in the paper must match a logged experiment result.</div>
+      <div class="task">Run the full benchmark suite one more time on the deployed model to confirm results are reproducible. If any number shifted, investigate and update.</div>
+      <div class="task">Verify database encryption is intact in the production deployment — hex-inspect the DB file via the Render console. Confirm Fernet-encrypted config values are unreadable without the key.</div>
+      <div class="task">Write the "Limitations and Future Work" section of the paper (required for IEEE format): multilingual injection detection, real-time WebSocket support, and LLM-agnostic evaluation are honest gaps to acknowledge.</div>
+      <div class="deliverable del-t">
+        <div class="del-label">Deliverable</div>
+        Final paper ready for submission. All benchmark results verified and reproducible. Production deployment confirmed secure.
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-header"><span class="who who-s">Shravya</span> Presentation final + submission checklist</div>
+      <div class="task">Incorporate feedback from Week 8 rehearsal into the presentation. Final timing pass — total presentation including live demo should be under 12 minutes with 3 minutes Q&amp;A buffer.</div>
+      <div class="task">Do a final run-through of the live demo alone — without Tushar present. You should be able to explain every layer, every dashboard metric, and every configuration option when Tushar is answering a paper question and can't help.</div>
+      <div class="task">Check the GitHub repo one last time: README screenshots are up to date with the final UI, all links work, the demo video link plays, the paper PDF is in the repo root.</div>
+      <div class="task">Prepare a one-page project summary handout (optional but high-impact): what it is, the 4 novel contributions, the key accuracy figure, the live URL, and a QR code. Print 5 copies for the presentation panel.</div>
+      <div class="deliverable del-s">
+        <div class="del-label">Deliverable</div>
+        Final presentation deck. GitHub repo fully polished and submission-ready. One-page summary handout prepared. Project submitted by July 5.
+      </div>
+    </div>
+  </div>
+  <div class="sync-row">
+    <span class="sync-icon">⟳</span>
+    <span><strong>Final sync (Jul 3–4):</strong> Do one last full end-to-end rehearsal on the live URL — exactly as you will present. Both of you must be comfortable with the full system, not just your own half. Submit everything by end of day July 5.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ OWNERSHIP SUMMARY -->
+<div class="ownership">
+  <div class="section-label">Full ownership summary</div>
+  <div class="own-grid">
+    <div class="own-card">
+      <div class="own-card-header own-card-header-t">Tushar — ML, Backend &amp; Security</div>
+      <div class="own-list">
+        <div class="own-item">Dataset engineering — Corpus 1 (700-sample manual annotation) + Corpus 2 (328k multi-source)</div>
+        <div class="own-item">pattern_engine.py — Layer A (47 regex patterns, 7 OWASP categories)</div>
+        <div class="own-item">PromptGuard-86M fine-tuning + ml_classifier.py — Layer B</div>
+        <div class="own-item">semantic_engine.py + FAISS index — Layer C</div>
+        <div class="own-item">risk_scorer.py — weighted aggregation, RiskResult API</div>
+        <div class="own-item">FastAPI backend — all 6 endpoints, async, rate-limited</div>
+        <div class="own-item">Breach-resilient storage — PII scrubbing pipeline, SHA-256 log tokenisation, Fernet config encryption</div>
+        <div class="own-item">SQLCipher (dev) + pgcrypto (prod) database encryption</div>
+        <div class="own-item">SEL — all 5 modules: Tool Access Controller, Dynamic Data Masking, Secret Protection Engine, Permission Validator, Action Audit Logger</div>
+        <div class="own-item">output_validator.py — dual-stage output consistency validation</div>
+        <div class="own-item">Docker + docker-compose + Render.com deployment</div>
+        <div class="own-item">All benchmark experiments + ablation results table</div>
+        <div class="own-item">Research paper — primary author (all sections)</div>
+      </div>
+    </div>
+    <div class="own-card">
+      <div class="own-card-header own-card-header-s">Shravya — Frontend, Research &amp; Demo</div>
+      <div class="own-list">
+        <div class="own-item">Literature review — gap analysis of LLM Guard, Rebuff, Vigil, LlamaFirewall</div>
+        <div class="own-item">React app architecture + Axios API client module</div>
+        <div class="own-item">Main Dashboard — 4 metric cards, LiveThreatFeed with animated rows, doughnut + bar charts</div>
+        <div class="own-item">Threat Analysis page — filterable table, 3-panel forensics view, risk speedometer gauge</div>
+        <div class="own-item">Configuration page — all 4 tabs: Context Settings, Custom Rules, Privacy Mode toggle, Permission Roles</div>
+        <div class="own-item">Comparison Mode — split-screen demo centrepiece, 5 one-click presets</div>
+        <div class="own-item">False Positive Review Queue — human-in-the-loop feedback page</div>
+        <div class="own-item">RAG Document Pre-Scanner UI — file upload + injection detection result display</div>
+        <div class="own-item">Production deployment verification + frontend pointed to live URL</div>
+        <div class="own-item">3-minute demo video</div>
+        <div class="own-item">Presentation deck (9 slides) + live demo script + fallback video</div>
+        <div class="own-item">README front-page summary + one-page handout</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ GROUND RULES -->
+<div class="rules-section">
+  <div class="section-label" style="margin-top: 36px;">Ground rules to protect quality</div>
+
+  <div class="principle"><strong>API contract is frozen after Week 1 sync.</strong> The exact shape of <code>RiskResult</code> JSON — including the top-3 FAISS matches and per-layer confidence fields — must be agreed on by end of Week 1 and never changed unilaterally. Tushar cannot rename a field; Shravya cannot add a field she hasn't agreed on. This prevents the classic "backend works, frontend breaks" failure.</div>
+
+  <div class="principle"><strong>Mock data first, real data swap.</strong> Shravya builds every page to full visual completion on static mock data. When Tushar's API is ready, it is a one-line base-URL change, not a rebuild. This means UI quality is never blocked by backend timing.</div>
+
+  <div class="principle"><strong>PromptGuard training is Week 2's non-negotiable.</strong> The DGX A100 server is a finite resource. If the fine-tuning run fails, debug it and rerun — do not move to Week 3 with a below-target model. Every downstream accuracy claim in the paper depends on this model.</div>
+
+  <div class="principle"><strong>The SEL is Tushar's biggest new addition.</strong> Each of the 5 SEL modules has a unit test requirement. Do not commit a module without a test proving its core invariant — e.g. the Dynamic Data Masking test must confirm the LLM never receives the raw phone number, only the masked form.</div>
+
+  <div class="principle"><strong>The Configuration page's new tabs need early design alignment.</strong> The Privacy Mode toggle and Permission Roles tab involve subtle UX decisions (what happens if an admin toggles Privacy Mode mid-session? what does deleting a role do to existing sessions?). Tushar and Shravya must agree on these edge cases in Week 4 before either builds their side — behaviour undefined at the seam causes bugs that look like frontend issues but are backend logic gaps.</div>
+
+  <div class="principle"><strong>Both of you know the whole system.</strong> Tushar should understand what every frontend page shows and why. Shravya should understand what every detection layer does and why the SEL is a separate trust boundary from the input firewall. If a judge asks Shravya how the Permission Validator works, she should be able to answer clearly. If a judge asks Tushar what the Privacy Mode toggle stores, he should answer immediately.</div>
+
+  <div class="principle"><strong>Comparison Mode is your most powerful asset.</strong> Shravya owns the UI but both of you should be able to run it and narrate it fluently. Rehearse the 5 preset attacks until the sequence is automatic. The visceral contrast between the blocked left panel and the compliant right panel is what makes this project memorable to judges.</div>
+</div>
+
+</body>
+</html>
