@@ -32,11 +32,12 @@ const PATTERN_PREFIXES = {
   CM: 'Context Manipulation',
   PE: 'Privilege Escalation',
   HE: 'Harmful Elicitation',
+  SA: 'Safe / No Threat',
 }
 
 function parsePatternId(id) {
-  if (!id) return 'Suspicious Query'
-  const prefix = id.substring(0, 2)
+  if (!id) return 'Unknown'
+  const prefix = id.substring(0, 2).toUpperCase()
   return PATTERN_PREFIXES[prefix] || id.replace(/_/g, ' ')
 }
 

@@ -26,11 +26,13 @@ const PATTERN_PREFIXES = {
   CM: 'Context Manipulation',
   PE: 'Privilege Escalation',
   HE: 'Harmful Elicitation',
+  SA: 'Safe / No Threat',
 }
 
 function parsePatternId(id) {
-  const prefix = id.substring(0, 2)
-  return PATTERN_PREFIXES[prefix] || prefix
+  if (!id) return 'Unknown'
+  const prefix = id.substring(0, 2).toUpperCase()
+  return PATTERN_PREFIXES[prefix] || id
 }
 
 export default function ThreatAnalysis() {
