@@ -50,9 +50,10 @@ class ScanInputRequest(BaseModel):
                     three-layer firewall runs.  The LLM never sees this field.
     user_id       : opaque session token (not a PII value — the real user identity
                     is never sent to the firewall API).  Used for ActionLog only.
-    privacy_mode  : controls what is stored in ThreatLog.
-                      "tokenised" (default) → stores only SHA-256 hash + metadata.
-                      "full"                → also stores PII-scrubbed prompt text.
+    privacy_mode  : recorded in ThreatLog for audit purposes.
+                      PII-scrubbed text is always stored regardless of this
+                      setting to support the forensic dashboard.
+                      "tokenised" (default) / "full" — retained for metadata.
     """
     prompt:       str            = Field(..., min_length=1, max_length=10_000)
     session_role: str            = Field(default="customer")   # admin / employee / customer
@@ -119,8 +120,8 @@ class ScanDocumentResponse(BaseModel):
 class ThreatLogEntry(BaseModel):
     """
     Single row from ThreatLog serialised for the frontend.
-    Note: scrubbed_text is excluded — it is for forensic use only, never sent to
-    the frontend in the standard logs list.
+    The PII-scrubbed prompt text is mapped to prompt_full so the forensic
+    dashboard can render highlighted threat analysis.
     """
     id:               int
     timestamp:        datetime

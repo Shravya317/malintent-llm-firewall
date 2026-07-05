@@ -2,8 +2,8 @@
 models.py — SQLAlchemy ORM models for MalIntent's three-table database schema.
 
 Design principle: this schema is breach-resilient by construction.
-  - ThreatLog  never stores the raw prompt text.  It stores either a PII-scrubbed
-    summary (Full Logging mode) or only a SHA-256 hash (Tokenised Logging mode).
+  - ThreatLog  never stores the raw prompt text.  It always stores a PII-scrubbed
+    summary (via Presidio) alongside a SHA-256 hash for duplicate detection.
   - Configuration stores only Fernet ciphertext — never plaintext API keys or
     system context strings.
   - ActionLog records SEL tool-call decisions without echoing prompt content.
@@ -24,8 +24,8 @@ class ThreatLog(Base):
 
     Storage rules (enforced in routers/scan.py before every INSERT):
       - payload_hash  : SHA-256 hex digest of the ORIGINAL prompt.  Always stored.
-      - scrubbed_text : PII-scrubbed text.  Stored only in Full Logging mode;
-                        NULL in Tokenised Logging mode.
+      - scrubbed_text : PII-scrubbed text.  Always stored so the forensic
+                         dashboard can render highlighted threat analysis.
       - Raw prompt text is NEVER written to this table under any logging mode.
     """
 

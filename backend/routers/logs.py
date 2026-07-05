@@ -5,11 +5,10 @@ Returns paginated, filterable ThreatLog entries for:
   - The Live Threat Feed on the main dashboard (last 50 entries, no filter)
   - The Threat Analysis forensics page (filtered by decision, date range, etc.)
 
-Note: the scrubbed_text field is intentionally excluded from ThreatLogEntry.
-It is available in the database for forensic review by an administrator with
-direct DB access, but it should never be served over the API in the standard
-logs endpoint — doing so would expose PII-scrubbed content to anyone with an
-API key.
+The PII-scrubbed prompt text (scrubbed_text) is mapped to the prompt_full
+response field so the forensic dashboard can render highlighted threat
+analysis.  Only PII-redacted text is ever served — raw prompts are never
+stored or returned.
 """
 
 from __future__ import annotations
@@ -67,7 +66,12 @@ async def get_logs(
 
     logger.debug("Returning %d log entries (decision=%s)", len(entries), decision)
 
-    return [ThreatLogEntry.model_validate(entry) for entry in entries]
+    result = []
+    for entry in entries:
+        dto = ThreatLogEntry.model_validate(entry)
+        dto.prompt_full = entry.scrubbed_text
+        result.append(dto)
+    return result
 
 
 @router.put("/logs/{log_id}/decision", response_model=LogDecisionUpdateResponse)

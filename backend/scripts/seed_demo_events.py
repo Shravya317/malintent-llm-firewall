@@ -38,9 +38,10 @@ Notably:
     the triggered-layers set for the event.
   - layer_b_confidence is a Float — stored directly as Layer B's simulated
     confidence score.
-  - scrubbed_text is left NULL for all seed rows, since seed data is
-    generated in Tokenised Logging mode (privacy_mode="tokenised"), which
-    never stores a scrubbed summary.
+  - scrubbed_text is left NULL for all seed rows because seed data uses
+    synthetic payload hashes, not real prompts that would pass through the
+    PII scrubber.  In production, scrubbed_text is always populated by
+    the scan pipeline.
   - user_id is populated with an opaque, non-PII seed session token (never
     a real name), consistent with ThreatLog.user_id's "opaque session
     token" contract.
