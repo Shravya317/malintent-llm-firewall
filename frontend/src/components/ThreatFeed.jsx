@@ -60,7 +60,7 @@ export default function ThreatFeed() {
             type: parsePatternId(log.attack_category),
             source: log.source_ip || 'N/A',
             model: log.target_model || 'Unknown',
-            payload: log.prompt_full || log.payload_hash || 'No payload available',
+            payload: log.prompt_full || '[Data permanently redacted due to Tokenised Privacy Mode]',
             status: log.decision === 'ALLOW' ? 'monitored' : log.decision.toLowerCase(),
           }))
           // Assuming backend returns them in descending order; if not, sort here.

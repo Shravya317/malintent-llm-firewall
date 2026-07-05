@@ -60,7 +60,7 @@ export default function ThreatAnalysis() {
             ...log,
             id: `THR-${String(log.id).padStart(4, '0')}`,
             primary_category: log.attack_category ? parsePatternId(log.attack_category) : 'Safe',
-            prompt_full: log.prompt_full || log.payload_hash || 'No payload available',
+            prompt_full: log.prompt_full || '[Data permanently redacted due to Tokenised Privacy Mode]',
             prompt_preview: log.prompt_full ? log.prompt_full.substring(0, 48) + '...' : (log.payload_hash || '').substring(0, 24) + '...',
             layers_triggered: log.layers_triggered ? log.layers_triggered.split(',') : [],
             total_latency_ms: log.latency_ms || 0,
