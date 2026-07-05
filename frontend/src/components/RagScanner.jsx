@@ -234,7 +234,7 @@ export default function RagScanner() {
                 <div style={{ background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '20px 24px' }}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Extracted Embedded Instruction</div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.6, borderLeft: '2px solid var(--accent-threat)', paddingLeft: 16 }}>
-                    <mark style={{ background: 'rgba(229,57,53,0.18)', color: 'var(--accent-threat)', fontWeight: 'bold', textDecoration: 'underline' }}>{result.instruction}</mark>
+                    <mark style={{ background: 'var(--accent-threat)', color: '#000', fontWeight: 'bold', padding: '2px 6px', borderRadius: 4 }}>{result.instruction}</mark>
                   </div>
                 </div>
               </div>

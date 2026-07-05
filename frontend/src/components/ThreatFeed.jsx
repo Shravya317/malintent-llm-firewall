@@ -22,6 +22,24 @@ function formatTime(ts) {
   })
 }
 
+// Pattern prefix → full display name
+const PATTERN_PREFIXES = {
+  DI: 'Direct Injection',
+  PO: 'Persona Override',
+  DE: 'Data Exfiltration',
+  EO: 'Encoding Obfuscation',
+  II: 'Indirect Injection',
+  CM: 'Context Manipulation',
+  PE: 'Privilege Escalation',
+  HE: 'Harmful Elicitation',
+}
+
+function parsePatternId(id) {
+  if (!id) return 'Suspicious Query'
+  const prefix = id.substring(0, 2)
+  return PATTERN_PREFIXES[prefix] || id.replace(/_/g, ' ')
+}
+
 export default function ThreatFeed() {
   const [threats, setThreats] = useState([])
   const [filter, setFilter] = useState('all')
@@ -38,7 +56,7 @@ export default function ThreatFeed() {
             id: `THR-${String(log.id).padStart(4, '0')}`,
             timestamp: log.timestamp,
             severity: log.risk_score >= 70 ? 'critical' : log.risk_score >= 50 ? 'high' : log.risk_score >= 25 ? 'medium' : 'low',
-            type: log.attack_category || 'Suspicious Query',
+            type: parsePatternId(log.attack_category),
             source: log.source_ip || 'N/A',
             model: log.target_model || 'Unknown',
             payload: log.prompt_full || log.payload_hash || 'No payload available',

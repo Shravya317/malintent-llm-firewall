@@ -57,7 +57,7 @@ export default function ThreatAnalysis() {
           const mapped = rawLogs.map(log => ({
             ...log,
             id: `THR-${String(log.id).padStart(4, '0')}`,
-            primary_category: log.attack_category || 'Safe',
+            primary_category: log.attack_category ? parsePatternId(log.attack_category) : 'Safe',
             prompt_full: log.prompt_full || log.payload_hash || 'No payload available',
             prompt_preview: log.prompt_full ? log.prompt_full.substring(0, 48) + '...' : (log.payload_hash || '').substring(0, 24) + '...',
             layers_triggered: log.layers_triggered ? log.layers_triggered.split(',') : [],
@@ -291,7 +291,7 @@ export default function ThreatAnalysis() {
                                     <div style={{ width: 1, height: 28, background: 'var(--border-faint)' }} />
                                     <div>
                                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Payload Signature</div>
-                                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: item.primary_category === 'Safe' ? 'var(--accent-secure)' : 'var(--accent-threat)', fontWeight: 600 }}>{item.primary_category === 'Safe' ? 'Safe / No Threat' : item.primary_category.replace(/_/g, ' ')}</div>
+                                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: item.primary_category === 'Safe' ? 'var(--accent-secure)' : 'var(--accent-threat)', fontWeight: 600 }}>{item.primary_category === 'Safe' ? 'Safe / No Threat' : item.primary_category}</div>
                                     </div>
                                   </div>
                                   <div>

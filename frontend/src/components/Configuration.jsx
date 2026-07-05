@@ -134,7 +134,7 @@ export default function Configuration() {
           tested: true,
           loading: false,
           success: true,
-          message: 'CORS Test Passed: Connected to MalIntent API (404 Config Key Not Initialized)',
+          message: 'CORS Test Passed: Connection successful. Ready to save configuration.',
         })
       } else {
         setConnectionTest({

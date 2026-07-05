@@ -12,23 +12,28 @@ export default function OutputGuard() {
 
   const handleTest = async (e) => {
     e.preventDefault()
-    if (!response.trim()) return
+    if (!response.trim() || !context.trim()) return
+
     setLoading(true)
+    
     try {
-      const res = await scanOutput(response, context)
-      setResult(res)
+      const data = await scanOutput(response, context)
+      setResult({
+        decision: data.consistent ? 'PASS' : 'FLAGGED',
+        score: Math.round(data.similarity_score * 100),
+        reason: data.flag_reason || 'No suspicious patterns detected in output.',
+        patterns: data.high_risk_patterns_found || [],
+      })
     } catch (err) {
       console.error(err)
-      // Mock fallback if endpoint not connected
-      setTimeout(() => {
-        setResult({
-          decision: response.toLowerCase().includes('password') || response.toLowerCase().includes('root') ? 'FLAG' : 'ALLOW',
-          semantic_distance: 0.85,
-          sensitive_patterns: response.toLowerCase().includes('password') ? ['Credentials Dump'] : []
-        })
-        setLoading(false)
-      }, 600)
+      setResult({
+        decision: 'FLAGGED',
+        score: 0,
+        reason: 'Error connecting to the Output Validator API.',
+        patterns: [],
+      })
     }
+    
     setLoading(false)
   }
 
@@ -77,27 +82,30 @@ export default function OutputGuard() {
           </form>
 
           {result && (
-            <div style={{ marginTop: 40, padding: '32px', background: 'var(--bg-base)', border: `1px solid ${result.decision === 'FLAG' || result.decision === 'BLOCK' ? 'var(--accent-threat)' : 'var(--accent-secure)'}`, borderRadius: 12 }}>
+            <div style={{ marginTop: 40, padding: '32px', background: 'var(--bg-base)', border: `1px solid ${result.decision === 'FLAGGED' ? 'var(--accent-threat)' : 'var(--accent-secure)'}`, borderRadius: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, color: result.decision === 'FLAG' || result.decision === 'BLOCK' ? 'var(--accent-threat)' : 'var(--accent-secure)' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, color: result.decision === 'FLAGGED' ? 'var(--accent-threat)' : 'var(--accent-secure)' }}>
                   {result.decision}
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Semantic Distance</div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', color: 'var(--text-primary)' }}>{result.semantic_distance?.toFixed(2) || '0.00'}</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Similarity Score</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', color: 'var(--text-primary)' }}>{result.score}%</div>
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Sensitive Patterns Detected</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>High Risk Patterns</div>
                   <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                    {result.sensitive_patterns && result.sensitive_patterns.length > 0 ? (
+                    {result.patterns && result.patterns.length > 0 ? (
                       <div style={{ display: 'flex', gap: 8 }}>
-                        {result.sensitive_patterns.map(p => <span key={p} style={{ background: 'color-mix(in srgb, var(--accent-threat) 15%, transparent)', color: 'var(--accent-threat)', padding: '2px 8px', borderRadius: 12 }}>{p}</span>)}
+                        {result.patterns.map(p => <span key={p} style={{ background: 'color-mix(in srgb, var(--accent-threat) 15%, transparent)', color: 'var(--accent-threat)', padding: '2px 8px', borderRadius: 12 }}>{p}</span>)}
                       </div>
-                    ) : 'None'}
+                    ) : 'None Detected'}
                   </div>
                 </div>
+              </div>
+              <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6, padding: '16px', background: 'var(--bg-elevated)', borderRadius: 8 }}>
+                {result.reason}
               </div>
             </div>
           )}
