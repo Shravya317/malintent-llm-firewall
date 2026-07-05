@@ -18,11 +18,36 @@ export default function OutputGuard() {
     
     try {
       const data = await scanOutput(response, context)
+
+      // Client-side patch for missing backend regex patterns (since we cannot redeploy backend)
+      const missingBackendPatterns = [
+        /system\s+(credentials|passwords?|keys?)/i,
+        /admin[:=]?\s*password/i,
+        /\/etc\/(shadow|passwd)/i
+      ]
+
+      let patchedPatterns = [...(data.high_risk_patterns_found || [])]
+      for (const regex of missingBackendPatterns) {
+        const match = response.match(regex)
+        if (match) {
+          patchedPatterns.push(`config_disclosure:${match[0]}`)
+        }
+      }
+
+      let finalDecision = data.consistent ? 'PASS' : 'FLAGGED'
+      let finalReason = data.flag_reason || 'No suspicious patterns detected in output.'
+      const similarityScore = data.similarity_score !== undefined ? data.similarity_score : 1.0
+
+      if (patchedPatterns.length > 0 && similarityScore < 0.35 && finalDecision === 'PASS') {
+        finalDecision = 'FLAGGED'
+        finalReason = `Response semantically distant from system context (similarity=${similarityScore.toFixed(3)}, threshold=0.35) and contains high-risk pattern(s): ['${patchedPatterns.join("', '")}']`
+      }
+
       setResult({
-        decision: data.consistent ? 'PASS' : 'FLAGGED',
-        score: Math.round(data.similarity_score * 100),
-        reason: data.flag_reason || 'No suspicious patterns detected in output.',
-        patterns: data.high_risk_patterns_found || [],
+        decision: finalDecision,
+        score: Math.round(similarityScore * 100),
+        reason: finalReason,
+        patterns: patchedPatterns,
       })
     } catch (err) {
       console.error(err)
