@@ -83,7 +83,7 @@ export default function ThreatAnalysis() {
   const [decisions, setDecisions] = useState({ ALLOW: true, FLAG: true, BLOCK: true })
   const [category, setCategory] = useState('All')
   const [expandedId, setExpandedId] = useState(null)
-  const [hoveredIndex, setHoveredIndex] = useState(null)
+  const [clickedIndex, setClickedIndex] = useState(null)
   const [threats, setThreats] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -111,7 +111,14 @@ export default function ThreatAnalysis() {
             layer_c_confidence: 0.0,
             layer_c_top_matches: [],
             suspicious_segments: log.prompt_full && log.attack_category !== 'safe' ? generateSuspiciousSegments(log.prompt_full) : [],
-            explanation: log.explanation || 'Detailed explanation not available yet.',
+            explanation: (() => {
+              if (log.decision === 'BLOCK') {
+                return `This request was blocked because it strongly matches the profile of a ${parsePatternId(log.attack_category)} attack. It triggered multiple defense layers (${log.layers_triggered ? log.layers_triggered.replace(/,/g, ', ') : 'none'}) indicating high confidence of malicious intent.`
+              } else if (log.decision === 'FLAG') {
+                return `This request was flagged for review. While it didn't strictly violate core rules, it exhibited suspicious traits of a ${parsePatternId(log.attack_category)} attack, triggering layer(s) ${log.layers_triggered || 'none'}.`
+              }
+              return 'No malicious intent detected. Request allowed to proceed.'
+            })(),
           }))
           setThreats(mapped)
           setError(null)
@@ -170,19 +177,20 @@ export default function ThreatAnalysis() {
     })
     return parts.map((part, i) => {
       if (!part.isMatch) return <span key={i}>{part.text}</span>
-      const isHovered = hoveredIndex === part.index
+      const isClicked = clickedIndex === part.index
       return (
         <mark key={i}
-          onMouseEnter={() => setHoveredIndex(part.index)}
-          onMouseLeave={() => setHoveredIndex(null)}
-          style={{ background: 'rgba(229,57,53,0.18)', color: 'var(--accent-threat)', borderBottom: '2px solid var(--accent-threat)', fontWeight: 'bold', textDecoration: 'underline', cursor: 'help', position: 'relative', padding: '2px 4px', borderRadius: 4 }}
+          onClick={(e) => { e.stopPropagation(); setClickedIndex(isClicked ? null : part.index) }}
+          style={{ background: 'rgba(229,57,53,0.18)', color: 'var(--accent-threat)', borderBottom: '2px dashed var(--accent-threat)', cursor: 'pointer', position: 'relative', padding: '2px 4px', borderRadius: 4, transition: 'background 0.2s ease' }}
         >
           {part.text}
-          <span style={{ marginLeft: 6, background: 'var(--accent-threat)', color: 'var(--bg-base)', padding: '2px 6px', borderRadius: 12, fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', verticalAlign: 'middle', textDecoration: 'none', display: 'inline-block' }}>{categoryStr}</span>
-          {isHovered && (
-            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 10, padding: '14px 18px', background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', borderRadius: 8, boxShadow: '0 16px 40px rgba(0,0,0,0.85)', width: 320, zIndex: 100, fontFamily: 'var(--font-sans)', fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--text-primary)', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>
-              <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Suspicious Segment Analysis</div>
-              {part.reason}
+          {isClicked && (
+            <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: 10, padding: '16px', background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 8, boxShadow: '0 12px 32px rgba(0,0,0,0.85)', width: 280, zIndex: 100, fontFamily: 'var(--font-sans)', fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--text-primary)', textAlign: 'left', cursor: 'default' }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Suspicious Segment</span>
+                <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', background: 'var(--accent-threat)', color: 'var(--bg-base)', padding: '2px 6px', borderRadius: 12, fontWeight: 800, textTransform: 'uppercase' }}>{categoryStr}</span>
+              </div>
+              <div style={{ color: 'var(--text-secondary)' }}>{part.reason}</div>
             </div>
           )}
         </mark>
@@ -349,7 +357,7 @@ export default function ThreatAnalysis() {
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', lineHeight: 2.0, color: 'var(--text-primary)', background: 'rgba(15, 18, 28, 0.6)', padding: 28, borderRadius: 12, border: '1px solid var(--border-subtle)', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.2)', whiteSpace: 'pre-wrap' }}>
                                       {renderHighlightedPrompt(item.prompt_full, item.suspicious_segments, item.primary_category)}
                                     </div>
-                                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.78rem', color: 'var(--text-muted)', margin: '16px 0 0', fontStyle: 'italic' }}>* Hover over highlighted segments to view detailed forensic explanations.</p>
+                                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.78rem', color: 'var(--text-muted)', margin: '16px 0 0', fontStyle: 'italic' }}>* Click on highlighted segments to view detailed forensic explanations.</p>
                                   </div>
 
                                   {/* PANEL 2: Layer Analysis */}
