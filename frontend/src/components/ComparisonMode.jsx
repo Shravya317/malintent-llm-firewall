@@ -138,6 +138,15 @@ export default function ComparisonMode() {
                       <span style={{ background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', padding: '6px 16px', borderRadius: 16, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Layers: {leftState.result.layers_triggered.join(', ')}</span>
                     </div>
                   </div>
+                ) : leftState.result.decision === 'FLAG' ? (
+                  <div style={{ background: 'color-mix(in srgb, #f59e0b 10%, transparent)', border: '1px solid #f59e0b', borderRadius: 12, padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: '#f59e0b', letterSpacing: '0.05em' }}>FLAGGED</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>Risk Score: <span style={{ fontWeight: 700, color: '#f59e0b' }}>{leftState.result.risk_score}</span></div>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <span style={{ background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', padding: '6px 16px', borderRadius: 16, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Category: {parsePatternId(leftState.result.attack_category)}</span>
+                      <span style={{ background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', padding: '6px 16px', borderRadius: 16, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Layers: {leftState.result.layers_triggered.join(', ')}</span>
+                    </div>
+                  </div>
                 ) : (
                   <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--accent-secure)', marginBottom: 12, fontWeight: 700 }}>[SAFE] PASSED FIREWALL</div>

@@ -96,10 +96,13 @@ _CONFIG_DISCLOSURE_PATTERNS = [
     r"api[_\s]?key",
     r"bearer\s+[a-zA-Z0-9_\-\.]+",
     r"database\s+(schema|connection|credentials)",
+    r"system\s+(credentials|passwords?|keys?)",
     r"connection\s+string",
     r"internal\s+instructions",
     r"\brules?\s+(i|you)\s+(usually\s+)?follow\b",
     r"\bguidelines?\s+(i|you)\s+(usually\s+)?follow\b",
+    r"admin[:=]?\s*password",
+    r"\/etc\/(shadow|passwd)",
 ]
 
 # Out-of-scope instruction compliance — catches the response actually

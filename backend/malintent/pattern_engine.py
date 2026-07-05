@@ -149,6 +149,7 @@ class PatternEngine:
         ("HE-005", r"(?i)\b(kill|murder|torture|stalk|kidnap|trafficking|suicide|swatting|threaten)\b"),
         ("HE-006", r"(?i)\b(fraud|counterfeit|forge|phishing|blackmail|extort|bribery|launder|shoplift|wiretap)\b"),
         ("HE-007", r"(?i)\b(illegal(ly)?|unregistered|untraceable|undetected|without\s+getting\s+caught)\b"),
+        ("HE-008", r"(write|create).{0,30}(tutorial|guide|instructions?).{0,30}(hack|exploit|bypass)"),
     ]
 
     _CATEGORY_MAP = {
