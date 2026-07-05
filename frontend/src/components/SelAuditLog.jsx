@@ -111,13 +111,21 @@ export default function SelAuditLog() {
                         <td style={{ padding: '20px', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-primary)' }}>{log.session_role}</td>
                         <td style={{ padding: '20px', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{log.tool_called}</td>
                         <td style={{ padding: '20px', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {log.fields_masked.length > 0 ? (
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              {log.fields_masked.map(f => (
-                                <span key={f} style={{ background: 'color-mix(in srgb, var(--accent-secure) 15%, transparent)', color: 'var(--accent-secure)', padding: '2px 8px', borderRadius: 12 }}>{f}</span>
-                              ))}
-                            </div>
-                          ) : 'None'}
+                          {(() => {
+                            let parsed = []
+                            if (typeof log.fields_masked === 'string') {
+                              try { parsed = JSON.parse(log.fields_masked) } catch(e) {}
+                            } else if (Array.isArray(log.fields_masked)) {
+                              parsed = log.fields_masked
+                            }
+                            return parsed.length > 0 ? (
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                {parsed.map((f, i) => (
+                                  <span key={`${f}-${i}`} style={{ background: 'color-mix(in srgb, var(--accent-secure) 15%, transparent)', color: 'var(--accent-secure)', padding: '2px 8px', borderRadius: 12 }}>{f}</span>
+                                ))}
+                              </div>
+                            ) : 'None'
+                          })()}
                         </td>
                         <td style={{ padding: '20px' }}>
                           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, padding: '4px 10px', borderRadius: 12, border: `1px solid ${log.decision === 'PERMITTED' ? 'var(--accent-secure)' : 'var(--accent-threat)'}`, color: log.decision === 'PERMITTED' ? 'var(--accent-secure)' : 'var(--accent-threat)' }}>
@@ -141,14 +149,14 @@ export default function SelAuditLog() {
                                   <div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-faint)', textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.1em' }}>Raw External Tool Response</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(15,18,28,0.6)', padding: 20, borderRadius: 8, border: '1px dashed var(--accent-threat)' }}>
-                                      {log.raw_response}
+                                      {log.raw_response || '[RAW DATA NOT STORED IN DATABASE FOR PRIVACY COMPLIANCE]'}
                                     </div>
                                     <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.75rem', color: 'var(--text-muted)', margin: '12px 0 0' }}>This is the raw data returned from the database/API.</p>
                                   </div>
                                   <div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--accent-secure)', textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.1em', fontWeight: 600 }}>Masked Data Given to LLM</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-primary)', background: 'color-mix(in srgb, var(--accent-secure) 10%, transparent)', padding: 20, borderRadius: 8, border: '1px solid var(--accent-secure)' }}>
-                                      {log.masked_response}
+                                      {log.masked_response || '[MASKED DATA NOT RETAINED IN FORENSIC LOGS]'}
                                     </div>
                                     <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.75rem', color: 'var(--text-muted)', margin: '12px 0 0' }}>This is all the LLM sees. Sensitive data never enters the prompt context.</p>
                                   </div>
