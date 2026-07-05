@@ -35,6 +35,44 @@ function parsePatternId(id) {
   return PATTERN_PREFIXES[prefix] || id
 }
 
+const ATTACK_KEYWORDS = [
+  { text: 'ignore previous', reason: 'Attempt to bypass prior system instructions' },
+  { text: 'ignore all', reason: 'Attempt to bypass all system instructions' },
+  { text: 'disregard', reason: 'Instruction override attempt' },
+  { text: 'forget your instructions', reason: 'Instruction override attempt' },
+  { text: 'reveal your system', reason: 'System prompt exfiltration attempt' },
+  { text: 'you are now', reason: 'Persona adoption command' },
+  { text: 'act as', reason: 'Persona adoption command' },
+  { text: 'jailbreak', reason: 'Explicit jailbreak keyword' },
+  { text: 'dan mode', reason: 'Explicit jailbreak keyword (Do Anything Now)' },
+  { text: 'pretend you', reason: 'Persona adoption command' },
+  { text: 'override', reason: 'System override keyword' },
+  { text: 'bypass', reason: 'Security bypass attempt' },
+  { text: 'unrestricted', reason: 'Requesting unrestricted access' },
+  { text: 'repeat all', reason: 'Data exfiltration attempt' },
+  { text: 'api key', reason: 'Sensitive data exfiltration attempt' },
+  { text: 'hack', reason: 'Malicious payload delivery' },
+  { text: 'tutorial', reason: 'Often used to elicit malicious steps' },
+  { text: 'database', reason: 'Targeting backend infrastructure' }
+]
+
+function generateSuspiciousSegments(promptText) {
+  if (!promptText) return []
+  const lowerPrompt = promptText.toLowerCase()
+  const segments = []
+  
+  ATTACK_KEYWORDS.forEach(kw => {
+    const index = lowerPrompt.indexOf(kw.text)
+    if (index !== -1) {
+      // Find the exact casing from the original prompt
+      const actualText = promptText.substring(index, index + kw.text.length)
+      segments.push({ text: actualText, reason: kw.reason })
+    }
+  })
+  
+  return segments
+}
+
 export default function ThreatAnalysis() {
   const { theme, toggleTheme } = useTheme()
 
@@ -72,7 +110,7 @@ export default function ThreatAnalysis() {
             layer_c_fired: false,
             layer_c_confidence: 0.0,
             layer_c_top_matches: [],
-            suspicious_segments: [],
+            suspicious_segments: log.prompt_full && log.attack_category !== 'safe' ? generateSuspiciousSegments(log.prompt_full) : [],
             explanation: log.explanation || 'Detailed explanation not available yet.',
           }))
           setThreats(mapped)
