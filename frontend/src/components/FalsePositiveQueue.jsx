@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
 import Sidebar from './Sidebar'
-import { getLogs, mockUpdateLogDecision } from '../api/client'
+import { getLogs, updateLogDecision } from '../api/client'
 
 export default function FalsePositiveQueue() {
   const { theme, toggleTheme } = useTheme()
@@ -35,7 +35,7 @@ export default function FalsePositiveQueue() {
 
   const handleDecision = async (id, decision) => {
     try {
-      await mockUpdateLogDecision(id, decision)
+      await updateLogDecision(id, decision)
       setQueue(prev => prev.filter(log => log.id !== id))
       setMetrics(prev => ({
         reviewed: prev.reviewed + 1,

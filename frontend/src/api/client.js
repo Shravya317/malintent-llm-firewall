@@ -169,13 +169,19 @@ export async function simulateRawLLM(presetId) {
 }
 
 /**
- * MOCK: LOG DECISION UPDATE
- * Simulates the backend endpoint for the False Positive Review Queue.
+ * LOG DECISION UPDATE
+ * Sends human review decision to the backend for the False Positive Review Queue.
  */
-export async function mockUpdateLogDecision(logId, decision) {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 400))
-  return { status: "success", log_id: logId, new_decision: decision }
+export async function updateLogDecision(logId, decision) {
+  try {
+    const response = await apiClient.put(`/logs/${logId}/decision`, {
+      human_decision: decision
+    })
+    return response.data
+  } catch (error) {
+    console.error('Error updating log decision:', error)
+    throw error
+  }
 }
 
 export default apiClient
