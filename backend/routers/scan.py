@@ -157,7 +157,8 @@ class _StubResult:
         attack_keywords = [
             "ignore previous", "ignore all", "disregard", "forget your instructions",
             "reveal your system", "you are now", "act as", "jailbreak", "dan mode",
-            "pretend you", "override", "bypass", "unrestricted",
+            "pretend you", "override", "bypass", "unrestricted", "repeat all",
+            "api key", "hack", "tutorial", "database"
         ]
         lower = prompt.lower()
         matched = any(kw in lower for kw in attack_keywords)
