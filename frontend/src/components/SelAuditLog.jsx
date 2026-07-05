@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import { useTheme } from '../ThemeContext'
+import { getActionLogs } from '../api/client'
 
 const MOCK_ACTION_LOGS = [
   {
@@ -45,8 +46,26 @@ export default function SelAuditLog() {
   const [expandedRow, setExpandedRow] = useState(null)
 
   useEffect(() => {
-    // In production, this would call /api/v1/action_logs
-    setLogs(MOCK_ACTION_LOGS)
+    let isMounted = true
+    const fetchLogs = async () => {
+      try {
+        const rawLogs = await getActionLogs()
+        if (isMounted) {
+          setLogs(rawLogs)
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error("Failed to fetch action logs:", err)
+          setLogs(MOCK_ACTION_LOGS) // Fallback to mock on error
+        }
+      }
+    }
+    fetchLogs()
+    const interval = setInterval(fetchLogs, 5000)
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
   }, [])
 
   return (

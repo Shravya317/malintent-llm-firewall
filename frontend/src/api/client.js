@@ -77,6 +77,20 @@ export async function getLogs() {
 }
 
 /**
+ * ACTION LOGS
+ * Fetch SEL action logs.
+ */
+export async function getActionLogs() {
+  try {
+    const response = await apiClient.get('/action_logs')
+    return response.data
+  } catch (error) {
+    console.error('Error in getActionLogs:', error)
+    throw error
+  }
+}
+
+/**
  * STATS
  * Fetch dashboard stats and hourly trends.
  */
