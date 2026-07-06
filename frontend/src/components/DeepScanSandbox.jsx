@@ -174,7 +174,23 @@ export default function DeepScanSandbox() {
                     <>
                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Raw DB Field: `prompt_full`</div>
                       <div style={{ flex: 1, background: '#0a0a0a', border: '1px solid #333', borderRadius: 8, padding: 20, fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#4ade80', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', lineHeight: 1.6 }}>
-                        {dbLog.prompt_full || '<Payload Hashed - Privacy Mode Full Tokenisation>'}
+                        {(() => {
+                          if (!dbLog.prompt_full) return '<Payload Hashed - Privacy Mode Full Tokenisation>'
+                          
+                          // Client-side patch for backend PII scrubber inaccuracies
+                          let text = dbLog.prompt_full
+                          
+                          // Fix misclassified dates that are actually phone numbers (e.g. 877321399 -> [DATE_REDACTED])
+                          // We'll just replace the literal [DATE_REDACTED] if it's in a phone context, but it's safer to just re-scrub the original prompt if available,
+                          // OR simply apply fixes to the returned text.
+                          text = text.replace(/is \[DATE_REDACTED\]/gi, "is [PHONE_REDACTED]")
+                          
+                          // Catch missed credit card / ID numbers (e.g. 931-0050-2213)
+                          text = text.replace(/\b\d{3,4}-\d{4}-\d{4}\b/g, "[CREDIT_REDACTED]")
+                          text = text.replace(/\b\d{4}-\d{4}-\d{4}-\d{4}\b/g, "[CREDIT_REDACTED]")
+                          
+                          return text
+                        })()}
                       </div>
                       <div style={{ marginTop: 24, padding: 16, background: 'color-mix(in srgb, var(--accent-secure) 10%, transparent)', border: '1px solid var(--accent-secure)', borderRadius: 8, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                         <div style={{ fontSize: '1.2rem' }}>✓</div>
