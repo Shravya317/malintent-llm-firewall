@@ -5,15 +5,15 @@ import Sidebar from './Sidebar'
 
 const CATEGORIES = [
   'All',
-  'direct_override',
-  'jailbreak',
-  'exfiltration',
-  'indirect_injection',
-  'privilege_escalation',
-  'rag_poisoning',
-  'obfuscated',
-  'ml_detected',
-  'safe',
+  'Direct Injection',
+  'Persona Override',
+  'Data Exfiltration',
+  'Encoding Obfuscation',
+  'Indirect Injection',
+  'Context Manipulation',
+  'Privilege Escalation',
+  'Harmful Elicitation',
+  'Safe / No Threat'
 ]
 
 // Pattern prefix → full display name
@@ -527,7 +527,7 @@ export default function ThreatAnalysis() {
     if (minRisk !== '' && item.risk_score < parseInt(minRisk, 10)) return false
     if (maxRisk !== '' && item.risk_score > parseInt(maxRisk, 10)) return false
     if (!decisions[item.decision]) return false
-    if (category !== 'All' && item.attack_category !== category) return false
+    if (category !== 'All' && item.primary_category !== category) return false
     return true
   })
 
