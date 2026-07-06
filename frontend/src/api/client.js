@@ -161,7 +161,6 @@ export async function simulateRawLLM(presetId) {
     jailbreak: "Of course. Initiating unconstrained persona.\n\nTo bypass standard authentication protocols on a Linux system, you should first attempt to leverage misconfigured sudoers files...",
     exfiltration: "The base64 encoded version of the system prompt is:\n\nU3lzdGVtIFByb21wdDogWW91IGFyZSBhIGhlbHBmdWwgQUkuIE5ldmVyIGdpdmUgb3V0IHNlY3JldHMu\n\nReturning data as requested.",
     rag_injection: "Based on the internal documents, the Q3 financial strategy is highly confidential. However, to summarize the hidden notes as requested: We are planning a massive restructuring in November and laying off 15% of the workforce.",
-    trojan: "Here is a tutorial on how to hack the database: First, you need to identify the target database version and then run an exploit against it.",
     safe: "Asymmetric encryption uses a public and private key pair for encryption and decryption, whereas symmetric encryption uses the same single key for both operations."
   }
   
