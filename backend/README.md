@@ -1055,7 +1055,7 @@ Google Cloud Run is configured using:
 - `PG_CRYPTO_KEY`
 - `FERNET_KEY`
 - `HUGGINGFACE_TOKEN`
-- `GEMINI_API_KEY`
+- `GROQ_API_KEY`
 - `CORS_ALLOWED_ORIGINS`
 
 The production backend connects to Supabase using the Transaction Pooler,

@@ -1396,7 +1396,7 @@ docker run -p 8000:8000 \
   -e FERNET_KEY=$FERNET_KEY \
   -e PG_CRYPTO_KEY=$PG_CRYPTO_KEY \
   -e HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
-  -e GEMINI_API_KEY=$GEMINI_API_KEY \
+  -e GROQ_API_KEY=$GROQ_API_KEY \
   malintent-backend
 ```
 
@@ -1430,7 +1430,7 @@ gcloud run deploy malintent-backend \
   --set-env-vars FERNET_KEY=$FERNET_KEY \
   --set-env-vars PG_CRYPTO_KEY=$PG_CRYPTO_KEY \
   --set-env-vars HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
-  --set-env-vars GEMINI_API_KEY=$GEMINI_API_KEY \
+  --set-env-vars GROQ_API_KEY=$GROQ_API_KEY \
   --set-env-vars SUPABASE_DIRECT_URL=$SUPABASE_DIRECT_URL \
   --set-env-vars SUPABASE_TRANSACTION_POOLER_URL=$SUPABASE_TRANSACTION_POOLER_URL
 ```
