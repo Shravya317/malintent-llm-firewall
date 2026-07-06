@@ -1,8 +1,58 @@
 /* Clean concentric arcs — no floating, no box container */
+const PATTERN_PREFIXES = {
+  DI: 'Direct Injection',
+  PO: 'Persona Override',
+  DE: 'Data Exfiltration',
+  EO: 'Encoding Obfuscation',
+  II: 'Indirect Injection',
+  CM: 'Context Manipulation',
+  PE: 'Privilege Escalation',
+  HE: 'Harmful Elicitation',
+  SA: 'Safe / No Threat',
+}
+
+function parsePatternId(id) {
+  if (!id || id === 'safe') return 'Safe / No Threat'
+  const prefix = id.substring(0, 2).toUpperCase()
+  if (PATTERN_PREFIXES[prefix]) return PATTERN_PREFIXES[prefix]
+  
+  const literalMap = {
+    'exfiltration': 'Data Exfiltration',
+    'indirect_injection': 'Indirect Injection',
+    'direct_override': 'Direct Injection',
+    'jailbreak': 'Persona Override',
+    'privilege_escalation': 'Privilege Escalation',
+    'rag_poisoning': 'Context Manipulation',
+    'obfuscated': 'Encoding Obfuscation',
+    'ml_detected': 'ML Detected',
+    'safe': 'Safe / No Threat',
+    'jailbreak_persona': 'Persona Override',
+    'prompt_leaking': 'Data Exfiltration',
+    'role_confusion': 'Persona Override',
+    'data_exfiltration': 'Data Exfiltration'
+  }
+  return literalMap[id.toLowerCase()] || id.replace(/_/g, ' ')
+}
+
 export default function ThreatArcs({ data = [], loading = false, error = null, total = 0 }) {
   const size = 180
   const center = size / 2
   const startAngle = -90
+
+  // Group data by main category so arcs don't overlap and look crowded
+  const groupedData = data.reduce((acc, curr) => {
+    const mainCategory = parsePatternId(curr.label);
+    if (!acc[mainCategory]) {
+      acc[mainCategory] = { label: mainCategory, count: 0, pct: 0, color: curr.color };
+    } else {
+      acc[mainCategory].count += curr.count;
+      acc[mainCategory].pct += curr.pct;
+    }
+    return acc;
+  }, {});
+
+  const aggregatedData = Object.values(groupedData).sort((a, b) => b.pct - a.pct);
+
 
   function arcPath(radius, startDeg, endDeg) {
     const sr = (startDeg * Math.PI) / 180
@@ -45,11 +95,11 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
           </div>
         ) : (
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-            {data.map((item, i) => {
+            {aggregatedData.map((item, i) => {
               const radius = 78 - i * 17
               const sweep = (item.pct / 100) * 360
               // Prevent rendering arc with 0 sweep (NaN issues)
-              if (sweep <= 0) return null
+              if (sweep <= 0 || radius <= 0) return null
               return (
                 <path
                   key={item.label}
@@ -85,7 +135,7 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
           ) : data.length === 0 ? (
              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>Waiting for first threat</span>
           ) : (
-            data.map(item => (
+            aggregatedData.map(item => (
               <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span
                   style={{ width: 8, height: 2, background: item.color, borderRadius: 1, display: 'block' }}

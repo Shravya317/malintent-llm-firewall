@@ -105,7 +105,7 @@ export default function ThreatFeed() {
             Threat Feed
           </h2>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-faint)' }}>
-            {threats.length} events
+            Showing top {Math.min(filtered.length, 15)} of {threats.length} events
           </span>
         </div>
 
@@ -182,7 +182,7 @@ export default function ThreatFeed() {
         ) : filtered.length === 0 ? (
           <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-faint)' }}>No events match current filter.</div>
         ) : null}
-        {filtered.map(threat => {
+        {filtered.slice(0, 15).map(threat => {
           const sevColor = severityColor[threat.severity]
           const stat = statusLabel[threat.status]
 
