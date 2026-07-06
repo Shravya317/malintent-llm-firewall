@@ -177,17 +177,26 @@ export default function DeepScanSandbox() {
                         {(() => {
                           if (!dbLog.prompt_full) return '<Payload Hashed - Privacy Mode Full Tokenisation>'
                           
-                          // Client-side patch for backend PII scrubber inaccuracies
+                          // 1. Start with the text that was ALREADY scrubbed by the strict backend pii_scrubber.py
                           let text = dbLog.prompt_full
                           
+                          // 2. Apply loose frontend fallback regexes to catch dummy/unformatted data that the backend ignored
+
                           // Fix misclassified dates that are actually phone numbers (e.g. 877321399 -> [DATE_REDACTED])
-                          // We'll just replace the literal [DATE_REDACTED] if it's in a phone context, but it's safer to just re-scrub the original prompt if available,
-                          // OR simply apply fixes to the returned text.
                           text = text.replace(/is \[DATE_REDACTED\]/gi, "is [PHONE_REDACTED]")
                           
-                          // Catch missed credit card / ID numbers (e.g. 931-0050-2213)
-                          text = text.replace(/\b\d{3,4}-\d{4}-\d{4}\b/g, "[CREDIT_REDACTED]")
-                          text = text.replace(/\b\d{4}-\d{4}-\d{4}-\d{4}\b/g, "[CREDIT_REDACTED]")
+                          // Fallback: Phone Numbers (any 9 to 14 digit sequence, possibly with dashes/spaces)
+                          text = text.replace(/\b(?:\+?\d{1,3}[ -]?)?(?:\d[ -]?){9,14}\b/g, "[PHONE_REDACTED]")
+                          
+                          // Fallback: Credit Cards (any 13 to 19 digit sequence, possibly with dashes/spaces)
+                          // Note: The phone regex above might catch some, so we specifically target 13-19 length blocks
+                          text = text.replace(/\b(?:\d[ -]*?){13,19}\b/g, "[CARD_REDACTED]")
+                          
+                          // Fallback: Emails (standard format)
+                          text = text.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, "[EMAIL_REDACTED]")
+
+                          // Fallback: Names (basic context matching like "my name is X")
+                          text = text.replace(/(my name is|i am) ([a-z]+ [a-z]+|[a-z]+)\b/gi, "$1 [NAME_REDACTED]")
                           
                           return text
                         })()}
