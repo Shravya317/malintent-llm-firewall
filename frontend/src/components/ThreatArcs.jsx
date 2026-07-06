@@ -113,37 +113,35 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>No threats yet</span>
           </div>
         ) : (
-          <svg width={size} height={size + 40} viewBox={`0 0 ${size} ${size + 40}`}>
-            {aggregatedData.map((item, i) => {
-              const radius = 78 - i * 17
-              const sweep = (item.pct / 100) * 360
-              // Prevent rendering arc with 0 sweep (NaN issues)
-              if (sweep <= 0 || radius <= 0) return null
-              return (
-                <path
-                  key={item.label}
-                  d={arcPath(radius, startAngle, startAngle + sweep)}
-                  fill="none"
-                  stroke={item.color}
-                  strokeWidth={8}
-                  strokeLinecap="round"
-                  opacity={0.8}
-                />
-              )
-            })}
-            <text
-              x={center} y={size + 15} textAnchor="middle"
-              style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, fill: 'var(--text-primary)' }}
-            >
-              {total.toLocaleString()}
-            </text>
-            <text
-              x={center} y={size + 30} textAnchor="middle"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.45rem', fill: 'var(--text-faint)', letterSpacing: '0.1em' }}
-            >
-              TOTAL THREATS
-            </text>
-          </svg>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+              {aggregatedData.map((item, i) => {
+                const radius = 78 - i * 17
+                const sweep = (item.pct / 100) * 360
+                // Prevent rendering arc with 0 sweep (NaN issues)
+                if (sweep <= 0 || radius <= 0) return null
+                return (
+                  <path
+                    key={item.label}
+                    d={arcPath(radius, startAngle, startAngle + sweep)}
+                    fill="none"
+                    stroke={item.color}
+                    strokeWidth={8}
+                    strokeLinecap="round"
+                    opacity={0.8}
+                  />
+                )
+              })}
+            </svg>
+            <div style={{ textAlign: 'center', marginTop: -20 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
+                {total.toLocaleString()}
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.45rem', color: 'var(--text-faint)', letterSpacing: '0.1em', marginTop: 4 }}>
+                TOTAL THREATS
+              </div>
+            </div>
+          </div>
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
