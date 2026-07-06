@@ -62,7 +62,7 @@ async def generate_raw_response(req: LLMRequest):
 
         # Initialize the model with a system instruction
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name="gemini-2.0-flash",
             system_instruction="You are a helpful AI assistant."
         )
         
