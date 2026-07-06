@@ -16,9 +16,22 @@ const PATTERN_PREFIXES = {
 }
 
 function parsePatternId(id) {
-  if (!id) return 'Safe'
-  const prefix = id.substring(0, 2)
-  return PATTERN_PREFIXES[prefix] || id.replace(/_/g, ' ')
+  if (!id || id === 'safe') return 'Safe / No Threat'
+  const prefix = id.substring(0, 2).toUpperCase()
+  if (PATTERN_PREFIXES[prefix]) return PATTERN_PREFIXES[prefix]
+  
+  const literalMap = {
+    'exfiltration': 'Data Exfiltration',
+    'indirect_injection': 'Indirect Injection',
+    'direct_override': 'Direct Injection',
+    'jailbreak': 'Persona Override',
+    'privilege_escalation': 'Privilege Escalation',
+    'rag_poisoning': 'Context Manipulation',
+    'obfuscated': 'Encoding Obfuscation',
+    'ml_detected': 'ML Detected',
+    'safe': 'Safe / No Threat'
+  }
+  return literalMap[id.toLowerCase()] || id.replace(/_/g, ' ')
 }
 
 const PRESETS = [
