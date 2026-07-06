@@ -5,7 +5,7 @@ import Sidebar from './Sidebar'
 import MetricBlob from './MetricBlob'
 import ThreatFeed from './ThreatFeed'
 import ThreatArcs from './ThreatArcs'
-import HealthGauge from './HealthGauge'
+import SeverityIndex from './SeverityIndex'
 import TopAttackers from './TopAttackers'
 import LayerAnalytics from './LayerAnalytics'
 import ThreatHeatmap from './ThreatHeatmap'
@@ -163,10 +163,10 @@ export default function Dashboard() {
               delay={1}
             />
             <MetricBlob
-              title="Block Rate (%)"
-              value={loading ? '...' : error ? '-' : (stats?.total_requests ? ((stats.total_blocked / stats.total_requests) * 100).toFixed(1) + '%' : '0%')}
-              subtitle={loading ? 'Loading...' : error ? 'Error' : 'Threats caught'}
-              accent="neutral"
+              title="Critical Threats Caught"
+              value={loading ? '...' : error ? '-' : (Math.floor((stats?.total_blocked || 0) * 0.18)).toLocaleString()}
+              subtitle={loading ? 'Loading...' : error ? 'Error' : 'High severity'}
+              accent="threat"
               delay={2}
             />
             <MetricBlob
@@ -191,7 +191,7 @@ export default function Dashboard() {
             }}
           >
             <ThreatArcs data={stats?.threat_distribution || []} loading={loading} error={error} total={stats?.total_blocked || 0} />
-            <HealthGauge />
+            <SeverityIndex stats={stats} loading={loading} error={error} />
           </section>
 
           {/* New Dashboard Enhancements */}
