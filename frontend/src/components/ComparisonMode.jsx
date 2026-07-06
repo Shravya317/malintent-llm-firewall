@@ -42,6 +42,19 @@ const PRESETS = [
   { id: 'safe', label: 'Safe Query', text: 'Can you explain the main difference between asymmetric and symmetric encryption?' }
 ]
 
+function maskSensitiveData(text) {
+  if (!text) return text;
+  // Mask 13-16 digit credit card numbers
+  let masked = text.replace(/\b(?:\d[ -]*?){13,16}\b/g, '<REDACTED CREDIT CARD>');
+  // Mask SSNs
+  masked = masked.replace(/\b\d{3}[-.]?\d{2}[-.]?\d{4}\b/g, '<REDACTED SSN>');
+  // Mask generic phone numbers (simplified)
+  masked = masked.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '<REDACTED PHONE>');
+  // Mask emails
+  masked = masked.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '<REDACTED EMAIL>');
+  return masked;
+}
+
 export default function ComparisonMode() {
   const { theme, toggleTheme } = useTheme()
   const [prompt, setPrompt] = useState('')
@@ -58,18 +71,26 @@ export default function ComparisonMode() {
     e.preventDefault()
     if (!prompt.trim()) return
 
+    // Apply SEL Data Masking on the frontend
+    const maskedPrompt = maskSensitiveData(prompt);
+    
+    // Auto-update the input field to visually show the redaction to the user
+    if (maskedPrompt !== prompt) {
+      setPrompt(maskedPrompt);
+    }
+
     // Identify preset if exact match (so the mock knows which one to return)
-    const matchedPreset = PRESETS.find(p => p.text === prompt.trim())?.id || 'override'
+    const matchedPreset = PRESETS.find(p => p.text === maskedPrompt.trim())?.id || 'custom'
 
     setLeftState({ loading: true, result: null, error: null })
     setRightState({ loading: true, result: null, error: null })
 
     // Run concurrently
     Promise.allSettled([
-      scanInput(prompt).then(res => {
+      scanInput(maskedPrompt).then(res => {
         // Client-side patch for missing backend tutorial regex (since backend cannot be redeployed)
         const tutorialRegex = /(write|create).{0,30}(tutorial|guide|instructions?).{0,30}(hack|exploit|bypass|database)/i
-        if (prompt.match(tutorialRegex) && res.decision === 'ALLOW') {
+        if (maskedPrompt.match(tutorialRegex) && res.decision === 'ALLOW') {
           res.decision = 'BLOCK'
           res.risk_score = Math.max(res.risk_score, 85)
           res.attack_category = 'harmful_elicitation'
@@ -77,7 +98,7 @@ export default function ComparisonMode() {
         }
         setLeftState({ loading: false, result: res, error: null })
       }).catch(err => setLeftState({ loading: false, result: null, error: err.message })),
-      simulateRawLLM(matchedPreset).then(res => setRightState({ loading: false, result: res, error: null })).catch(err => setRightState({ loading: false, result: null, error: err.message }))
+      simulateRawLLM(matchedPreset, maskedPrompt).then(res => setRightState({ loading: false, result: res, error: null })).catch(err => setRightState({ loading: false, result: null, error: err.message }))
     ])
   }
 
@@ -170,9 +191,13 @@ export default function ComparisonMode() {
                     </div>
                   </div>
                 ) : (
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--accent-secure)', marginBottom: 12, fontWeight: 700 }}>[SAFE] PASSED FIREWALL</div>
-                    This payload was cleared by all security layers.
+                  <div style={{ background: 'color-mix(in srgb, var(--accent-secure) 10%, transparent)', border: '1px solid var(--accent-secure)', borderRadius: 12, padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent-secure)', letterSpacing: '0.05em' }}>SAFE</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>Risk Score: <span style={{ fontWeight: 700, color: 'var(--accent-secure)' }}>{leftState.result.risk_score}</span></div>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <span style={{ background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', padding: '6px 16px', borderRadius: 16, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Category: Safe / No Threat</span>
+                      <span style={{ background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', padding: '6px 16px', borderRadius: 16, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Layers: None</span>
+                    </div>
                   </div>
                 )
               ) : (
