@@ -85,7 +85,7 @@ export default function ThreatFeed() {
   }, [])
 
   const filtered = filter === 'all' ? threats : threats.filter(t => t.severity === filter)
-  const filters = ['all', 'critical', 'high', 'medium', 'low']
+  const filters = ['all', 'critical', 'high', 'low']
 
   return (
     <div>

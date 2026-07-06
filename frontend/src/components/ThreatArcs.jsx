@@ -113,7 +113,7 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>No threats yet</span>
           </div>
         ) : (
-          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <svg width={size} height={size + 40} viewBox={`0 0 ${size} ${size + 40}`}>
             {aggregatedData.map((item, i) => {
               const radius = 78 - i * 17
               const sweep = (item.pct / 100) * 360
@@ -132,13 +132,13 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
               )
             })}
             <text
-              x={center} y={center - 4} textAnchor="middle"
+              x={center} y={size + 15} textAnchor="middle"
               style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, fill: 'var(--text-primary)' }}
             >
               {total.toLocaleString()}
             </text>
             <text
-              x={center} y={center + 14} textAnchor="middle"
+              x={center} y={size + 30} textAnchor="middle"
               style={{ fontFamily: 'var(--font-mono)', fontSize: '0.45rem', fill: 'var(--text-faint)', letterSpacing: '0.1em' }}
             >
               TOTAL THREATS
