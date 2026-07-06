@@ -39,11 +39,30 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
   const center = size / 2
   const startAngle = -90
 
+  // Vibrant Distinct Color Palette
+  const CATEGORY_COLORS = {
+    'Data Exfiltration': '#ef4444', // Red
+    'Persona Override': '#f59e0b', // Amber
+    'Direct Injection': '#3b82f6', // Blue
+    'Indirect Injection': '#8b5cf6', // Purple
+    'Context Manipulation': '#10b981', // Emerald
+    'Encoding Obfuscation': '#ec4899', // Pink
+    'Privilege Escalation': '#f97316', // Orange
+    'Harmful Elicitation': '#06b6d4', // Cyan
+    'Safe / No Threat': '#22c55e', // Green
+    'ML Detected': '#6366f1', // Indigo
+  };
+
   // Group data by main category so arcs don't overlap and look crowded
   const groupedData = data.reduce((acc, curr) => {
     const mainCategory = parsePatternId(curr.label);
     if (!acc[mainCategory]) {
-      acc[mainCategory] = { label: mainCategory, count: 0, pct: 0, color: curr.color };
+      acc[mainCategory] = { 
+        label: mainCategory, 
+        count: 0, 
+        pct: 0, 
+        color: CATEGORY_COLORS[mainCategory] || curr.color || '#a1a1aa'
+      };
     } else {
       acc[mainCategory].count += curr.count;
       acc[mainCategory].pct += curr.pct;
