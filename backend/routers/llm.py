@@ -72,7 +72,7 @@ async def generate_raw_response(req: LLMRequest):
                     "content": req.prompt
                 }
             ],
-            model="llama-3.1-8b-instant",
+            model="openai/gpt-oss-20b",
             temperature=0.7,
             max_tokens=300,
         )
