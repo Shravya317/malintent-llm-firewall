@@ -5,10 +5,10 @@ const navItems = [
   { label: 'Dashboard', path: '/' },
   { label: 'Threats', path: '/threats' },
   { label: 'Comparison Mode', path: '/comparison' },
-  { label: 'Review Queue', path: '/queue' },
+  { label: 'Deep Scan Sandbox', path: '/sandbox' },
+  { label: 'Review Queue', path: '/review-queue' },
   { label: 'Document Scanner', path: '/scanner' },
   { label: 'Action Logs', path: '/action-logs' },
-  { label: 'Output Guard', path: '/output-guard' },
   { label: 'Integration SDK', path: '/sdk' },
   { label: 'System Settings', path: '/settings' },
 ]

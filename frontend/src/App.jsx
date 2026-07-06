@@ -4,10 +4,10 @@ import ThreatAnalysis from './components/ThreatAnalysis'
 import Configuration from './components/Configuration'
 import ComparisonMode from './components/ComparisonMode'
 import FalsePositiveQueue from './components/FalsePositiveQueue'
+import DeepScanSandbox from './components/DeepScanSandbox'
 import RagScanner from './components/RagScanner'
 import SelAuditLog from './components/SelAuditLog'
 import SdkIntegration from './components/SdkIntegration'
-import OutputGuard from './components/OutputGuard'
 
 export default function App() {
   return (
@@ -15,10 +15,10 @@ export default function App() {
       <Route path="/" element={<Dashboard />} />
       <Route path="/threats" element={<ThreatAnalysis />} />
       <Route path="/comparison" element={<ComparisonMode />} />
-      <Route path="/queue" element={<FalsePositiveQueue />} />
+      <Route path="/sandbox" element={<DeepScanSandbox />} />
+      <Route path="/review-queue" element={<FalsePositiveQueue />} />
       <Route path="/scanner" element={<RagScanner />} />
       <Route path="/action-logs" element={<SelAuditLog />} />
-      <Route path="/output-guard" element={<OutputGuard />} />
       <Route path="/sdk" element={<SdkIntegration />} />
       <Route path="/settings" element={<Configuration />} />
       <Route path="/*" element={<Dashboard />} />
