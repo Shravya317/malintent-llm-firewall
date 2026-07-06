@@ -1396,6 +1396,7 @@ docker run -p 8000:8000 \
   -e FERNET_KEY=$FERNET_KEY \
   -e PG_CRYPTO_KEY=$PG_CRYPTO_KEY \
   -e HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
+  -e GEMINI_API_KEY=$GEMINI_API_KEY \
   malintent-backend
 ```
 
@@ -1429,6 +1430,7 @@ gcloud run deploy malintent-backend \
   --set-env-vars FERNET_KEY=$FERNET_KEY \
   --set-env-vars PG_CRYPTO_KEY=$PG_CRYPTO_KEY \
   --set-env-vars HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
+  --set-env-vars GEMINI_API_KEY=$GEMINI_API_KEY \
   --set-env-vars SUPABASE_DIRECT_URL=$SUPABASE_DIRECT_URL \
   --set-env-vars SUPABASE_TRANSACTION_POOLER_URL=$SUPABASE_TRANSACTION_POOLER_URL
 ```
@@ -1749,6 +1751,22 @@ Document Scanner.
 
 ---
 
+### /api/v1/llm/raw
+
+Raw LLM proxy for Comparison Mode.
+
+Proxies a prompt directly to Google Gemini without any firewall filtering. Used by the frontend Comparison Mode to demonstrate the difference between a protected and unprotected LLM path.
+
+No PII scrubbing, no risk scoring, no permission checks — the response is returned verbatim.
+
+Request body: `{ "prompt": "..." }`
+
+Response: `{ "response": "..." }`
+
+Requires: `GEMINI_API_KEY` environment variable.
+
+---
+
 ## GET
 
 ### /api/v1/logs
@@ -1839,6 +1857,24 @@ Retrieve later using:
 
 ```text
 GET /api/v1/config/system_context
+```
+
+---
+
+## Raw LLM Proxy (Comparison Mode)
+
+POST /api/v1/llm/raw
+
+```json
+{
+  "prompt": "Can you teach me photosynthesis?"
+}
+```
+
+Expected Result:
+
+```text
+200 OK with a detailed response from Gemini about photosynthesis.
 ```
 
 ---
