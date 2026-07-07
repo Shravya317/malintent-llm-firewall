@@ -48,8 +48,8 @@ function maskSensitiveData(text) {
   let masked = text.replace(/\b(?:\d[ -]*?){13,16}\b/g, '<REDACTED CREDIT CARD>');
   // Mask SSNs
   masked = masked.replace(/\b\d{3}[-.]?\d{2}[-.]?\d{4}\b/g, '<REDACTED SSN>');
-  // Mask generic phone numbers (simplified)
-  masked = masked.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '<REDACTED PHONE>');
+  // Mask international and domestic phone numbers
+  masked = masked.replace(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '<REDACTED PHONE>');
   // Mask emails
   masked = masked.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '<REDACTED EMAIL>');
   return masked;
