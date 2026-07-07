@@ -8,25 +8,25 @@
 
 <br/>
 
-<a href="https://malintent-llm-firewall.vercel.app/">
-  <img src="https://img.shields.io/badge/◈ LIVE DEMO-Launch Dashboard-00d4aa?style=for-the-badge&labelColor=0a0f1e" />
-</a>
-&nbsp;
-<a href="https://github.com/tusharr-mishra/malintent-llm-firewall">
-  <img src="https://img.shields.io/badge/◈ SOURCE-GitHub Repo-3b82f6?style=for-the-badge&labelColor=0a0f1e" />
-</a>
+<img src="https://img.shields.io/badge/React-19.x-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+&nbsp;&nbsp;
+<img src="https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+&nbsp;&nbsp;
+<img src="https://img.shields.io/badge/React_Router-7.x-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white" alt="React Router" />
+&nbsp;&nbsp;
+<img src="https://img.shields.io/badge/Axios-1.18-5A29E4?style=for-the-badge&logo=axios&logoColor=white" alt="Axios" />
 
 <br/><br/>
 
-[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Recharts](https://img.shields.io/badge/Recharts-2.15-22B5BF?style=flat-square)](#)
-[![Lucide](https://img.shields.io/badge/Lucide-1.14-F472B6?style=flat-square)](#)
-[![CSS](https://img.shields.io/badge/Design-Glassmorphism-8b5cf6?style=flat-square&labelColor=0a0f1e)](#)
-[![Theme](https://img.shields.io/badge/Theme-Dark%20%2F%20Light-f59e0b?style=flat-square&labelColor=0a0f1e)](#)
-[![Responsive](https://img.shields.io/badge/Responsive-All%20Devices-10b981?style=flat-square&labelColor=0a0f1e)](#)
+<img src="https://img.shields.io/badge/Recharts-2.15-22B5BF?style=for-the-badge&logo=d3dotjs&logoColor=white" alt="Recharts" />
+&nbsp;&nbsp;
+<img src="https://img.shields.io/badge/Lucide-1.14-F472B6?style=for-the-badge&logo=lucide&logoColor=white" alt="Lucide" />
+&nbsp;&nbsp;
+<img src="https://img.shields.io/badge/CSS3-Design_System-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" />
+&nbsp;&nbsp;
+<img src="https://img.shields.io/badge/Google_Fonts-Typography-4285F4?style=for-the-badge&logo=googlefonts&logoColor=white" alt="Google Fonts" />
 
-<br/>
+<br/><br/>
 
 </div>
 
