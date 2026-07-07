@@ -1,3 +1,11 @@
+/**
+ * TopAttackers.jsx — Source IP Tracking.
+ *
+ * Lists the most frequent sources of malicious prompts, aiding in IP-based
+ * blocking decisions and identifying persistent bad actors.
+ *
+ * @component
+ */
 import React from 'react'
 
 const TOP_IPS = [

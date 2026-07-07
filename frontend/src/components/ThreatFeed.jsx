@@ -1,3 +1,11 @@
+/**
+ * ThreatFeed.jsx — Real-time Attack Log.
+ *
+ * Continuously polls and displays the latest blocked or flagged requests in a
+ * scrolling feed, allowing security analysts to monitor live activity.
+ *
+ * @component
+ */
 import { useState, useEffect } from 'react'
 import { getLogs } from '../api/client'
 

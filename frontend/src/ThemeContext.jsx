@@ -1,3 +1,11 @@
+/**
+ * ThemeContext.jsx — Global State Management for Theming.
+ *
+ * Provides a React context that manages the active theme (dark/light) across the entire application,
+ * persisting user preference and enabling seamless visual toggling.
+ *
+ * @context
+ */
 import { createContext, useContext, useState, useEffect } from 'react'
 
 const ThemeContext = createContext()

@@ -1,3 +1,11 @@
+/**
+ * ThreatProfile.jsx — Radar Chart Analysis.
+ *
+ * Maps multi-dimensional threat characteristics (complexity, urgency, evasion attempts)
+ * onto a radar chart for rapid visual profiling of attacker sophistication.
+ *
+ * @component
+ */
 import React from 'react'
 import {
   Radar,

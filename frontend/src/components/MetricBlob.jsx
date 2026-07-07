@@ -1,3 +1,11 @@
+/**
+ * MetricBlob.jsx — Animated Status Indicator.
+ *
+ * A highly visual, animated blob component that pulsates to reflect the real-time
+ * risk status of the system (e.g., green for secure, red for active threat).
+ *
+ * @component
+ */
 import { useEffect, useState, useMemo } from 'react'
 
 const accentMap = {

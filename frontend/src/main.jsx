@@ -1,3 +1,9 @@
+/**
+ * main.jsx — Application Entry Point.
+ *
+ * Bootstraps the React application, mounts it to the DOM, and wraps it with essential
+ * global providers like ThemeProvider and ErrorBoundary.
+ */
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import '@fontsource/syncopate/400.css'

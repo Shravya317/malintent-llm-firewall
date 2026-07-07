@@ -1,3 +1,11 @@
+/**
+ * LayerAnalytics.jsx — Defense Layer Utilization.
+ *
+ * Visualizes how often each security layer (Pattern Engine, ML Classifier, Semantic Similarity)
+ * is triggered by incoming threats, helping admins understand which heuristics are most active.
+ *
+ * @component
+ */
 import React from 'react'
 
 export default function LayerAnalytics() {

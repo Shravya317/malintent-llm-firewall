@@ -1,3 +1,11 @@
+/**
+ * ThreatHeatmap.jsx — Temporal Threat Density.
+ *
+ * Renders a calendar heatmap showing the density and frequency of prompt injection
+ * attempts over time, helping identify cyclical patterns or coordinated attacks.
+ *
+ * @component
+ */
 import React from 'react'
 
 const INTENSITY_COLORS = [

@@ -1,3 +1,11 @@
+/**
+ * SeverityIndex.jsx — Threat Severity Breakdown.
+ *
+ * Calculates and displays a breakdown of threats by severity level (Critical, High, Medium, Low)
+ * to provide a quick assessment of the current risk landscape.
+ *
+ * @component
+ */
 export default function SeverityIndex({ stats, loading, error }) {
   // Calculate mock or derived severities for dashboard impact
   const total = stats?.total_blocked || 0;

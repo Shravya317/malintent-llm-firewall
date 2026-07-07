@@ -1,3 +1,11 @@
+/**
+ * ThreatArcs.jsx — Attack Vector Distribution.
+ *
+ * A specialized visualization component that displays the distribution of different
+ * prompt injection vectors (Direct, Persona Override, Data Exfiltration, etc.)
+ *
+ * @component
+ */
 import { useState } from 'react'
 
 const PATTERN_PREFIXES = {

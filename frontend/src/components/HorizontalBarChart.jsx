@@ -1,3 +1,11 @@
+/**
+ * HorizontalBarChart.jsx — Top Targeted Applications.
+ *
+ * Visualizes the specific internal systems or endpoints (e.g., HR System, CRM)
+ * that are receiving the most attack traffic in a horizontal bar format.
+ *
+ * @component
+ */
 import { useState } from 'react'
 import React from 'react'
 

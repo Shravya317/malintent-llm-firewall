@@ -1,3 +1,11 @@
+/**
+ * AreaChart.jsx — Time-series Visualization.
+ *
+ * Renders an area chart to visualize the volume of incoming requests and
+ * the proportion of those that are malicious over a rolling time window.
+ *
+ * @component
+ */
 import React from 'react'
 import {
   AreaChart,

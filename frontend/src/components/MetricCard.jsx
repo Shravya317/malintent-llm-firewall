@@ -1,3 +1,11 @@
+/**
+ * MetricCard.jsx — Key Performance Indicator Display.
+ *
+ * A reusable UI component for displaying high-level metrics with trend indicators
+ * (e.g., total requests blocked, up 12% since last week).
+ *
+ * @component
+ */
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 const trendConfig = {

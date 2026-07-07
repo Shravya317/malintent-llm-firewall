@@ -1,3 +1,11 @@
+/**
+ * TargetedModels.jsx — LLM Endpoint Vulnerability.
+ *
+ * Displays which specific AI models (e.g., GPT-4o, Claude 3.5) are experiencing
+ * the highest volume of attack traffic.
+ *
+ * @component
+ */
 /* Clean targeted models list — no box, no diagonal offset */
 export default function TargetedModels() {
   const models = [
