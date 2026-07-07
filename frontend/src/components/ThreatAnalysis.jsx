@@ -504,6 +504,7 @@ export default function ThreatAnalysis() {
       try {
         const rawLogs = await getLogs()
         if (isMounted) {
+          // Normalize raw backend logs into enriched frontend data models for the visualization engine
           const mapped = rawLogs.map(log => ({
             ...log,
             id: `THR-${String(log.id).padStart(4, '0')}`,
@@ -559,6 +560,7 @@ export default function ThreatAnalysis() {
     setDecisions({ ALLOW: true, FLAG: true, BLOCK: true }); setCategory('All')
   }
 
+  // Multi-dimensional filter chain: iteratively removes logs that don't match active search criteria
   const filteredThreats = threats.filter(item => {
     if (fromDate && item.timestamp.substring(0, 10) < fromDate) return false
     if (toDate && item.timestamp.substring(0, 10) > toDate) return false
@@ -569,6 +571,7 @@ export default function ThreatAnalysis() {
     return true
   })
 
+  // Advanced highlighting engine: slices the prompt text into an array of marked/unmarked segments for UI rendering
   const renderHighlightedPrompt = (promptText, segments, categoryStr) => {
     if (!segments || segments.length === 0) return <span>{promptText}</span>
     let parts = [{ text: promptText, isMatch: false }]

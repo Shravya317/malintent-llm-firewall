@@ -39,6 +39,7 @@ export default function Dashboard() {
     let isMounted = true
     const fetchStats = async () => {
       try {
+        // Fetch fresh stats from the FastAPI backend to keep the dashboard live
         const data = await getStats()
         if (isMounted) {
           setStats(data)
@@ -53,8 +54,10 @@ export default function Dashboard() {
       }
     }
     fetchStats()
+    // Poll the backend every 3 seconds for real-time threat feed updates
     const intervalId = setInterval(fetchStats, 3000)
     return () => {
+      // Cleanup: prevent state updates on unmounted components
       isMounted = false
       clearInterval(intervalId)
     }

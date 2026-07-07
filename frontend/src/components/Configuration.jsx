@@ -161,7 +161,8 @@ export default function Configuration() {
     }
   }
 
-  // Save Handlers
+  // Centralized Configuration Handlers: 
+  // Pushes dynamic configuration state to the backend where it is stored in a Fernet-encrypted SQLite database.
   const handleSaveContextSettings = async () => {
     setSaveStatus({ loading: true, message: 'Saving context settings...', error: false })
     try {
@@ -175,6 +176,7 @@ export default function Configuration() {
     }
   }
 
+  // Adds a custom rule to the rule engine (e.g., regex filters or IP blocks)
   const handleAddRule = async () => {
     if (!newRuleText.trim()) return
     const newRule = { id: 'rule-' + Date.now(), text: newRuleText.trim(), type: newRuleType }
@@ -204,6 +206,7 @@ export default function Configuration() {
     }
   }
 
+  // Toggles the frontend and backend privacy modes (Full Logging vs Tokenised/Redacted Logging)
   const handleTogglePrivacyMode = async (mode) => {
     setPrivacyMode(mode)
     setSaveStatus({ loading: true, message: 'Updating privacy mode...', error: false })
