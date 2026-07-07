@@ -21,10 +21,12 @@
 
 <div align="center">
 
-<!-- PLACE YOUR DASHBOARD SCREENSHOT HERE -->
-<img src="assets/screenshots/dashboard.png" alt="MalIntent Dashboard Overview" width="88%" />
+<!-- PLACE YOUR DASHBOARD SCREENSHOTS HERE -->
+<img src="assets/screenshots/dashboard-dark.png" alt="MalIntent Dashboard Dark Mode" width="48%" />
+&nbsp;
+<img src="assets/screenshots/dashboard-light.png" alt="MalIntent Dashboard Light Mode" width="48%" />
 
-<sub> MalIntent Operations Center — Main Dashboard View</sub>
+<sub> MalIntent Operations Center — Main Dashboard View (Dark & Light Mode)</sub>
 
 </div>
 
@@ -38,9 +40,11 @@
 A full visual breakdown of all core modules — threat monitoring, 5-layer API interception, document scanning, incident response queues, and the responsive dark/light UI system.
 </p>
 
-<!-- PLACE YOUR THREAT ANALYSIS SCREENSHOT HERE -->
+<!-- PLACE YOUR THREAT ANALYSIS SCREENSHOTS HERE -->
 <p>
-<img src="assets/screenshots/threat-analysis.png" alt="MalIntent Threat Analysis Preview" width="850">
+<img src="assets/screenshots/threat-analysis-dark.png" alt="MalIntent Threat Analysis Dark Mode" width="48%">
+&nbsp;
+<img src="assets/screenshots/threat-analysis-light.png" alt="MalIntent Threat Analysis Light Mode" width="48%">
 </p>
 
 </div>
