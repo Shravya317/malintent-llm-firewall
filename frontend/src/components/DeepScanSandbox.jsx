@@ -1,3 +1,18 @@
+/**
+ * DeepScanSandbox.jsx — Advanced Security Analysis Environment.
+ *
+ * A specialized diagnostic view for analyzing complex, multi-stage prompt attacks.
+ * Unlike the standard ThreatAnalysis page, the Sandbox provides deeper insights
+ * into the internal logic of the firewall's decision-making process.
+ *
+ * Features:
+ *   - Detailed JSON payload breakdown of the firewall's response.
+ *   - Visualizes specific bypass techniques attempted by the prompt (e.g. Obfuscation).
+ *   - Provides a playground for red-teamers to test complex jailbreaks and view
+ *     how the semantic ML layer interprets the intent.
+ *
+ * @component
+ */
 import React, { useState } from 'react'
 import { useTheme } from '../ThemeContext'
 import { ShieldAlert, Fingerprint, Lock, ShieldCheck, Activity, Search, Database, Code, Maximize2, AlertTriangle, EyeOff } from 'lucide-react'

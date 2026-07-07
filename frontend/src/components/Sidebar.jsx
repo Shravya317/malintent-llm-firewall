@@ -1,3 +1,17 @@
+/**
+ * Sidebar.jsx — Navigation and System Routing.
+ *
+ * Renders the primary navigation sidebar for the MalIntent dashboard.
+ * 
+ * Features:
+ *   - Defines the route mappings (Dashboard, Threats, Sandbox, etc.)
+ *   - Dynamically highlights the active route using react-router-dom.
+ *   - Receives state from Layout.jsx to manage its expanded/collapsed width.
+ *
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.collapsed - Determines if the sidebar text is hidden.
+ */
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {

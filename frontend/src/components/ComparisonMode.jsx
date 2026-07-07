@@ -1,3 +1,18 @@
+/**
+ * ComparisonMode.jsx — Side-by-side A/B Testing Interface.
+ *
+ * This component provides an A/B testing environment allowing security researchers
+ * to evaluate prompts concurrently against two different configurations:
+ *   1. Protected (routed through the MalIntent Firewall via /api/v1/scan/input)
+ *   2. Unprotected (routed directly to the raw LLM via /api/v1/simulate/raw)
+ *
+ * Features:
+ *   - Concurrent API requests to compare latency overhead.
+ *   - Visual rendering of both raw and sanitized outputs.
+ *   - Demonstrates the tangible value of the firewall in a highly visual manner.
+ *
+ * @component
+ */
 import React, { useState } from 'react'
 import { useTheme } from '../ThemeContext'
 import { ShieldCheck, ShieldAlert, AlertTriangle, Info, Play, RefreshCw, Layers } from 'lucide-react'

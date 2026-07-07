@@ -1,3 +1,17 @@
+/**
+ * Configuration.jsx — System Settings & Security Thresholds.
+ *
+ * This component acts as the control panel for the MalIntent firewall.
+ * It allows administrators to dynamically adjust the aggressiveness of the
+ * detection layers without restarting the backend.
+ *
+ * Key Features:
+ *   - Adjust risk threshold sliders (e.g. at what score do we block?).
+ *   - Toggle specific ML models or regex engines on/off.
+ *   - Manage API keys, endpoints, and role-based access policies (RBAC).
+ *
+ * @component
+ */
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
 import { Settings, Save, Key, Shield, Zap, RefreshCw, Eye, EyeOff, Database, Users, Link } from 'lucide-react'

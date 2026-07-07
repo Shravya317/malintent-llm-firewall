@@ -1,3 +1,21 @@
+/**
+ * Layout.jsx — Master Responsive Layout Wrapper.
+ *
+ * This component acts as the foundational shell for all pages in the MalIntent frontend.
+ * It manages the global layout state including:
+ *   - Sidebar expansion/collapse state (desktop)
+ *   - Mobile menu overlay visibility (mobile)
+ *   - The global theme toggle button for the mobile header
+ *
+ * Architecture Notes:
+ *   - The Sidebar operates as a flexible sibling element, dynamically sizing itself.
+ *   - On mobile viewports (<= 768px), the layout automatically shifts to a sticky header
+ *     with a slide-in off-canvas menu, managed by CSS media queries in index.css.
+ *
+ * @component
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - The specific page content rendered inside the main content area.
+ */
 import React, { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'

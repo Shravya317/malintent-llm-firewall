@@ -1,3 +1,18 @@
+/**
+ * App.jsx — Main Application Router for the MalIntent Frontend.
+ *
+ * This file serves as the root router component. It wraps the entire application
+ * in the global `Layout` component and defines the routing structure for all
+ * dashboard modules using `react-router-dom`.
+ *
+ * Architecture Notes:
+ *   - The `ThemeProvider` wraps this at the `main.jsx` level, ensuring all components
+ *     (and the Layout itself) have access to the global dark/light theme state.
+ *   - All primary pages (Dashboard, Sandbox, Review Queue, etc.) are lazy-loaded
+ *     components directly tied to their respective routes here.
+ *
+ * @component
+ */
 import { Routes, Route } from 'react-router-dom'
 import Dashboard from './components/Dashboard'
 import ThreatAnalysis from './components/ThreatAnalysis'

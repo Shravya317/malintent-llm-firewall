@@ -1,3 +1,18 @@
+/**
+ * SelAuditLog.jsx — System Execution Logs & Audit Trail.
+ *
+ * A raw, detailed view of all firewall intercept events. Designed for
+ * security engineers and compliance auditors who need to review the exact
+ * payloads, timestamps, and layer decisions for every request that passed
+ * through or was blocked by the system.
+ *
+ * Features:
+ *   - Search and filter capabilities.
+ *   - Secure display of intercepted prompts.
+ *   - Integration with enterprise SIEM pipelines (conceptually).
+ *
+ * @component
+ */
 import React, { useState, useEffect } from 'react'
 import { ShieldCheck, Database, Search, ArrowUpRight, Copy, TerminalSquare, AlertOctagon, Info } from 'lucide-react'
 import { useTheme } from '../ThemeContext'

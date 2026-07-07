@@ -1,196 +1,154 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React" />
-  <img src="https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="License" />
-  <img src="https://img.shields.io/badge/Phase-1%20%7C%20Frontend-ff2d55?style=for-the-badge" alt="Phase 1" />
-</p>
+<div align="center">
 
-<h1 align="center">🛡️ MalIntent</h1>
+# <img src="https://img.icons8.com/fluency/48/shield.png" width="32" height="32" alt="shield"/> MalIntent Security Dashboard
 
-<p align="center">
-  <strong>Enterprise-Grade LLM Security Firewall</strong><br/>
-  <em>Real-time detection and mitigation of adversarial prompt injection attacks against Large Language Models.</em>
-</p>
+### *Real-time LLM Threat Monitoring & Prevention. Engineered for clarity.*
 
-<p align="center">
-  <a href="#abstract">Abstract</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#architecture--features">Architecture</a> •
-  <a href="#project-structure">Structure</a> •
-  <a href="#local-installation">Installation</a> •
-  <a href="#future-scope">Future Scope</a>
-</p>
+<p>A futuristic cybersecurity dashboard delivering real-time LLM threat monitoring, multi-layered injection detection,<br/>sandbox analytics, and operational insights — built for speed and visual impact.</p>
+
+<br/>
+
+[![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![CSS](https://img.shields.io/badge/Vanilla_CSS-UI-1572B6?style=for-the-badge&logo=css3&logoColor=white)](#)
+[![Lucide](https://img.shields.io/badge/Lucide-Icons-F472B6?style=for-the-badge&logo=lucide&logoColor=white)](#)
+
+<br/><br/>
+
+</div>
 
 ---
 
-## Abstract
+<div align="center">
 
-Large Language Models (LLMs) deployed in production environments face an expanding class of adversarial threats that bypass conventional input sanitization. **MalIntent** is an enterprise-grade security firewall purpose-built to detect, classify, and neutralize sophisticated prompt injection attacks in real time.
+<!-- PLACE YOUR DASHBOARD SCREENSHOT HERE -->
+<img src="assets/screenshots/dashboard.png" alt="MalIntent Dashboard Overview" width="88%" />
 
-Drawing from the taxonomy established by the [HackAPrompt](https://arxiv.org/abs/2311.16119) research competition and informed by recently disclosed vulnerabilities such as **EchoLeak (CVE-2025-32711)**, MalIntent defends against the following primary attack vectors:
+<sub> MalIntent Operations Center — Main Dashboard View</sub>
 
-| Attack Vector | Description |
-|---|---|
-| **Payload Splitting** | Fragmentation of malicious instructions across multiple turns or token boundaries to evade single-pass classifiers. |
-| **Persona Adoption** | Coercing the model into assuming an unrestricted identity (e.g., "DAN", "Developer Mode") to override system-level safety constraints. |
-| **Format Obfuscation** | Encoding adversarial payloads via Base64, Unicode escapes, homoglyphs, or multilingual transliteration to circumvent pattern-matching filters. |
-
-MalIntent operates as an inline inspection layer between the client and the LLM endpoint, adding sub-3ms latency overhead while maintaining a 99.7%+ uptime SLA.
-
-> **Current Status:** Phase 1 (Frontend Architecture) is complete. The tactical monitoring dashboard is fully operational with simulated threat telemetry.
+</div>
 
 ---
 
-## Tech Stack
+<div align="center">
 
-### Phase 1 — Frontend Architecture
+## 🎥 Security Overview
 
-| Technology | Version | Purpose |
+<p>
+A full visual breakdown of all core modules — threat monitoring, 5-layer API interception, document scanning, incident response queues, and the responsive dark/light UI system.
+</p>
+
+<!-- PLACE YOUR THREAT ANALYSIS SCREENSHOT HERE -->
+<p>
+<img src="assets/screenshots/threat-analysis.png" alt="MalIntent Threat Analysis Preview" width="850">
+</p>
+
+</div>
+
+---
+
+<div align="center">
+
+## About the Platform
+
+</div>
+
+**MalIntent Frontend** is a meticulously engineered security platform designed to simulate the operational command layer of a modern AI firewall system. 
+
+Built prioritizing **vanilla web engineering** (Custom CSS variables, dynamic DOM rendering, no heavy UI frameworks), it demonstrates mastery of real-time state management, glassmorphic design systems, and responsive interface logic.
+
+> *Think of it as a mission control interface for the AI era — where data clarity meets enterprise-grade precision.*
+
+The platform surfaces six intelligence modules in a unified dashboard: live threat operations, layered API analytics, AI-generated bypass predictions, operational KPI analytics, log review queues, and actionable integration insights.
+
+---
+
+<div align="center">
+
+## Feature Matrix
+
+</div>
+
+| Module | Description | Status |
 |---|---|---|
-| [React](https://react.dev) | 19.x | Component-based UI framework |
-| [Vite](https://vite.dev) | 8.x | Next-generation build tooling & HMR |
-| [Tailwind CSS](https://tailwindcss.com) | 4.x | Utility-first CSS with `@theme` design tokens |
-| [React Router DOM](https://reactrouter.com) | 7.x | Declarative client-side routing |
-| [Lucide React](https://lucide.dev) | 1.x | Consistent, tree-shakable SVG icon library |
+| 🛡 **Live Threat Dashboard** | Real-time security metrics, latency tracking, and block feeds | `Operational` |
+| 🔍 **Threat Analysis** | Interactive 5-layer interception visualizer with latency breakdowns | `Operational` |
+| ⚖️ **Comparison Mode** | A/B testing: Protected vs Raw LLM prompt execution | `Operational` |
+| 🧪 **Deep Scan Sandbox** | Diagnostic playground with full JSON payload rendering for Red-Teamers | `Operational` |
+| ✅ **False Positive Queue** | Human-in-the-loop review system to flag missed threats or false positives | `Operational` |
+| 📄 **Document Scanner** | Large-scale RAG (Retrieval-Augmented Generation) document parsing | `Operational` |
+| 📜 **Action Logs** | Immutable system execution logs and threat audit trails | `Operational` |
+| ⚙️ **Configuration** | Dynamic security thresholds, RBAC, and engine toggles | `Operational` |
+| 🎨 **Light / Dark Mode** | Persistent theme toggle with seamless CSS variable management | `Operational` |
+| 📱 **Responsive Design** | Fluid layouts optimized across mobile, tablet, and desktop viewports | `Operational` |
 
 ---
 
-## Architecture & Features
+<div align="center">
 
-MalIntent's frontend implements a **tactical dark-mode interface** optimized for Security Operations Center (SOC) workflows. The design system employs a gunmetal/slate-900 base palette with neon threat indicators (red `#ff2d55` / teal `#00d4aa`) and the Inter typeface for maximum readability during sustained monitoring.
+## Technology Stack
 
-### Component Overview
-
-#### `Sidebar.jsx` — Navigation Panel
-- Collapsible left-hand navigation with smooth width transitions
-- Active route highlighting with inset glow borders
-- Real-time **Firewall Active** status indicator with animated ping effect
-- Lucide icon integration for each navigation item
-- Engine version and model metadata in the footer
-
-#### `MetricCard.jsx` — KPI Display Card
-- Reusable, prop-driven stat card with configurable accent colors (`red`, `teal`, `amber`, `blue`)
-- **Glassmorphism effect** via `backdrop-filter: blur(12px)` with translucent gradient overlays
-- Trend indicators (↑ / ↓ / —) with contextual color coding
-- Hover-activated glow borders and scale micro-animations
-- Bottom accent bar with fade-in transition on interaction
-
-#### `ThreatFeed.jsx` — Real-Time Attack Monitor
-- Live-updating data table displaying intercepted injection attempts
-- Severity-based row styling: **CRITICAL** threats render with `text-shadow` glow in neon red
-- Filterable by severity level (`ALL` / `CRITICAL` / `HIGH` / `MEDIUM`)
-- Simulated real-time feed: new threat events auto-inject every 8 seconds
-- Monospace payload preview with truncation for rapid triage
-- Status badges: `BLOCKED` / `FLAGGED` / `MONITORED`
-
-#### `Dashboard.jsx` — Primary Layout Container
-- Flexbox-based layout: persistent sidebar + scrollable content area
-- Sticky header with backdrop-blur and system status indicator
-- **4-column metric grid**: Threats Blocked, Safe Queries, Active Models, Avg Latency
-- **3-column analytics panel**:
-  - Threat Distribution — horizontal progress bars by attack category
-  - Top Targeted Models — ranked list with attack counts
-  - Firewall Health — SVG circular gauge (99.7% uptime) with animated scan-line effect
-- Full-width ThreatFeed table below the analytics tier
-
-### Design System Highlights
-
-- **Custom `@theme` tokens** for Tailwind CSS v4 with semantic color variables (`threat-*`, `secure-*`, `warn-*`, `info-*`)
-- **Glassmorphism utilities** (`.glass`, `.glass-hover`) for card surfaces
-- **Glow classes** (`.glow-red`, `.glow-teal`, `.glow-amber`, `.glow-blue`) for accent borders
-- **Text glow** (`.text-glow-red`) for critical severity emphasis
-- **Staggered fade-in** animations with configurable delay per child element
-- **Scan-line effect** via CSS `@keyframes` for a tactical HUD aesthetic
-
----
-
-## Project Structure
-
-```
-malintent-frontend/
-├── index.html                  # Entry HTML with Inter font & SEO meta tags
-├── vite.config.js              # Vite + React + Tailwind CSS v4 plugin config
-├── package.json
-├── public/
-│   └── favicon.svg
-└── src/
-    ├── main.jsx                # React DOM root + BrowserRouter provider
-    ├── App.jsx                 # Route definitions (react-router-dom)
-    ├── index.css               # Design system: @theme tokens, utilities, animations
-    └── components/
-        ├── Dashboard.jsx       # Main layout: sidebar + metrics + analytics + feed
-        ├── Sidebar.jsx         # Collapsible navigation panel
-        ├── MetricCard.jsx      # Reusable glassmorphic KPI card
-        └── ThreatFeed.jsx      # Live threat data table with severity filtering
-```
-
----
-
-## Local Installation
-
-### Prerequisites
-
-- **Node.js** ≥ 18.x
-- **npm** ≥ 9.x
-
-### Setup
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/<your-username>/malintent.git
-cd malintent/malintent-frontend
-
-# 2. Install dependencies
-npm install
-
-# 3. Start the development server
-npm run dev
-```
-
-The application will be available at **`http://localhost:5173/`**.
-
-### Build for Production
-
-```bash
-npm run build
-npm run preview
-```
-
----
-
-## Future Scope
-
-### Phase 2 — Backend Architecture & ML Pipeline
-
-The upcoming backend phase will implement the core detection engine as an inline proxy service. The planned architecture is as follows:
-
-| Component | Technology | Description |
+| Layer | Technology | Purpose |
 |---|---|---|
-| **API Gateway** | Python / FastAPI | High-performance async HTTP server for request interception |
-| **ML Classifier** | DistilBERT (HuggingFace) | Fine-tuned transformer model for prompt injection classification |
-| **Feature Pipeline** | scikit-learn / spaCy | Token-level feature extraction, entropy analysis, and encoding detection |
-| **Threat Database** | PostgreSQL + Redis | Persistent threat logging with in-memory caching for rule lookups |
-| **WebSocket Layer** | FastAPI WebSockets | Real-time telemetry streaming to the frontend ThreatFeed |
+| **Core** | ![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black) | Component architecture & state management |
+| **Build Tool** | ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) | Lightning-fast HMR and optimized production bundles |
+| **Routing** | ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=react-router&logoColor=white) | Client-side navigation & deep linking |
+| **Styling** | ![CSS3](https://img.shields.io/badge/Vanilla_CSS-1572B6?style=flat-square&logo=css3&logoColor=white) | Design tokens, glassmorphism, and responsive grids |
+| **Icons** | ![Lucide](https://img.shields.io/badge/Lucide_React-F472B6?style=flat-square) | Consistent, clean SVG iconography |
+| **Charting** | ![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=flat-square) | Animated SVG charts (Area, Radar, Radial) |
+| **Fonts** | ![Google Fonts](https://img.shields.io/badge/Google_Fonts-4285F4?style=flat-square&logo=google&logoColor=white) | Space Grotesk, Syne, and JetBrains Mono |
 
-#### Planned Detection Capabilities
-
-- **Multi-turn context analysis** — Detect payload splitting across conversation history
-- **Persona drift scoring** — Measure model identity deviation from the system prompt baseline
-- **Encoding normalization** — Decode Base64, Unicode escapes, and homoglyph substitutions before classification
-- **Confidence-gated blocking** — Configurable thresholds for `BLOCK` / `FLAG` / `MONITOR` actions
-- **Explainability layer** — SHAP-based attribution maps for each classification decision
+</div>
 
 ---
 
-## References
+## 📁 Architecture & File Structure
 
-- Schulhoff, S., et al. (2023). *"Ignore This Title and HackAPrompt: Exposing Systemic Weaknesses of LLMs Through a Global Scale Prompt Hacking Competition."* [arXiv:2311.16119](https://arxiv.org/abs/2311.16119)
-- CVE-2025-32711 — EchoLeak: System prompt exfiltration via indirect prompt injection in multi-modal LLM pipelines.
+The `/src` folder is highly modularized. All major files include conversational JSDoc blocks explaining their purpose.
+
+```text
+frontend/
+├── index.html           # Main entry point, loads fonts and root script
+├── src/
+│   ├── main.jsx         # React DOM mount point & ThemeProvider wrapper
+│   ├── App.jsx          # Route definitions for all modules
+│   ├── index.css        # Global design tokens, responsive queries, reset
+│   ├── ThemeContext.jsx # Global dark/light mode state management
+│   ├── api/
+│   │   └── client.js    # Centralized Axios logic for communicating with the backend
+│   └── components/      # The UI Layer
+│       ├── Layout.jsx           # Global wrapper (header, sidebars)
+│       ├── Sidebar.jsx          # Main navigation
+│       ├── Dashboard.jsx        # The root analytics page
+│       ├── ThreatAnalysis.jsx   # Live scanning visualizer
+│       └── ...                  # Other core modules
+└── assets/
+    └── screenshots/     # Images utilized in this README
+```
 
 ---
 
-<p align="center">
-  <sub>Built with precision by the MalIntent Security Team.</sub><br/>
-  <sub>© 2025 MalIntent. All rights reserved.</sub>
-</p>
+<div align="center">
+
+## 🚀 Quick Start (Local Development)
+
+</div>
+
+1. **Install Dependencies**
+   Ensure you have Node.js (v18+) installed.
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. **Start the Development Server**
+   ```bash
+   npm run dev
+   ```
+
+3. **Production Build**
+   ```bash
+   npm run build
+   ```
+
+*Make sure your backend API is running concurrently on port 8000 for live data to populate the dashboard!*

@@ -1,3 +1,12 @@
+/**
+ * SdkIntegration.jsx — Developer Implementation Guide.
+ *
+ * A static documentation view that provides developers with copy-pasteable
+ * code snippets for integrating the MalIntent firewall into their own Python,
+ * Node.js, or cURL-based environments.
+ *
+ * @component
+ */
 import { useTheme } from '../ThemeContext'
 
 export default function SdkIntegration() {

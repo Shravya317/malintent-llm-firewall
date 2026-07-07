@@ -1,3 +1,20 @@
+/**
+ * Dashboard.jsx — Real-time Analytics & System Overview.
+ *
+ * This is the primary landing page of the MalIntent application.
+ * It provides a high-level, real-time overview of the firewall's operational status.
+ *
+ * Key Integrations:
+ *   - Fetches global statistics from the backend `/api/v1/stats` endpoint.
+ *   - Renders multiple sub-components (MetricBlob, ThreatProfile, SeverityIndex, ThreatFeed)
+ *     which use the passed-down data to populate their charts and UI elements.
+ *
+ * Layout:
+ *   - Uses the responsive `.dashboard-grid` class to dynamically wrap from
+ *     a multi-column layout on desktop to a single column on mobile devices.
+ *
+ * @component
+ */
 import { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
 import { getStats } from '../api/client'

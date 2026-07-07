@@ -1,3 +1,18 @@
+/**
+ * FalsePositiveQueue.jsx — Incident Response & Log Review.
+ *
+ * This component acts as the human-in-the-loop review queue. It pulls the latest
+ * scanned prompts from the database via /api/v1/logs and presents them to analysts
+ * to verify if the firewall's automated decision was correct.
+ *
+ * Key Interactions:
+ *   - Analysts can mark a log as a "False Positive" or "True Threat".
+ *   - Calls `/api/v1/logs/{id}/decision` to update the backend database.
+ *   - This feedback loop is essential for fine-tuning the ML layer and reducing
+ *     business disruption caused by over-aggressive regex rules.
+ *
+ * @component
+ */
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
 import { getLogs, updateLogDecision } from '../api/client'

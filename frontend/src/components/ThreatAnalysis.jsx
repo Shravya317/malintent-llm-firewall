@@ -1,3 +1,23 @@
+/**
+ * ThreatAnalysis.jsx — Interactive Live Scanning & Threat Visualization.
+ *
+ * This module allows users to manually test inputs against the MalIntent firewall.
+ * It visualizes the multi-layered security engine, providing real-time feedback
+ * on exactly which layer caught a threat and what confidence score was assigned.
+ *
+ * Key Interactions:
+ *   - Calls `/api/v1/scan/input` with user-provided text.
+ *   - Parses the JSON response to extract `risk_score`, `flags`, and `layer_results`.
+ *   - Renders the 5-layer visualizer (Pattern Engine, ML Classifier, Semantic Similarity,
+ *     Consistency Validator, Leakage Detection).
+ *
+ * Features:
+ *   - Debounced input scanning (auto-scans as the user types).
+ *   - Animated visual feedback indicating "Scanning..." vs "Clean" vs "Threat Detected".
+ *   - Detailed JSON payload viewer for developer transparency.
+ *
+ * @component
+ */
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
 import { getLogs } from '../api/client'

@@ -1,3 +1,15 @@
+/**
+ * RagScanner.jsx — RAG Document Security Scanner.
+ *
+ * This component handles the scanning of large documents or datasets that are
+ * intended to be ingested by a Retrieval-Augmented Generation (RAG) pipeline.
+ *
+ * It prevents "Indirect Prompt Injection", where a malicious actor embeds
+ * instructions inside a seemingly benign document (like a PDF or CSV) which
+ * then hijacks the LLM during the retrieval phase.
+ *
+ * @component
+ */
 import React, { useState, useRef } from 'react'
 import { FileText, UploadCloud, FileWarning, ShieldCheck, Activity, Eye, AlertTriangle } from 'lucide-react'
 import { scanDocument } from '../api/client'
