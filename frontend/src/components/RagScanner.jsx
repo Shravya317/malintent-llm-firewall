@@ -63,6 +63,9 @@ export default function RagScanner() {
             score: response.risk_score || 85,
             decision: response.decision || 'BLOCK'
           })
+        } else if (response.status === 'stub') {
+          // Trigger the fallback UI mock logic since backend /scan/document is not implemented yet
+          throw new Error('Backend returned stub');
         } else {
           setResult({
             status: 'clean',
