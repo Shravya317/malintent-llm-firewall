@@ -11,6 +11,7 @@
  * @component
  */
 import React, { useState, useRef } from 'react'
+import { useTheme } from '../ThemeContext'
 import { FileText, UploadCloud, FileWarning, ShieldCheck, Activity, Eye, AlertTriangle } from 'lucide-react'
 import { scanDocument } from '../api/client'
 

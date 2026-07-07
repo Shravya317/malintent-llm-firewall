@@ -7,7 +7,7 @@
  * @component
  */
 import { useState, useEffect } from 'react'
-import { getLogs } from '../api/client'
+import { getLogs } from '../../api/client'
 
 const severityColor = {
   critical: 'var(--accent-threat)',

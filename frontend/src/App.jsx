@@ -14,17 +14,17 @@
  * @component
  */
 import { Routes, Route } from 'react-router-dom'
-import Dashboard from './components/Dashboard'
-import ThreatAnalysis from './components/ThreatAnalysis'
-import Configuration from './components/Configuration'
-import ComparisonMode from './components/ComparisonMode'
-import FalsePositiveQueue from './components/FalsePositiveQueue'
-import DeepScanSandbox from './components/DeepScanSandbox'
-import RagScanner from './components/RagScanner'
-import SelAuditLog from './components/SelAuditLog'
-import SdkIntegration from './components/SdkIntegration'
+import Dashboard from './views/Dashboard'
+import ThreatAnalysis from './views/ThreatAnalysis'
+import Configuration from './views/Configuration'
+import ComparisonMode from './views/ComparisonMode'
+import FalsePositiveQueue from './views/FalsePositiveQueue'
+import DeepScanSandbox from './views/DeepScanSandbox'
+import RagScanner from './views/RagScanner'
+import SelAuditLog from './views/SelAuditLog'
+import SdkIntegration from './views/SdkIntegration'
 
-import Layout from './components/Layout'
+import Layout from './components/layout/Layout'
 
 export default function App() {
   return (
