@@ -14,8 +14,8 @@ Pipeline for /api/v1/scan/input (order is intentional and security-critical):
   3. PII scrubbing          — scrub_safe() replaces PII in the prompt with tokens.
   4. SHA-256 hash            — computed from the ORIGINAL prompt (before scrubbing).
                               Used to identify duplicate prompts in forensic review.
-  5. ThreatLog write        — stores hash + metadata.  Stores scrubbed_text only if
-                              privacy_mode == "full".  Raw text is NEVER written.
+  5. ThreatLog write        — stores hash + metadata.  Always stores PII-scrubbed
+                              text for the forensic dashboard.  Raw text is NEVER written.
   6. Return ScanInputResponse to caller.
 
 Order-of-operations note (from the project bible):
@@ -486,10 +486,10 @@ async def scan_input(
     payload_hash = hashlib.sha256(body.prompt.encode("utf-8")).hexdigest()
 
     # ── Step 5: Write to ThreatLog ────────────────────────────────────────────
-    # Determine what to store in scrubbed_text based on privacy_mode.
-    # In "tokenised" mode (default), scrubbed_text is NULL — only the hash is kept.
-    # In "full" mode, the PII-scrubbed text is stored for forensic review.
-    store_scrubbed = scrubbed  # Always store the prompt text for the forensic dashboard
+    # Always store the PII-scrubbed text so the forensic dashboard can render
+    # highlighted prompt analysis.  The text has already passed through
+    # scrub_safe() — no raw PII is persisted, only redacted placeholders.
+    store_scrubbed = scrubbed
 
     # layer_c_top_matches is a list of dicts: [{phrase, category, similarity}]
     # (RiskResult guarantees this shape — never objects with attributes.)

@@ -24,6 +24,7 @@
 #   FERNET_KEY          — Week 4 app-layer config encryption key
 #   PG_CRYPTO_KEY       — pgcrypto field-level encryption key (Week 7)
 #   LLM_API_KEY         — your LLM provider API key (Groq / OpenAI)
+#   GROQ_API_KEY        — Groq API key for the raw LLM proxy (Comparison Mode)
 #   CORS_ALLOWED_ORIGINS — comma-separated list of allowed frontend origins
 # =============================================================================
 
@@ -48,6 +49,7 @@ services:
       FERNET_KEY: ${FERNET_KEY}
       PG_CRYPTO_KEY: ${PG_CRYPTO_KEY}
       LLM_API_KEY: ${LLM_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
       # Set to "true" to print SQLAlchemy queries to stdout during development.
       SQLALCHEMY_ECHO: ${SQLALCHEMY_ECHO:-false}

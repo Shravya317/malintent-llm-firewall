@@ -66,7 +66,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from database import init_db
-from routers import scan, logs, stats, config as config_router
+from routers import scan, logs, stats, config as config_router, llm
 
 # ── LOGGING ──────────────────────────────────────────────────────────────────
 
@@ -221,6 +221,7 @@ app.include_router(scan.router,          prefix="/api/v1", tags=["scan"])
 app.include_router(logs.router,          prefix="/api/v1", tags=["logs"])
 app.include_router(stats.router,         prefix="/api/v1", tags=["stats"])
 app.include_router(config_router.router, prefix="/api/v1", tags=["config"])
+app.include_router(llm.router,           prefix="/api/v1", tags=["llm"])
 
 
 # ── ROOT HEALTH CHECK ────────────────────────────────────────────────────────

@@ -1041,6 +1041,7 @@ Deployment features include:
 | `/api/v1/scan/input`    | Prompt injection scanning     |
 | `/api/v1/scan/output`   | Output consistency validation |
 | `/api/v1/scan/document` | Document scanner              |
+| `/api/v1/llm/raw`       | Raw LLM proxy (Comparison Mode) |
 | `/api/v1/logs`          | Threat log retrieval          |
 | `/api/v1/stats`         | Dashboard statistics          |
 
@@ -1054,6 +1055,7 @@ Google Cloud Run is configured using:
 - `PG_CRYPTO_KEY`
 - `FERNET_KEY`
 - `HUGGINGFACE_TOKEN`
+- `GROQ_API_KEY`
 - `CORS_ALLOWED_ORIGINS`
 
 The production backend connects to Supabase using the Transaction Pooler,
