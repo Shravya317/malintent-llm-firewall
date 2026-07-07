@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import Logo from './Logo'
 
 export const SIDEBAR_WIDTH = '240px'
 
@@ -57,7 +58,7 @@ export default function Sidebar() {
       {/* Brand */}
       <div
         style={{
-          padding: collapsed ? '32px 0 0' : '32px 24px 0',
+          padding: collapsed ? '32px 0 0' : '32px 16px 0', // Shifted left, standard padding
           display: 'flex',
           flexDirection: 'column',
           alignItems: collapsed ? 'center' : 'flex-start',
@@ -65,26 +66,19 @@ export default function Sidebar() {
         }}
       >
         {collapsed ? (
-          <span
-            style={{
-              fontFamily: 'var(--font-brand)',
-              fontSize: '2.2rem',
-              letterSpacing: '0.05em',
-              color: 'var(--accent-threat)',
-              lineHeight: 1,
-              userSelect: 'none',
-            }}
-          >
-            M
-          </span>
+          <div style={{ width: 42, height: 42, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Logo style={{ width: '100%', height: '100%' }} />
+          </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 28, height: 28, flexShrink: 0 }} /> {/* Logo placeholder space */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 42, height: 42, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Logo style={{ width: '100%', height: '100%', marginTop: '6px' }} />
+            </div>
             <div>
               <h1
                 style={{
                   fontFamily: 'var(--font-brand)',
-                  fontSize: '1.3rem',
+                  fontSize: '1.15rem', // Reduced slightly to fit
                   fontWeight: 400,
                   letterSpacing: '0.05em',
                   color: 'var(--text-primary)',
@@ -103,7 +97,7 @@ export default function Sidebar() {
                   letterSpacing: '0.1em',
                   color: 'var(--text-faint)',
                   textTransform: 'uppercase',
-                  margin: '6px 0 0 2px',
+                  margin: '4px 0 0 2px',
                   lineHeight: 1,
                 }}
               >

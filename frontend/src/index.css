@@ -415,3 +415,20 @@ h1, h2, h3, h4, h5, h6 {
 [data-theme="light"] .comparison-page .safe-text-bg {
   background: #8ca1b8 !important;
 }
+
+/* --- LOGO VARIABLES --- */
+:root {
+  --logo-top: #ff4d4d;
+  --logo-left: #b30000;
+  --logo-front: #e60000;
+  --logo-glow: rgba(255, 77, 77, 0.4);
+  --logo-glow-bright: rgba(255, 77, 77, 0.9);
+}
+
+[data-theme="light"] {
+  --logo-top: #475569;
+  --logo-left: #0f172a;
+  --logo-front: #1e293b;
+  --logo-glow: rgba(51, 65, 85, 0.5);
+  --logo-glow-bright: rgba(51, 65, 85, 0.95);
+}

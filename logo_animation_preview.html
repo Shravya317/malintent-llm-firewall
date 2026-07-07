@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo Animation Preview</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    /* Container setup */
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Dark Mode Side */
+    .dark-mode {
+      background-color: #0f172a; /* Deep black/slate */
+      color: white;
+    }
+
+    /* Light Mode Side */
+    .light-mode {
+      background-color: #f1f5f9; /* Light grey */
+      color: #1e293b;
+    }
+
+    h2 {
+      margin-bottom: 2rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    /* The Images */
+    .logo-img {
+      width: 400px;
+      height: 400px;
+      object-fit: contain;
+      border-radius: 20px;
+    }
+
+    /* --- ANIMATION: Dark Mode Fire Glow --- */
+    .dark-mode .logo-img {
+      /* Aggressive pulsing fiery glow using drop-shadow */
+      animation: firePulse 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes firePulse {
+      0% {
+        filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.4)) drop-shadow(0 0 20px rgba(234, 88, 12, 0.2)) brightness(1);
+        transform: scale(1);
+      }
+      50% {
+        filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.8)) drop-shadow(0 0 40px rgba(234, 88, 12, 0.5)) brightness(1.1);
+        transform: scale(1.02);
+      }
+      100% {
+        filter: drop-shadow(0 0 15px rgba(220, 38, 38, 0.6)) drop-shadow(0 0 30px rgba(234, 88, 12, 0.3)) brightness(1.05);
+        transform: scale(1.01);
+      }
+    }
+
+    /* --- ANIMATION: Light Mode Back-and-Forth Glow --- */
+    .light-mode .logo-img {
+      /* Soft, scanning silver/white glow moving left to right */
+      animation: scanGlow 3s infinite alternate ease-in-out;
+    }
+
+    @keyframes scanGlow {
+      0% {
+        filter: drop-shadow(-30px 0 20px rgba(255, 255, 255, 1)) drop-shadow(-10px 0 10px rgba(148, 163, 184, 0.6));
+      }
+      50% {
+        filter: drop-shadow(0px 0 30px rgba(255, 255, 255, 1)) drop-shadow(0px 0 15px rgba(148, 163, 184, 0.8));
+      }
+      100% {
+        filter: drop-shadow(30px 0 20px rgba(255, 255, 255, 1)) drop-shadow(10px 0 10px rgba(148, 163, 184, 0.6));
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Dark Mode -->
+  <div class="container dark-mode">
+    <h2>Dark Mode Concept</h2>
+    <img 
+      src="C:\Users\shrav\.gemini\antigravity\brain\ef90da8e-b1e7-4f6c-be0f-d5a8221d869f\firewall_logo_dark_fire_1783451680169.png" 
+      alt="Dark Mode Fire Logo" 
+      class="logo-img"
+    >
+  </div>
+
+  <!-- Light Mode -->
+  <div class="container light-mode">
+    <h2>Light Mode Concept</h2>
+    <img 
+      src="C:\Users\shrav\.gemini\antigravity\brain\ef90da8e-b1e7-4f6c-be0f-d5a8221d869f\firewall_logo_light_glow_1783451695441.png" 
+      alt="Light Mode Glowing Logo" 
+      class="logo-img"
+    >
+  </div>
+
+</body>
+</html>
