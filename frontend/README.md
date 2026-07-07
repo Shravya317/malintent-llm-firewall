@@ -2,7 +2,7 @@
 
 # <img src="https://img.icons8.com/fluency/48/shield.png" width="36" height="36" alt="shield"/> MalIntent — Security Dashboard
 
-### *Next-generation LLM Firewall Interface. Engineered for zero-trust AI.*
+### *Next-generation LLM Firewall Interface. Engineered for secure AI.*
 
 <p>A production-grade cybersecurity command center delivering real-time prompt injection monitoring,<br/>multi-layered threat forensics, and sandbox analytics — purpose-built for the AI attack surface.</p>
 
@@ -366,7 +366,7 @@ npm run preview
 
 <div align="center">
 
-<p><b>MalIntent Security Dashboard &nbsp;·&nbsp; Engineered for the zero-trust AI era</b></p>
+<p><b>MalIntent Security Dashboard &nbsp;·&nbsp; Engineered for the secure AI era</b></p>
 
 <p><i>Threat detected. Firewall engaged. System secure.</i></p>
 
@@ -378,7 +378,7 @@ npm run preview
 
 <img src="https://img.shields.io/badge/React_19-Component_Architecture-61DAFB?style=for-the-badge&labelColor=0a0f1e&logo=react&logoColor=61DAFB" />
 <img src="https://img.shields.io/badge/Design-Glassmorphism-8b5cf6?style=for-the-badge&labelColor=0a0f1e" />
-<img src="https://img.shields.io/badge/Security-Zero_Trust-ef4444?style=for-the-badge&labelColor=0a0f1e" />
+<img src="https://img.shields.io/badge/Security-LLM_Firewall-ef4444?style=for-the-badge&labelColor=0a0f1e" />
 
 <br/><br/>
 
