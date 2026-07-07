@@ -133,6 +133,7 @@ export default function Dashboard() {
 
           {/* Metrics */}
           <section
+            className="dashboard-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(4, 1fr)',
@@ -177,9 +178,10 @@ export default function Dashboard() {
 
           {/* Threat Distribution & System Risk & Profile */}
           <section
+            className="dashboard-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
+              gridTemplateColumns: 'repeat(3, 1fr)',
               gap: 32,
               paddingBottom: 32,
             }}
@@ -191,9 +193,10 @@ export default function Dashboard() {
 
           {/* Layout Analytics, Ranked Bars, Heatmap */}
           <section
+            className="dashboard-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
+              gridTemplateColumns: 'repeat(3, 1fr)',
               gap: 32,
               paddingBottom: 48,
               alignItems: 'stretch'
@@ -214,14 +217,15 @@ export default function Dashboard() {
 
           {/* Footer Area */}
           <footer
-            className="footer-region"
+            className="footer-region flex-row-responsive"
             style={{
               marginTop: 64,
               paddingTop: 24,
               borderTop: '1px solid var(--border-faint)',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              gap: 24
             }}
           >
             <div>

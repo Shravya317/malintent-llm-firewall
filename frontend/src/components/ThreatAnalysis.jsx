@@ -737,7 +737,7 @@ export default function ThreatAnalysis() {
                                 </div>
 
                                 {/* 3-PANEL GRID */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1.15fr 0.85fr', gap: 40, padding: '36px 32px' }}>
+                                <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1.15fr 0.85fr', gap: 40, padding: '36px 32px' }}>
 
                                   {/* PANEL 1: Prompt Analysis */}
                                   <div>

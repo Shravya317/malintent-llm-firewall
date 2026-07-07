@@ -450,7 +450,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .sidebar-wrapper {
-  position: relative;
+  position: sticky;
+  top: 0;
+  height: 100vh;
   z-index: 50;
   flex-shrink: 0;
 }
@@ -498,22 +500,18 @@ h1, h2, h3, h4, h5, h6 {
     position: fixed;
     top: 0;
     bottom: 0;
-    left: -280px; /* Hide off-screen */
-    width: 280px;
+    left: -240px; /* Hide off-screen matching sidebar-width */
+    width: 240px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
   }
 
   .sidebar-wrapper.open {
-    transform: translateX(280px); /* Slide in */
+    transform: translateX(240px); /* Slide in */
   }
 
   .main-content {
     padding-top: 65px; /* Height of mobile header */
-  }
-
-  .desktop-margin {
-    margin-left: 0 !important;
   }
 
   /* Make grids and flex containers wrap properly */

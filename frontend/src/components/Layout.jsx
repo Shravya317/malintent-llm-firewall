@@ -68,12 +68,7 @@ export default function Layout({ children }) {
       </div>
 
       {/* Main Content */}
-      <main 
-        className="main-content desktop-margin"
-        style={{
-          marginLeft: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'
-        }}
-      >
+      <main className="main-content">
         {children}
       </main>
     </div>

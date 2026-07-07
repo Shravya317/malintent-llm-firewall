@@ -39,12 +39,8 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
     <aside
       className="sidebar-region"
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        bottom: 0,
         width,
-        zIndex: 50,
+        height: '100vh',
         background: 'var(--sidebar-bg)',
         borderRight: '1px solid var(--sidebar-border)',
         display: 'flex',
