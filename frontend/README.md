@@ -53,6 +53,36 @@ A full visual breakdown of all core modules — threat monitoring, 5-layer API i
 
 <div align="center">
 
+## 🧩 Core Modules
+
+<p>
+<strong>Comparison Mode</strong><br/>
+<em>A/B Testing Interface comparing protected vs raw LLM prompt execution to measure firewall latency overhead and effectiveness.</em>
+</p>
+<img src="assets/screenshots/comparison-light.png" alt="Comparison Mode" width="85%" />
+
+<br/><br/>
+
+<p>
+<strong>Document Scanner</strong><br/>
+<em>Large-scale RAG (Retrieval-Augmented Generation) document parsing to detect and prevent indirect prompt injections embedded within files.</em>
+</p>
+<img src="assets/screenshots/document-scanner-dark.png" alt="Document Scanner" width="85%" />
+
+<br/><br/>
+
+<p>
+<strong>Live Threat Feed & Action Logs</strong><br/>
+<em>Immutable system execution logs providing real-time visibility into intercepted payloads, attack vectors, and layer decisions.</em>
+</p>
+<img src="assets/screenshots/livethreatfeed-dark.png" alt="Live Threat Feed" width="85%" />
+
+</div>
+
+---
+
+<div align="center">
+
 ## About the Platform
 
 </div>
