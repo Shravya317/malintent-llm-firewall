@@ -40,37 +40,31 @@
 A full visual breakdown of all core modules — threat monitoring, 5-layer API interception, document scanning, incident response queues, and the responsive dark/light UI system.
 </p>
 
-<!-- PLACE YOUR THREAT ANALYSIS SCREENSHOTS HERE -->
+<!-- THREAT ANALYSIS -->
 <p>
 <img src="assets/screenshots/threat-analysis-dark.png" alt="MalIntent Threat Analysis Dark Mode" width="48%">
 &nbsp;
 <img src="assets/screenshots/threat-analysis-light.png" alt="MalIntent Threat Analysis Light Mode" width="48%">
 </p>
+<br/>
 
-</div>
-
----
-
-<div align="center">
-
-## 🧩 Core Modules
-
+<!-- COMPARISON MODE -->
 <p>
 <strong>Comparison Mode</strong><br/>
 <em>A/B Testing Interface comparing protected vs raw LLM prompt execution to measure firewall latency overhead and effectiveness.</em>
 </p>
 <img src="assets/screenshots/comparison-light.png" alt="Comparison Mode" width="85%" />
-
 <br/><br/>
 
+<!-- DOCUMENT SCANNER -->
 <p>
 <strong>Document Scanner</strong><br/>
 <em>Large-scale RAG (Retrieval-Augmented Generation) document parsing to detect and prevent indirect prompt injections embedded within files.</em>
 </p>
 <img src="assets/screenshots/document-scanner-dark.png" alt="Document Scanner" width="85%" />
-
 <br/><br/>
 
+<!-- LIVE THREAT FEED -->
 <p>
 <strong>Live Threat Feed & Action Logs</strong><br/>
 <em>Immutable system execution logs providing real-time visibility into intercepted payloads, attack vectors, and layer decisions.</em>
