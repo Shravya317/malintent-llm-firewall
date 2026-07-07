@@ -6,6 +6,7 @@ import { useTheme } from '../ThemeContext'
 
 export default function Layout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const { theme, toggleTheme } = useTheme()
   const location = useLocation()
 
@@ -58,11 +59,21 @@ export default function Layout({ children }) {
 
       {/* Sidebar Wrapper */}
       <div className={`sidebar-wrapper ${mobileMenuOpen ? 'open' : ''}`}>
-        <Sidebar mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
+        <Sidebar 
+          mobileMenuOpen={mobileMenuOpen} 
+          setMobileMenuOpen={setMobileMenuOpen} 
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
       </div>
 
       {/* Main Content */}
-      <main className="main-content">
+      <main 
+        className="main-content desktop-margin"
+        style={{
+          marginLeft: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'
+        }}
+      >
         {children}
       </main>
     </div>

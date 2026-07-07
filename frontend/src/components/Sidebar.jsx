@@ -29,8 +29,7 @@ const navItems = [
   { label: 'System Settings', path: '/settings', icon: Settings },
 ]
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
+export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, setCollapsed }) {
   const location = useLocation()
   const navigate = useNavigate()
 
