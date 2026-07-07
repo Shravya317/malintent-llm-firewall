@@ -8,25 +8,16 @@
 
 <br/>
 
-<img src="https://img.shields.io/badge/React-19.x-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-&nbsp;&nbsp;
-<img src="https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
-&nbsp;&nbsp;
-<img src="https://img.shields.io/badge/React_Router-7.x-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white" alt="React Router" />
-&nbsp;&nbsp;
-<img src="https://img.shields.io/badge/Axios-1.18-5A29E4?style=for-the-badge&logo=axios&logoColor=white" alt="Axios" />
+<a href="https://reactjs.org/"><img src="https://img.shields.io/badge/React-19.x-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" /></a>
+<a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" /></a>
+<a href="https://reactrouter.com/"><img src="https://img.shields.io/badge/React_Router-7.x-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white" alt="React Router" /></a>
+<a href="https://axios-http.com/"><img src="https://img.shields.io/badge/Axios-1.18-5A29E4?style=for-the-badge&logo=axios&logoColor=white" alt="Axios" /></a>
+<a href="https://recharts.org/"><img src="https://img.shields.io/badge/Recharts-2.15-22B5BF?style=for-the-badge&logo=d3dotjs&logoColor=white" alt="Recharts" /></a>
+<a href="https://lucide.dev/"><img src="https://img.shields.io/badge/Lucide-1.14-F472B6?style=for-the-badge&logo=lucide&logoColor=white" alt="Lucide" /></a>
+<a href="https://developer.mozilla.org/en-US/docs/Web/CSS"><img src="https://img.shields.io/badge/CSS3-Design_System-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" /></a>
+<a href="https://fonts.google.com/"><img src="https://img.shields.io/badge/Google_Fonts-Typography-4285F4?style=for-the-badge&logo=googlefonts&logoColor=white" alt="Google Fonts" /></a>
 
-<br/><br/>
-
-<img src="https://img.shields.io/badge/Recharts-2.15-22B5BF?style=for-the-badge&logo=d3dotjs&logoColor=white" alt="Recharts" />
-&nbsp;&nbsp;
-<img src="https://img.shields.io/badge/Lucide-1.14-F472B6?style=for-the-badge&logo=lucide&logoColor=white" alt="Lucide" />
-&nbsp;&nbsp;
-<img src="https://img.shields.io/badge/CSS3-Design_System-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" />
-&nbsp;&nbsp;
-<img src="https://img.shields.io/badge/Google_Fonts-Typography-4285F4?style=for-the-badge&logo=googlefonts&logoColor=white" alt="Google Fonts" />
-
-<br/><br/>
+<br/>
 
 </div>
 
