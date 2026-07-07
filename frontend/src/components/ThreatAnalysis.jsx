@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
 import { getLogs } from '../api/client'
-import Sidebar from './Sidebar'
 
 const CATEGORIES = [
   'All',
@@ -594,9 +593,7 @@ export default function ThreatAnalysis() {
   const decColor = (dec) => dec === 'BLOCK' ? 'var(--accent-threat)' : dec === 'FLAG' ? 'var(--accent-warn)' : 'var(--accent-secure)'
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main className="threat-analysis-page" style={{ flex: 1, marginLeft: 'var(--sidebar-width)', minHeight: '100vh', overflowY: 'auto' }}>
+    <div className="threat-analysis-page" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', paddingBottom: 64 }}>
         {/* Header */}
         <header style={{ padding: '40px 56px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
@@ -879,7 +876,6 @@ export default function ThreatAnalysis() {
             </div>
           </div>
         </div>
-      </main>
     </div>
   )
 }

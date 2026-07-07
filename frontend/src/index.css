@@ -432,3 +432,104 @@ h1, h2, h3, h4, h5, h6 {
   --logo-glow: rgba(51, 65, 85, 0.5);
   --logo-glow-bright: rgba(51, 65, 85, 0.95);
 }
+
+/* ── Responsive Layout & Media Queries ────────────────────── */
+
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+
+.mobile-header {
+  display: none !important;
+}
+
+.mobile-sidebar-overlay {
+  display: none;
+}
+
+.sidebar-wrapper {
+  position: relative;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: padding-left 0.2s ease;
+  width: 100%;
+}
+
+/* Tablet / Smaller Desktop */
+@media (max-width: 1024px) {
+  /* Let pages adapt to narrower screens */
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: var(--bg-base);
+  }
+
+  .mobile-sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(2px);
+    z-index: 49;
+  }
+
+  .sidebar-wrapper {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: -280px; /* Hide off-screen */
+    width: 280px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 50;
+  }
+
+  .sidebar-wrapper.open {
+    transform: translateX(280px); /* Slide in */
+  }
+
+  .main-content {
+    padding-top: 65px; /* Height of mobile header */
+  }
+
+  /* Make grids and flex containers wrap properly */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .flex-row-responsive {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  header.responsive-header {
+    padding: 20px 20px 0 !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+
+  .responsive-padding {
+    padding: 20px !important;
+  }
+}

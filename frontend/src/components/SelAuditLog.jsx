@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Sidebar from './Sidebar'
+import { ShieldCheck, Database, Search, ArrowUpRight, Copy, TerminalSquare, AlertOctagon, Info } from 'lucide-react'
 import { useTheme } from '../ThemeContext'
 import { getActionLogs } from '../api/client'
 
@@ -69,10 +69,10 @@ export default function SelAuditLog() {
   }, [])
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main style={{ flex: 1, marginLeft: 'var(--sidebar-width)', minHeight: '100vh', overflowY: 'auto' }}>
-        <header style={{ padding: '40px 56px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div className="sel-audit-page" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', paddingBottom: 64 }}>
+      
+      {/* Header */}
+      <header className="responsive-header" style={{ padding: '40px 56px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>SEL Action Logs</h1>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Secure Execution Layer · Operational Forensics</p>
@@ -178,7 +178,6 @@ export default function SelAuditLog() {
             </table>
           </div>
         </div>
-      </main>
     </div>
   )
 }

@@ -44,28 +44,17 @@ export default function Dashboard() {
   }, [])
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-
-      <main
-        className="main-region"
+    <>
+      {/* Header */}
+      <header
+        className="responsive-header"
         style={{
-          flex: 1,
-          marginLeft: 'var(--sidebar-width)',
-          minHeight: '100vh',
-          overflowY: 'auto',
-          transition: 'margin-left 0.2s ease',
+          padding: '40px 56px 0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
         }}
       >
-        {/* Header */}
-        <header
-          style={{
-            padding: '40px 56px 0',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-          }}
-        >
           <div>
             <h1
               style={{
@@ -245,7 +234,6 @@ export default function Dashboard() {
             </div>
           </footer>
         </div>
-      </main>
-    </div>
+    </>
   )
 }

@@ -1,14 +1,11 @@
 import { useTheme } from '../ThemeContext'
-import Sidebar from './Sidebar'
 
 export default function SdkIntegration() {
   const { toggleTheme } = useTheme()
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main style={{ flex: 1, marginLeft: 'var(--sidebar-width)', minHeight: '100vh', overflowY: 'auto' }}>
-        <header style={{ padding: '40px 56px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div className="sdk-page" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', paddingBottom: 64 }}>
+      <header className="responsive-header" style={{ padding: '40px 56px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>Integration SDK</h1>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Drop-in Python Package · API Keys</p>
@@ -61,7 +58,6 @@ export default function SdkIntegration() {
           </div>
 
         </div>
-      </main>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
+import { FileText, UploadCloud, FileWarning, ShieldCheck, Activity, Eye, AlertTriangle } from 'lucide-react'
 import { scanDocument } from '../api/client'
-import Sidebar from './Sidebar'
 
 export default function RagScanner() {
   const [file, setFile] = useState(null)
@@ -109,16 +109,14 @@ export default function RagScanner() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main style={{ flex: 1, marginLeft: 'var(--sidebar-width)', minHeight: '100vh', overflowY: 'auto' }}>
-        {/* Header */}
-        <header style={{ padding: '40px 56px 0' }}>
+    <div className="rag-scanner-page" style={{ paddingBottom: 64 }}>
+      {/* Header */}
+      <header className="responsive-header" style={{ padding: '40px 56px 0' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>RAG Document Pre-Scanner</h1>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Ingestion Firewall · Block Embedded Prompt Injections Before Vectorization</p>
         </header>
 
-        <div style={{ padding: '36px 56px 96px', maxWidth: 880 }}>
+        <div className="responsive-padding" style={{ padding: '36px 56px 96px', maxWidth: 880 }}>
           <div style={{ background: 'var(--bg-elevated)', borderRadius: 12, border: '1px solid var(--border-subtle)', padding: '40px 48px', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
             
             {/* Upload Area */}
@@ -245,7 +243,6 @@ export default function RagScanner() {
 
           </div>
         </div>
-      </main>
     </div>
   )
 }

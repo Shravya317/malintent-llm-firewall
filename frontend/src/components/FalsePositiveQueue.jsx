@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
-import Sidebar from './Sidebar'
 import { getLogs, updateLogDecision } from '../api/client'
 
 export default function FalsePositiveQueue() {
@@ -47,12 +46,10 @@ export default function FalsePositiveQueue() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main className="review-queue-page" style={{ flex: 1, marginLeft: 'var(--sidebar-width)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        
-        {/* Header */}
-        <header style={{ padding: '40px 56px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div className="review-queue-page" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', paddingBottom: 64 }}>
+      
+      {/* Header */}
+      <header className="responsive-header" style={{ padding: '40px 56px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>Review Queue</h1>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>False Positive Identification & System Tuning</p>
@@ -129,7 +126,6 @@ export default function FalsePositiveQueue() {
             </table>
           </div>
         </div>
-      </main>
     </div>
   )
 }
