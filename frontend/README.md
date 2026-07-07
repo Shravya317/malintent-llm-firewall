@@ -372,15 +372,13 @@ npm run preview
 
 <br/>
 
-<p>Built with precision by <a href="https://github.com/Shravya317"><b>Shravya</b></a> & <a href="https://github.com/tusharr-mishra"><b>Tushar Mishra</b></a></p>
+<p>Built with precision by <a href="https://github.com/Shravya317"><b>Shravya</b></a></p>
 
 <br/>
 
-<img src="https://img.shields.io/badge/React_19-Component_Architecture-61DAFB?style=flat-square&labelColor=0a0f1e&logo=react&logoColor=61DAFB" />
-&nbsp;
-<img src="https://img.shields.io/badge/Design-Glassmorphism-8b5cf6?style=flat-square&labelColor=0a0f1e" />
-&nbsp;
-<img src="https://img.shields.io/badge/Security-Zero_Trust-ef4444?style=flat-square&labelColor=0a0f1e" />
+<img src="https://img.shields.io/badge/React_19-Component_Architecture-61DAFB?style=for-the-badge&labelColor=0a0f1e&logo=react&logoColor=61DAFB" />
+<img src="https://img.shields.io/badge/Design-Glassmorphism-8b5cf6?style=for-the-badge&labelColor=0a0f1e" />
+<img src="https://img.shields.io/badge/Security-Zero_Trust-ef4444?style=for-the-badge&labelColor=0a0f1e" />
 
 <br/><br/>
 
