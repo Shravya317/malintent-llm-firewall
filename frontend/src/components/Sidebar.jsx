@@ -1,155 +1,263 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  ShieldAlert,
+  GitCompare,
+  Search,
+  ListChecks,
+  FileSearch,
+  ScrollText,
+  Code,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
+
+export const SIDEBAR_WIDTH = '240px'
 
 const navItems = [
-  { label: 'Dashboard', path: '/' },
-  { label: 'Threats', path: '/threats' },
-  { label: 'Comparison Mode', path: '/comparison' },
-  { label: 'Deep Scan Sandbox', path: '/sandbox' },
-  { label: 'Review Queue', path: '/review-queue' },
-  { label: 'Document Scanner', path: '/scanner' },
-  { label: 'Action Logs', path: '/action-logs' },
-  { label: 'Integration SDK', path: '/sdk' },
-  { label: 'System Settings', path: '/settings' },
+  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Threats', path: '/threats', icon: ShieldAlert },
+  { label: 'Comparison Mode', path: '/comparison', icon: GitCompare },
+  { label: 'Deep Scan Sandbox', path: '/sandbox', icon: Search },
+  { label: 'Review Queue', path: '/review-queue', icon: ListChecks },
+  { label: 'Document Scanner', path: '/scanner', icon: FileSearch },
+  { label: 'Action Logs', path: '/action-logs', icon: ScrollText },
+  { label: 'Integration SDK', path: '/sdk', icon: Code },
+  { label: 'System Settings', path: '/settings', icon: Settings },
 ]
 
 export default function Sidebar() {
+  const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
 
+  const width = collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'
+
   return (
     <aside
+      className="sidebar-region"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         bottom: 0,
-        width: 200,
+        width,
         zIndex: 50,
-        background: 'var(--bg-base)',
+        background: 'var(--sidebar-bg)',
+        borderRight: '1px solid var(--sidebar-border)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
+        transition: 'width 0.2s ease',
+        overflow: 'hidden',
       }}
     >
-      {/* Brand — just text, no container */}
-      <div style={{ padding: '40px 32px 0' }}>
-        <h1
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '1.05rem',
-            fontWeight: 600,
-            color: 'var(--text-primary)',
-            margin: 0,
-            letterSpacing: '-0.03em',
-          }}
-        >
-          Mal<span style={{ color: 'var(--accent-threat)' }}>Intent</span>
-        </h1>
-        <p
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.55rem',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: 'var(--text-faint)',
-            margin: '6px 0 0',
-          }}
-        >
-          LLM Firewall
-        </p>
+      {/* Brand */}
+      <div
+        style={{
+          padding: collapsed ? '32px 0 0' : '32px 24px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: collapsed ? 'center' : 'flex-start',
+          minHeight: 72,
+        }}
+      >
+        {collapsed ? (
+          <span
+            style={{
+              fontFamily: 'var(--font-brand)',
+              fontSize: '2.2rem',
+              letterSpacing: '0.05em',
+              color: 'var(--accent-threat)',
+              lineHeight: 1,
+              userSelect: 'none',
+            }}
+          >
+            M
+          </span>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 28, height: 28, flexShrink: 0 }} /> {/* Logo placeholder space */}
+            <div>
+              <h1
+                style={{
+                  fontFamily: 'var(--font-brand)',
+                  fontSize: '1.3rem',
+                  fontWeight: 400,
+                  letterSpacing: '0.05em',
+                  color: 'var(--text-primary)',
+                  margin: 0,
+                  lineHeight: 1,
+                  userSelect: 'none',
+                }}
+              >
+                <span style={{ color: 'var(--accent-threat)' }}>MAL</span>
+                INTENT
+              </h1>
+              <p
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.55rem',
+                  letterSpacing: '0.1em',
+                  color: 'var(--text-faint)',
+                  textTransform: 'uppercase',
+                  margin: '6px 0 0 2px',
+                  lineHeight: 1,
+                }}
+              >
+                LLM Firewall
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Navigation — text links only, no backgrounds, no icons */}
-      <nav style={{ flex: 1, padding: '40px 32px' }}>
-        <p
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.5rem',
-            fontWeight: 500,
-            textTransform: 'uppercase',
-            letterSpacing: '0.14em',
-            color: 'var(--text-faint)',
-            margin: '0 0 16px',
-          }}
-        >
-          Navigation
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {navItems.map(({ label, path }) => {
+      {/* Navigation */}
+      <nav style={{ flex: 1, padding: collapsed ? '32px 0' : '32px 0 32px 0', overflowY: 'auto', overflowX: 'hidden' }}>
+        {!collapsed && (
+          <p
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.55rem',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.14em',
+              color: 'var(--text-faint)',
+              margin: '0 0 12px',
+              padding: '0 24px',
+            }}
+          >
+            NAVIGATION
+          </p>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {navItems.map(({ label, path, icon: Icon }) => {
             const isActive = location.pathname === path
             return (
               <button
                 key={path}
                 onClick={() => navigate(path)}
+                title={collapsed ? label : undefined}
                 style={{
-                  display: 'block',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
                   width: '100%',
-                  padding: '6px 0',
+                  padding: collapsed ? '10px 0' : '10px 24px',
+                  justifyContent: collapsed ? 'center' : 'flex-start',
                   border: 'none',
                   cursor: 'pointer',
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.82rem',
                   fontWeight: isActive ? 600 : 400,
                   color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
                   background: 'none',
                   textAlign: 'left',
-                  transition: 'color 0.15s ease',
-                  letterSpacing: '-0.01em',
+                  transition: 'color 0.15s ease, background 0.15s ease',
                   position: 'relative',
+                  whiteSpace: 'nowrap',
                 }}
                 onMouseEnter={e => {
-                  if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)'
+                  if (!isActive) {
+                    e.currentTarget.style.color = 'var(--text-secondary)'
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
+                  }
                 }}
                 onMouseLeave={e => {
-                  if (!isActive) e.currentTarget.style.color = 'var(--text-muted)'
+                  if (!isActive) {
+                    e.currentTarget.style.color = 'var(--text-muted)'
+                    e.currentTarget.style.background = 'none'
+                  }
                 }}
               >
-                {/* Active indicator — a tiny left dash, not a background box */}
+                {/* Active indicator bar */}
                 {isActive && (
                   <span
                     style={{
                       position: 'absolute',
-                      left: -16,
+                      left: 0,
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      width: 6,
-                      height: 1.5,
+                      width: 3,
+                      height: 24,
                       background: 'var(--accent-threat)',
-                      borderRadius: 1,
+                      borderRadius: '0 2px 2px 0',
                     }}
                   />
                 )}
-                {label}
+                <Icon size={18} strokeWidth={isActive ? 2 : 1.5} style={{ flexShrink: 0 }} />
+                {!collapsed && label}
               </button>
             )
           })}
         </div>
       </nav>
 
-      {/* Footer — minimal */}
-      <div style={{ padding: '0 32px 32px' }}>
-        <p
+      {/* Footer */}
+      <div
+        style={{
+          padding: collapsed ? '0 0 16px' : '0 24px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: collapsed ? 'center' : 'flex-start',
+          gap: 8,
+        }}
+      >
+        {/* Collapse toggle */}
+        <button
+          onClick={() => setCollapsed(c => !c)}
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.55rem',
-            color: 'var(--text-faint)',
-            margin: 0,
-            lineHeight: 1.8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 28,
+            height: 28,
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 6,
+            background: 'var(--bg-surface)',
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            transition: 'color 0.15s ease, border-color 0.15s ease',
+            marginBottom: 8,
           }}
-        >
-          v1.0.0
-        </p>
-        <p
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.55rem',
-            color: 'var(--text-faint)',
-            margin: 0,
+          onMouseEnter={e => {
+            e.currentTarget.style.color = 'var(--text-primary)'
+            e.currentTarget.style.borderColor = 'var(--text-muted)'
           }}
+          onMouseLeave={e => {
+            e.currentTarget.style.color = 'var(--text-muted)'
+            e.currentTarget.style.borderColor = 'var(--border-subtle)'
+          }}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          GPT-4o-shield
-        </p>
+          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
+
+        {!collapsed && (
+          <>
+            <p
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.55rem',
+                color: 'var(--text-faint)',
+                margin: 0,
+                lineHeight: 1.8,
+              }}
+            >
+              v1.0.0
+            </p>
+            <p
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.55rem',
+                color: 'var(--text-faint)',
+                margin: 0,
+              }}
+            >
+              GPT-4o-shield
+            </p>
+          </>
+        )}
       </div>
     </aside>
   )

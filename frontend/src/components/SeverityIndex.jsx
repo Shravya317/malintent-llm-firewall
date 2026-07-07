@@ -4,15 +4,32 @@ export default function SeverityIndex({ stats, loading, error }) {
   const critical = Math.floor(total * 0.18);
   const high = Math.floor(total * 0.42);
   const medium = total - critical - high;
-  
+
   // Confidence Score
   const confidence = 98.4;
 
+  const severityItems = [
+    { label: 'Critical', value: critical, barColor: 'var(--accent-threat)' },
+    { label: 'High', value: high, barColor: '#F97316' },
+    { label: 'Medium', value: medium, barColor: 'var(--accent-warn)' },
+  ];
+
   return (
-    <div>
+    <div
+      style={{
+        background: 'var(--card-bg)',
+        border: '1px solid var(--card-border)',
+        borderRadius: 'var(--card-radius)',
+        boxShadow: 'var(--card-shadow)',
+        padding: 24,
+        transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--card-shadow-hover)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--card-shadow)'; }}
+    >
       <h3
         style={{
-          fontFamily: 'var(--font-display)',
+          fontFamily: 'var(--font-heading)',
           fontSize: '0.95rem',
           fontWeight: 600,
           letterSpacing: '-0.02em',
@@ -33,7 +50,7 @@ export default function SeverityIndex({ stats, loading, error }) {
           <p
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(3rem, 5vw, 4rem)',
+              fontSize: 'clamp(2.4rem, 4vw, 3.2rem)',
               fontWeight: 700,
               letterSpacing: '-0.04em',
               lineHeight: 0.85,
@@ -64,89 +81,47 @@ export default function SeverityIndex({ stats, loading, error }) {
           {/* Thin divider */}
           <div style={{ height: 1, background: 'var(--border-faint)', margin: '24px 0' }} />
 
-          {/* Sub-stats — typographic approach, side by side */}
+          {/* Sub-stats — with colored bars above each number */}
           <div style={{ display: 'flex', gap: 32 }}>
-            <div>
-              <p
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.4rem',
-                  fontWeight: 700,
-                  letterSpacing: '-0.03em',
-                  color: 'var(--accent-threat)',
-                  margin: 0,
-                  lineHeight: 1,
-                }}
-              >
-                {critical}
-              </p>
-              <p
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.5rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--text-faint)',
-                  margin: '6px 0 0',
-                }}
-              >
-                Critical
-              </p>
-            </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.4rem',
-                  fontWeight: 700,
-                  letterSpacing: '-0.03em',
-                  color: '#F97316',
-                  margin: 0,
-                  lineHeight: 1,
-                }}
-              >
-                {high}
-              </p>
-              <p
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.5rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--text-faint)',
-                  margin: '6px 0 0',
-                }}
-              >
-                High
-              </p>
-            </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.4rem',
-                  fontWeight: 700,
-                  letterSpacing: '-0.03em',
-                  color: 'var(--accent-warn)',
-                  margin: 0,
-                  lineHeight: 1,
-                }}
-              >
-                {medium}
-              </p>
-              <p
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.5rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--text-faint)',
-                  margin: '6px 0 0',
-                }}
-              >
-                Medium
-              </p>
-            </div>
+            {severityItems.map(item => (
+              <div key={item.label}>
+                {/* Colored bar */}
+                <div
+                  style={{
+                    width: 32,
+                    height: 3,
+                    borderRadius: 2,
+                    background: item.barColor,
+                    marginBottom: 8,
+                  }}
+                />
+                <p
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '1.4rem',
+                    fontWeight: 700,
+                    letterSpacing: '-0.03em',
+                    color: item.barColor,
+                    margin: 0,
+                    lineHeight: 1,
+                  }}
+                >
+                  {item.value}
+                </p>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.55rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: 'var(--text-faint)',
+                    margin: '6px 0 0',
+                  }}
+                >
+                  {item.label}
+                </p>
+              </div>
+            ))}
           </div>
         </>
       )}

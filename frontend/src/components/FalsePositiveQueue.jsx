@@ -49,7 +49,7 @@ export default function FalsePositiveQueue() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ flex: 1, marginLeft: 200, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <main className="review-queue-page" style={{ flex: 1, marginLeft: 'var(--sidebar-width)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         
         {/* Header */}
         <header style={{ padding: '40px 56px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -111,13 +111,13 @@ export default function FalsePositiveQueue() {
                       <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                         <button 
                           onClick={() => handleDecision(log.id, 'ALLOW')}
-                          style={{ background: 'transparent', border: '1px solid var(--accent-secure)', color: 'var(--accent-secure)', padding: '6px 16px', borderRadius: 16, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease' }}
+                          className="btn-action btn-safe"
                         >
                           Mark Safe
                         </button>
                         <button 
                           onClick={() => handleDecision(log.id, 'BLOCK')}
-                          style={{ background: 'var(--accent-threat)', border: 'none', color: '#000', padding: '6px 16px', borderRadius: 16, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease' }}
+                          className="btn-action btn-threat"
                         >
                           Confirm Threat
                         </button>

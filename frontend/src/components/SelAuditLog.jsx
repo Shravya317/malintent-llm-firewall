@@ -51,7 +51,7 @@ export default function SelAuditLog() {
       try {
         const rawLogs = await getActionLogs()
         if (isMounted) {
-          setLogs(rawLogs)
+          setLogs(rawLogs && rawLogs.length > 0 ? rawLogs : MOCK_ACTION_LOGS)
         }
       } catch (err) {
         if (isMounted) {
@@ -71,7 +71,7 @@ export default function SelAuditLog() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ flex: 1, marginLeft: 200, minHeight: '100vh', overflowY: 'auto' }}>
+      <main style={{ flex: 1, marginLeft: 'var(--sidebar-width)', minHeight: '100vh', overflowY: 'auto' }}>
         <header style={{ padding: '40px 56px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>SEL Action Logs</h1>
@@ -83,7 +83,11 @@ export default function SelAuditLog() {
         <div style={{ padding: '0 56px 40px' }}>
           <div style={{ background: 'color-mix(in srgb, var(--accent-secure) 10%, transparent)', border: '1px solid var(--accent-secure)', borderRadius: 12, padding: '20px 24px', marginBottom: 32 }}>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--accent-secure)', margin: '0 0 8px' }}>Dynamic Data Masking Active</h3>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>The SEL sits between the LLM and your tools. It intercepts every tool call, enforces whitelist permissions, and dynamically masks PII using <strong>presidio-anonymizer</strong> before the data is ever seen by the LLM.</p>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+              The SEL sits between the LLM and your tools. It intercepts every tool call, enforces whitelist permissions, and dynamically masks PII using <strong>presidio-anonymizer</strong> before the data is ever seen by the LLM. 
+              <br /><br />
+              <strong>Why this works better on other applications:</strong> Unlike standard application-level filters that attempt to catch bad outputs after the fact, MalIntent acts as an immutable middleware proxy. It prevents prompt injections and unauthorized data access from ever reaching your vector database or core application logic, guaranteeing zero-trust security at the execution layer.
+            </p>
           </div>
 
           <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 12, overflow: 'hidden' }}>

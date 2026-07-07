@@ -10,14 +10,58 @@ const TOP_IPS = [
 
 export default function TopAttackers() {
   return (
-    <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 12, padding: 32, display: 'flex', flexDirection: 'column' }}>
-      <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 24px', fontWeight: 600 }}>Top Attacker IPs</h3>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div
+      style={{
+        background: 'var(--card-bg)',
+        border: '1px solid var(--card-border)',
+        borderRadius: 'var(--card-radius)',
+        boxShadow: 'var(--card-shadow)',
+        padding: 24,
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--card-shadow-hover)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--card-shadow)'; }}
+    >
+      <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', color: 'var(--text-primary)', margin: '0 0 20px', fontWeight: 600 }}>Top Attacker IPs</h3>
+
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {TOP_IPS.map((attacker, idx) => (
-          <div key={attacker.ip} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div
+            key={attacker.ip}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 8px',
+              borderBottom: idx < TOP_IPS.length - 1 ? '1px solid var(--border-faint)' : 'none',
+              borderRadius: 6,
+              cursor: 'default',
+              transition: 'background 0.15s ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-surface)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-faint)', width: 16 }}>{idx + 1}.</div>
+              {/* Rank circle */}
+              <div
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                  background: 'var(--bg-surface)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.65rem',
+                  color: 'var(--text-muted)',
+                  flexShrink: 0,
+                }}
+              >
+                {idx + 1}
+              </div>
               <div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600 }}>{attacker.ip}</div>
                 <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.65rem', color: 'var(--text-muted)' }}>{attacker.location}</div>

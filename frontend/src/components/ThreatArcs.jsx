@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 const PATTERN_PREFIXES = {
   DI: 'Direct Injection',
   PO: 'Persona Override',
@@ -70,6 +72,9 @@ function describePolarSlice(x, y, innerRadius, outerRadius, startAngle, endAngle
 }
 
 export default function ThreatArcs({ data = [], loading = false, error = null, total = 0 }) {
+  const [cardHovered, setCardHovered] = useState(false)
+  const [hoveredSlice, setHoveredSlice] = useState(null)
+
   const size = 180
   const center = size / 2
   const maxRadius = center - 2 // 88
@@ -111,10 +116,23 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
     .sort((a, b) => b.pct - a.pct);
 
   return (
-    <div>
+    <div
+      style={{
+        background: 'var(--card-bg)',
+        border: '1px solid var(--card-border)',
+        borderRadius: 'var(--card-radius)',
+        boxShadow: cardHovered ? 'var(--card-shadow-hover)' : 'var(--card-shadow)',
+        padding: 24,
+        transform: cardHovered ? 'translateY(-3px)' : 'translateY(0)',
+        transition:
+          'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+      onMouseEnter={() => setCardHovered(true)}
+      onMouseLeave={() => setCardHovered(false)}
+    >
       <h3
         style={{
-          fontFamily: 'var(--font-display)',
+          fontFamily: 'var(--font-heading)',
           fontSize: '0.95rem',
           fontWeight: 600,
           letterSpacing: '-0.02em',
@@ -139,7 +157,12 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>No threats yet</span>
           </div>
         ) : (
-          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.2))' }}>
+          <svg
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+            style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}
+          >
             {(() => {
               const numSlices = aggregatedData.length;
               const anglePerSlice = 360 / Math.max(1, numSlices);
@@ -153,6 +176,7 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
                 // Normalize pct so the most frequent category fills the maxRadius
                 const ratio = Math.sqrt(item.pct / maxPct);
                 const outerRadius = innerRadius + (availRadius * ratio);
+                const isSliceHovered = hoveredSlice === item.label;
 
                 return (
                   <path
@@ -161,8 +185,13 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
                     fill={item.color}
                     stroke="var(--bg-surface)"
                     strokeWidth={numSlices > 1 ? 2 : 0}
-                    opacity={0.9}
-                    style={{ transition: 'all 0.5s ease-in-out' }}
+                    opacity={isSliceHovered ? 0.9 : 0.85}
+                    style={{
+                      transition: 'all 0.5s ease-in-out',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={() => setHoveredSlice(item.label)}
+                    onMouseLeave={() => setHoveredSlice(null)}
                   />
                 )
               })
@@ -194,8 +223,29 @@ export default function ThreatArcs({ data = [], loading = false, error = null, t
              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)' }}>Waiting for first threat</span>
           ) : (
             aggregatedData.map(item => (
-              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 8, height: 8, background: item.color, borderRadius: '50%', display: 'block' }} />
+              <div
+                key={item.label}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  opacity: hoveredSlice && hoveredSlice !== item.label ? 0.5 : 1,
+                  transition: 'opacity 0.2s ease',
+                }}
+                onMouseEnter={() => setHoveredSlice(item.label)}
+                onMouseLeave={() => setHoveredSlice(null)}
+              >
+                {/* Rounded rectangle dot */}
+                <span
+                  style={{
+                    width: 12,
+                    height: 4,
+                    background: item.color,
+                    borderRadius: 2,
+                    display: 'block',
+                    flexShrink: 0,
+                  }}
+                />
                 <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
                   {item.label}
                 </span>

@@ -6,9 +6,11 @@ import MetricBlob from './MetricBlob'
 import ThreatFeed from './ThreatFeed'
 import ThreatArcs from './ThreatArcs'
 import SeverityIndex from './SeverityIndex'
-import TopAttackers from './TopAttackers'
 import LayerAnalytics from './LayerAnalytics'
 import ThreatHeatmap from './ThreatHeatmap'
+import ScanAreaChart from './AreaChart'
+import HorizontalBarChart from './HorizontalBarChart'
+import ThreatProfile from './ThreatProfile'
 
 export default function Dashboard() {
   const { theme, toggleTheme } = useTheme()
@@ -46,14 +48,16 @@ export default function Dashboard() {
       <Sidebar />
 
       <main
+        className="main-region"
         style={{
           flex: 1,
-          marginLeft: 200,
+          marginLeft: 'var(--sidebar-width)',
           minHeight: '100vh',
           overflowY: 'auto',
+          transition: 'margin-left 0.2s ease',
         }}
       >
-        {/* Header — text only, no containers */}
+        {/* Header */}
         <header
           style={{
             padding: '40px 56px 0',
@@ -65,8 +69,7 @@ export default function Dashboard() {
           <div>
             <h1
               style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.5rem',
+                fontSize: '2.2rem',
                 fontWeight: 700,
                 letterSpacing: '-0.04em',
                 color: 'var(--text-primary)',
@@ -78,7 +81,7 @@ export default function Dashboard() {
             <p
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.6rem',
+                fontSize: '0.75rem',
                 color: 'var(--text-faint)',
                 margin: '6px 0 0',
                 letterSpacing: '0.03em',
@@ -88,23 +91,23 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* Right side — status text + theme toggle as plain text */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span
                 style={{
-                  width: 5,
-                  height: 5,
+                  width: 6,
+                  height: 6,
                   borderRadius: '50%',
                   background: 'var(--accent-secure)',
                   display: 'block',
+                  boxShadow: 'var(--glow-secure)',
                 }}
               />
               <span
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '0.6rem',
-                  fontWeight: 500,
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
                   color: 'var(--accent-secure)',
                   letterSpacing: '0.06em',
                 }}
@@ -120,8 +123,8 @@ export default function Dashboard() {
                 border: 'none',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.6rem',
-                fontWeight: 500,
+                fontSize: '0.7rem',
+                fontWeight: 600,
                 color: 'var(--text-faint)',
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
@@ -139,13 +142,13 @@ export default function Dashboard() {
         {/* Content */}
         <div style={{ padding: '48px 56px 72px' }}>
 
-          {/* Metrics — asymmetric widths, no containers */}
+          {/* Metrics */}
           <section
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.5fr 1fr 0.5fr 1fr',
-              gap: 48,
-              paddingBottom: 56,
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 24,
+              paddingBottom: 32,
             }}
           >
             <MetricBlob
@@ -163,48 +166,52 @@ export default function Dashboard() {
               delay={1}
             />
             <MetricBlob
-              title="Critical Threats Caught"
+              title="Critical Threats"
               value={loading ? '...' : error ? '-' : (Math.floor((stats?.total_blocked || 0) * 0.18)).toLocaleString()}
               subtitle={loading ? 'Loading...' : error ? 'Error' : 'High severity'}
-              accent="threat"
+              accent="warn"
               delay={2}
             />
             <MetricBlob
               title="Avg Latency"
               value={loading ? '...' : error ? '-' : `${stats?.avg_latency_ms?.toFixed(1) || 0}ms`}
               subtitle={loading ? 'Loading...' : error ? 'Error' : 'Firewall overhead'}
-              accent="warn"
+              accent="info"
               delay={3}
             />
           </section>
 
-          {/* Thin separator */}
-          <div style={{ height: 1, background: 'var(--border-faint)', marginBottom: 48 }} />
+          {/* Scan Volume Area Chart (Full Width) */}
+          <section style={{ paddingBottom: 32 }}>
+            <ScanAreaChart data={stats?.hourly_trend || []} loading={loading} error={error} />
+          </section>
 
-          {/* Analytics — bento row, no containers */}
+          {/* Threat Distribution & System Risk & Profile */}
           <section
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.3fr 0.9fr',
-              gap: 56,
-              paddingBottom: 56,
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: 32,
+              paddingBottom: 32,
             }}
           >
             <ThreatArcs data={stats?.threat_distribution || []} loading={loading} error={error} total={stats?.total_blocked || 0} />
+            <ThreatProfile />
             <SeverityIndex stats={stats} loading={loading} error={error} />
           </section>
 
-          {/* New Dashboard Enhancements */}
+          {/* Layout Analytics, Ranked Bars, Heatmap */}
           <section
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1.5fr',
-              gap: 40,
-              paddingBottom: 56,
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: 32,
+              paddingBottom: 48,
+              alignItems: 'stretch'
             }}
           >
             <LayerAnalytics />
-            <TopAttackers />
+            <HorizontalBarChart data={stats?.threat_distribution || []} loading={loading} error={error} />
             <ThreatHeatmap />
           </section>
 
@@ -215,6 +222,28 @@ export default function Dashboard() {
           <section>
             <ThreatFeed />
           </section>
+
+          {/* Footer Area */}
+          <footer
+            className="footer-region"
+            style={{
+              marginTop: 64,
+              paddingTop: 24,
+              borderTop: '1px solid var(--border-faint)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <div>
+              &copy; {new Date().getFullYear()} MalIntent Security. All rights reserved.
+            </div>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy Policy</a>
+              <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Terms of Service</a>
+              <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>System Status</a>
+            </div>
+          </footer>
         </div>
       </main>
     </div>

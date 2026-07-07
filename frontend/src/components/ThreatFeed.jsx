@@ -3,9 +3,16 @@ import { getLogs } from '../api/client'
 
 const severityColor = {
   critical: 'var(--accent-threat)',
-  high: '#F97316',
+  high: 'var(--accent-warn)',
   medium: 'var(--accent-warn)',
-  low: 'var(--text-faint)',
+  low: 'var(--accent-secure)',
+}
+
+const severityShape = {
+  critical: '●',
+  high: '◆',
+  medium: '▲',
+  low: '○',
 }
 
 const statusLabel = {
@@ -75,7 +82,7 @@ export default function ThreatFeed() {
         }
       }
     }
-    
+
     fetchLogs()
     const intervalId = setInterval(fetchLogs, 3000)
     return () => {
@@ -88,47 +95,68 @@ export default function ThreatFeed() {
   const filters = ['all', 'critical', 'high', 'low']
 
   return (
-    <div>
+    <div
+      style={{
+        background: 'var(--card-bg)',
+        border: '1px solid var(--card-border)',
+        borderRadius: 'var(--card-radius)',
+        boxShadow: 'var(--card-shadow)',
+        padding: 24,
+        transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--card-shadow-hover)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--card-shadow)'; }}
+    >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <h2
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <h3
             style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.2rem',
+              fontFamily: 'var(--font-heading)',
+              fontSize: '0.95rem',
               fontWeight: 600,
-              letterSpacing: '-0.02em',
               color: 'var(--text-primary)',
               margin: 0,
             }}
           >
-            Threat Feed
-          </h2>
+            Live Threat Feed
+          </h3>
+          {/* Pulsing green dot */}
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: 'var(--accent-secure)',
+              display: 'inline-block',
+              boxShadow: '0 0 6px var(--accent-secure)',
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }}
+          />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-faint)' }}>
-            Showing top {Math.min(filtered.length, 15)} of {threats.length} events
+            {Math.min(filtered.length, 15)} of {threats.length} events
           </span>
         </div>
 
-        {/* Filters — pure text toggles, no background boxes */}
-        <div style={{ display: 'flex', gap: 16 }}>
+        {/* Filter pills */}
+        <div style={{ display: 'flex', gap: 8 }}>
           {filters.map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               style={{
-                padding: 0,
-                border: 'none',
-                background: 'none',
-                color: filter === f ? 'var(--text-primary)' : 'var(--text-faint)',
+                padding: '4px 12px',
+                border: filter === f ? '1px solid transparent' : '1px solid var(--card-border)',
+                background: filter === f ? 'var(--accent-threat)' : 'var(--bg-surface)',
+                color: filter === f ? '#ffffff' : 'var(--text-secondary)',
                 fontSize: '0.65rem',
-                fontWeight: filter === f ? 600 : 400,
+                fontWeight: 500,
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-mono)',
-                transition: 'color 0.15s ease',
-                borderBottom: filter === f ? '1px solid var(--text-primary)' : '1px solid transparent',
-                paddingBottom: 2,
+                borderRadius: 20,
+                transition: 'all 0.15s ease',
               }}
             >
               {f}
@@ -141,8 +169,8 @@ export default function ThreatFeed() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '56px 72px 1fr 140px 2fr 80px 72px',
-          padding: '0 0 8px',
+          gridTemplateColumns: '28px 72px 120px 64px 1fr 80px 68px',
+          padding: '0 8px 8px',
           borderBottom: '1px solid var(--border-subtle)',
         }}
       >
@@ -151,10 +179,10 @@ export default function ThreatFeed() {
             key={h}
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '0.52rem',
+              fontSize: '0.65rem',
               fontWeight: 500,
               textTransform: 'uppercase',
-              letterSpacing: '0.1em',
+              letterSpacing: '0.06em',
               color: 'var(--text-faint)',
             }}
           >
@@ -163,12 +191,12 @@ export default function ThreatFeed() {
         ))}
       </div>
 
-      {/* Rows — no backgrounds, pure typographic structure */}
+      {/* Rows */}
       <div>
         {loading && threats.length === 0 ? (
           [...Array(5)].map((_, i) => (
-            <div key={`skel-${i}`} style={{ display: 'grid', gridTemplateColumns: '56px 72px 1fr 140px 2fr 80px 72px', padding: '10px 0', borderBottom: '1px solid var(--border-faint)', alignItems: 'center' }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--border-subtle)', display: 'inline-block', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+            <div key={`skel-${i}`} style={{ display: 'grid', gridTemplateColumns: '28px 72px 120px 64px 1fr 80px 68px', padding: '10px 8px', borderBottom: '1px solid var(--border-faint)', alignItems: 'center' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--border-subtle)', display: 'inline-block', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
               <div style={{ height: 10, width: 40, background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
               <div style={{ height: 10, width: '60%', background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
               <div style={{ height: 10, width: '40%', background: 'var(--border-subtle)', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
@@ -182,7 +210,7 @@ export default function ThreatFeed() {
         ) : filtered.length === 0 ? (
           <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-faint)' }}>No events match current filter.</div>
         ) : null}
-        {filtered.slice(0, 15).map(threat => {
+        {filtered.slice(0, 15).map((threat, idx) => {
           const sevColor = severityColor[threat.severity]
           const stat = statusLabel[threat.status]
 
@@ -191,18 +219,23 @@ export default function ThreatFeed() {
               key={threat.id + threat.timestamp}
               style={{
                 display: 'grid',
-                gridTemplateColumns: '56px 72px 1fr 140px 2fr 80px 72px',
-                padding: '10px 0',
+                gridTemplateColumns: '28px 72px 120px 64px 1fr 80px 68px',
+                padding: '10px 8px',
                 borderBottom: '1px solid var(--border-faint)',
                 alignItems: 'center',
-                transition: 'opacity 0.15s ease',
+                background: idx % 2 === 0 ? 'var(--card-bg)' : 'var(--bg-surface)',
+                transition: 'background 0.15s ease',
+                borderRadius: 4,
               }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'color-mix(in srgb, var(--accent-info) 8%, var(--card-bg))'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = idx % 2 === 0 ? 'var(--card-bg)' : 'var(--bg-surface)'; }}
             >
-              {/* Severity dot */}
+              {/* Severity indicator */}
               <span
+                className={`sev-dot-${threat.severity}`}
                 style={{
-                  width: 5,
-                  height: 5,
+                  width: 10,
+                  height: 10,
                   borderRadius: '50%',
                   background: sevColor,
                   display: 'inline-block',
@@ -221,7 +254,7 @@ export default function ThreatFeed() {
                 {threat.source}
               </span>
 
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 16 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 16, fontWeight: 500 }}>
                 {threat.payload}
               </span>
 

@@ -1,107 +1,235 @@
 @import "tailwindcss";
 
-/* ── MalIntent · Editorial SaaS Design System ──────────────── */
+/* ── MalIntent · Premium Security Dashboard Design System ──── */
 
-@theme {
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-
-  /* Obsidian palette */
-  --color-obsidian-950: #0B0D14;
-  --color-obsidian-900: #0e1018;
-  --color-obsidian-800: #111524;
-  --color-obsidian-700: #181d30;
-  --color-obsidian-600: #1f2740;
-
-  /* Accent: Crimson (threats) */
-  --color-crimson-500: #E53935;
-  --color-crimson-400: #EF5350;
-  --color-crimson-300: #F48484;
-  --color-crimson-glow: rgba(229, 57, 53, 0.25);
-
-  /* Accent: Cyber Cyan (secure) */
-  --color-cyan-500: #00E5FF;
-  --color-cyan-400: #4DEEFC;
-  --color-cyan-300: #80F2FD;
-  --color-cyan-glow: rgba(0, 229, 255, 0.2);
-
-  /* Accent: Amber (warnings) */
-  --color-amber-500: #FFB020;
-  --color-amber-400: #FFC04D;
-
-  /* Accent: Slate Blue (info) */
-  --color-slate-blue-500: #6366F1;
-  --color-slate-blue-400: #818CF8;
-}
-
-/* ── CSS Custom Properties ──────────────────────────────────── */
+/* ── Netflix Dark Theme (Default) ──────────────────────────── */
 
 :root {
-  --bg-base: #0B0D14;
-  --bg-elevated: #111524;
-  --bg-surface: rgba(255, 255, 255, 0.02);
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-faint: rgba(255, 255, 255, 0.04);
+  /* Brand Font (Exclusively used for the MALINTENT logo) */
+  --font-brand: 'Syncopate', sans-serif;
+  /* Structural Fonts */
+  --font-sidebar: 'Montserrat', system-ui, sans-serif;
+  --font-main-body: 'Lora', serif;
+  --font-main-header: 'Playfair Display', serif;
+  --font-section-header: 'Playfair Display', serif;
+  --font-footer: 'Montserrat', system-ui, sans-serif;
+  /* Data / Numbers */
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --text-primary: #F3F4F6;
-  --text-secondary: #9CA3AF;
-  --text-muted: #8B949E;
-  --text-faint: #5C6370;
+  --bg-base: #0a0a0a;
+  --bg-elevated: #141414;
+  --bg-surface: #1c1c1c;
+  --border-subtle: #2a2a2a;
+  --border-faint: #1e1e1e;
 
-  --accent-threat: #E53935;
-  --accent-secure: #00E5FF;
-  --accent-warn: #FFB020;
+  --text-primary: #e5e5e5;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+  /* Brand Colors & Accents (Original) */
+  --accent-threat: #E50914;
+  --accent-secure: #46d369;
+  --accent-warn: #e8b600;
+  --accent-info: #0ea5e9;
 
-  --sidebar-bg: #0B0D14;
+  --sidebar-bg: #0a0a0a;
+  --sidebar-border: #1e1e1e;
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 72px;
+
+  /* 3D Card System */
+  --card-bg: #141414;
+  --card-border: #2a2a2a;
+  --card-radius: 16px;
+  --card-shadow:
+    0 1px 2px rgba(0,0,0,0.3),
+    0 4px 8px rgba(0,0,0,0.25),
+    0 12px 24px rgba(0,0,0,0.2);
+  --card-shadow-hover:
+    0 2px 4px rgba(0,0,0,0.3),
+    0 8px 16px rgba(0,0,0,0.25),
+    0 20px 40px rgba(0,0,0,0.2);
+
+  /* Chart Glow */
+  --glow-threat: 0 0 20px rgba(229, 9, 20, 0.3);
+  --glow-secure: 0 0 20px rgba(70, 211, 105, 0.3);
+  --glow-warn: 0 0 20px rgba(232, 182, 0, 0.3);
+  --glow-info: 0 0 20px rgba(14, 165, 233, 0.3);
+
+  /* Chart gradient fills */
+  --chart-threat-from: rgba(229, 9, 20, 0.35);
+  --chart-threat-to: rgba(229, 9, 20, 0.0);
+  --chart-secure-from: rgba(70, 211, 105, 0.35);
+  --chart-secure-to: rgba(70, 211, 105, 0.0);
+  --chart-info-from: rgba(14, 165, 233, 0.35);
+  --chart-info-to: rgba(14, 165, 233, 0.0);
+
+  /* Scrollbar */
+  --scrollbar-thumb: #2a2a2a;
 }
+
+/* ── Premium Light Theme ─────────────────────────────────── */
 
 [data-theme="light"] {
-  --bg-base: #F5F3EF;
-  --bg-elevated: #EDEAE4;
-  --bg-surface: rgba(255, 255, 255, 0.7);
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-faint: rgba(0, 0, 0, 0.04);
+  --bg-base: #f0f2f5;
+  --bg-elevated: #ffffff;
+  --bg-surface: #f8f9fb;
+  --border-subtle: #d1d5db;
+  --border-faint: #e5e7eb;
 
-  --text-primary: #1A1A2E;
-  --text-secondary: #4A4A6A;
-  --text-muted: #6B7280;
-  --text-faint: #9CA3AF;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
 
-  --accent-threat: #DC2626;
-  --accent-secure: #0891B2;
-  --accent-warn: #D97706;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e2e5ea;
 
-  --sidebar-bg: #0F1117;
+  /* 3D Cards — Rich elevation with layered shadows */
+  --card-bg: #ffffff;
+  --card-border: #e2e5ea;
+  --card-radius: 16px;
+  --card-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 12px rgba(0,0,0,0.06),
+    0 12px 28px rgba(15,23,42,0.08);
+  --card-shadow-hover:
+    0 2px 4px rgba(0,0,0,0.06),
+    0 8px 20px rgba(0,0,0,0.08),
+    0 24px 48px rgba(15,23,42,0.12);
+
+  --scrollbar-thumb: #cbd5e1;
 }
 
-/* ── Base ────────────────────────────────────────────────────── */
+/* ── Light Mode Enhancements ─────────────────────────────── */
+
+[data-theme="light"] body {
+  background: linear-gradient(165deg, #f0f2f5 0%, #e8ecf1 50%, #f0f2f5 100%);
+}
+
+[data-theme="light"] aside {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%) !important;
+  box-shadow: 2px 0 16px rgba(15,23,42,0.06) !important;
+}
+
+[data-theme="light"] .sidebar-region button[style],
+[data-theme="light"] .sidebar-region a {
+  transition: all 0.2s ease;
+}
+
+
+/* Table row hover for Light Mode */
+[data-theme="light"] tr:hover {
+  background: rgba(15,23,42,0.02) !important;
+}
+
+/* Metric blob cards in Light Mode - subtle left accent border */
+[data-theme="light"] .metric-card {
+  border-left: 3px solid #cbd5e1;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+[data-theme="light"] .metric-card:hover {
+  border-left-color: #475569;
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.06),
+    0 12px 32px rgba(15,23,42,0.10) !important;
+}
+
+/* ── Structural Typography Classes ────────────────────────── */
+
+.sidebar-region {
+  font-family: var(--font-sidebar);
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+}
+
+.sidebar-region a, .sidebar-region span {
+  font-family: inherit;
+}
+
+.main-region {
+  font-family: var(--font-main-body);
+  font-size: 1rem; /* 16px */
+}
+
+.main-region h1, .main-region h2, .main-region h3 {
+  font-family: var(--font-main-header);
+}
+
+.main-region h3 {
+  font-family: var(--font-section-header);
+}
+
+.footer-region {
+  font-family: var(--font-footer);
+  font-size: 0.75rem; /* 12px */
+  font-weight: 300;
+  color: var(--text-muted);
+}
+
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-obsidian-600) transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
   box-sizing: border-box;
 }
 
+/* ── Queue Action Buttons ──────────────────────────────────── */
+
+.btn-action {
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-safe {
+  border: 1px solid var(--accent-secure);
+  color: var(--accent-secure);
+}
+.btn-safe:hover, .btn-safe:active {
+  background: var(--accent-secure);
+  color: var(--bg-base) !important;
+  box-shadow: 0 4px 12px rgba(156, 163, 175, 0.4);
+}
+
+.btn-threat {
+  border: 1px solid var(--accent-threat);
+  color: var(--accent-threat);
+}
+.btn-threat:hover, .btn-threat:active {
+  background: var(--accent-threat);
+  color: var(--bg-base) !important;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.4);
+}
+
 html {
-  background: var(--bg-base);
+  font-family: var(--font-main-body);
+  font-size: 16px;
+  background-color: var(--bg-base);
   color: var(--text-primary);
-  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'cv11', 'ss01';
 }
 
 body {
   margin: 0;
+  padding: 0;
   min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-main-header);
 }
 
 #root {
   min-height: 100vh;
 }
 
-/* ── Subtle Animations (restrained, editorial) ──────────────── */
+/* ── Animations ────────────────────────────────────────────── */
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -111,6 +239,11 @@ body {
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse-dot {
@@ -128,16 +261,157 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Utility Classes ─────────────────────────────────────────── */
+@keyframes chartGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(229, 9, 20, 0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(229, 9, 20, 0.5)); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes barFill {
+  from { width: 0%; }
+  to { width: var(--bar-width); }
+}
+
+/* ── Utility Classes ───────────────────────────────────────── */
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.font-brand {
+  font-family: var(--font-brand);
 }
 
 .font-display {
   font-family: var(--font-display);
 }
 
+.font-heading {
+  font-family: var(--font-heading);
+}
+
 .font-mono {
   font-family: var(--font-mono);
+}
+
+/* ── 3D Card System ────────────────────────────────────────── */
+
+.card-3d {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-3d:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* ── Recharts Overrides ────────────────────────────────────── */
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: var(--border-faint) !important;
+}
+
+.recharts-text {
+  fill: var(--text-faint) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.65rem !important;
+}
+
+.recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+/* ── Skeleton Loading ──────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface) 25%,
+    var(--border-faint) 50%,
+    var(--bg-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ── Recharts Customization ────────────────────────────────── */
+
+.radar-axis-tick {
+  fill: var(--text-primary) !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+}
+
+.chart-axis-tick {
+  fill: var(--text-primary) !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.65rem !important;
+}
+
+/* ── Threat Analysis Page ──────────────────────────────────── */
+
+/* Revert to monochrome palette exclusively for Threat Analysis, Comparison Mode, and Review Queue in Light Mode */
+[data-theme="light"] .threat-analysis-page,
+[data-theme="light"] .comparison-page,
+[data-theme="light"] .review-queue-page {
+  --accent-threat: #1e293b;
+  --accent-secure: #cbd5e1;
+  --accent-warn:   #8492a6;
+  --accent-info:   #475569;
+}
+
+/* Solid capsule fills to differentiate them within the monochrome palette */
+[data-theme="light"] .threat-analysis-page span.dec-BLOCK,
+[data-theme="light"] .threat-analysis-page button.dec-active.dec-BLOCK {
+  background: var(--accent-threat) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-threat) !important;
+  box-shadow: 0 4px 12px rgba(30,41,59,0.2) !important;
+}
+
+[data-theme="light"] .threat-analysis-page span.dec-FLAG,
+[data-theme="light"] .threat-analysis-page button.dec-active.dec-FLAG {
+  background: var(--accent-warn) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-warn) !important;
+  box-shadow: 0 4px 12px rgba(148,163,184,0.3) !important;
+}
+
+[data-theme="light"] .threat-analysis-page span.dec-ALLOW,
+[data-theme="light"] .threat-analysis-page button.dec-active.dec-ALLOW {
+  background: var(--accent-secure) !important;
+  color: #1e293b !important;
+  border-color: var(--accent-secure) !important;
+  box-shadow: 0 4px 12px rgba(100,116,139,0.3) !important;
+}
+
+/* Ensure readable text when 'Mark Safe' button fills with light slate in Review Queue */
+[data-theme="light"] .review-queue-page .btn-safe:hover,
+[data-theme="light"] .review-queue-page .btn-safe:active {
+  color: #1e293b !important;
+}
+
+/* Ensure readable text for SAFE and FIREWALL ACTIVE text in Comparison Mode Light Mode */
+[data-theme="light"] .comparison-page .safe-text {
+  color: #8ca1b8 !important;
+}
+[data-theme="light"] .comparison-page .safe-text-bg {
+  background: #8ca1b8 !important;
 }
