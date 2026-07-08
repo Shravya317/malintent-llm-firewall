@@ -29,8 +29,7 @@ NLP pipeline) — pii_scrubber.py already pays that cost once at import time for
 the Firewall Log's PII scrubbing.  Rather than constructing a second
 AnalyzerEngine here (doubling memory usage and adding a second multi-second
 cold start), this module imports and reuses pii_scrubber's existing instance.
-This is the exact "audit every other module for the same mistake" lesson from
-Week 5 Day 2's latency profiling guidance, applied proactively.
+This avoids redundant latency and memory overhead.
 
 Bare-card fallback: Presidio's CREDIT_CARD recognizer is context-aware — it
 weights nearby keywords like "card", "visa", "amex" when scoring a match, and
@@ -53,7 +52,9 @@ from typing import Any, Dict
 
 # Reuse the module-level AnalyzerEngine singleton already initialised in
 # pii_scrubber.py instead of constructing a second one here.
-from pii_scrubber import _analyzer as _shared_analyzer  # noqa: F401  (intentional reuse)
+from pii_scrubber import (
+    _analyzer as _shared_analyzer,
+)  # noqa: F401  (intentional reuse)
 
 logger = logging.getLogger("malintent.sel.dynamic_data_masking")
 
@@ -71,9 +72,8 @@ _MASKABLE_ENTITIES = ("PHONE_NUMBER", "CREDIT_CARD", "EMAIL_ADDRESS")
 #
 # NOTE: this is process-local, in-memory state. It resets on server restart
 # and is not shared across multiple uvicorn worker processes. That's the
-# correct behaviour for Week 5 — Week 7's Action Audit Logger / session store
-# work can promote this to a shared cache (e.g. Redis) if cross-worker
-# determinism within a session becomes a requirement.
+# correct behaviour currently. A shared cache (e.g. Redis) can be introduced
+# if cross-worker determinism within a session becomes a requirement.
 _session_mask_cache: Dict[str, Dict[str, str]] = {}
 
 

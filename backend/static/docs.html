@@ -1373,7 +1373,7 @@
                     <div class="endpoint-header">
                         <span class="method-badge badge-put">PUT</span>
                         <span class="endpoint-path">/api/v1/config</span>
-                        <span class="endpoint-summary">Write a Fernet-encrypted config value</span>
+                        <span class="endpoint-summary">Write a pgcrypto-encrypted config value</span>
                         <svg class="endpoint-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2">
                             <polyline points="6 9 12 15 18 9" />
@@ -1381,7 +1381,7 @@
                     </div>
                     <div class="endpoint-body">
                         <p class="endpoint-desc">Upserts a configuration value. The plaintext value is encrypted with
-                            Fernet AES before any database write — only ciphertext is persisted. Raw plaintext never
+                            pgcrypto before any database write — only ciphertext is persisted. Raw plaintext never
                             touches disk.</p>
                         <div class="field-label">Request Body</div>
                         <table class="schema-table">

@@ -3,7 +3,7 @@ backend/tests/conftest.py
 =========================
 Pytest fixtures for the MalIntent test suite.
 
-Week 7 change: replaced the in-memory SQLite engine with a real PostgreSQL
+Database change: replaced the in-memory SQLite engine with a real PostgreSQL
 connection.  Tests run against the same engine (postgres:16) as both the local
 Docker dev environment and Supabase production, eliminating the entire class of
 "works in tests, breaks in prod" bugs caused by SQLite dialect differences.
@@ -32,15 +32,15 @@ completes, the transaction is rolled back — no state leaks between tests,
 no cleanup teardown needed, and the session-scoped engine table creation
 only runs once per test session.
 
-Field-name note (fixed after Week 7 review)
---------------------------------------------
+Field-name note
+---------------
 These fixtures were originally written against field names that did not
 match the real models.py schema (e.g. "triggered_layers" instead of
 "layers_triggered", "key_name" instead of "key", "user_role" instead of
 "session_role"). They have been corrected to match models.py exactly.
 
-Schema-drift fix (post Week 7 review)
---------------------------------------
+Schema-drift fix
+----------------
 The session-scoped `engine` fixture previously only called
 Base.metadata.create_all(eng). SQLAlchemy's create_all() is additive-only:
 if a table from an older schema version is already sitting in the local
@@ -91,6 +91,7 @@ Point it at a dedicated test database if you want full isolation:
 # Session-scoped engine — created once per pytest session
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="session")
 def engine():
     """
@@ -118,8 +119,7 @@ def engine():
 
     # Always start from a known-clean schema. create_all() alone is not
     # enough here: it will not alter an existing table left over from an
-    # older model version, which is exactly what caused the Week 7
-    # "column does not exist" failures.
+    # older model version, which causes "column does not exist" failures.
     Base.metadata.drop_all(eng)
     Base.metadata.create_all(eng)
     yield eng
@@ -129,6 +129,7 @@ def engine():
 # ---------------------------------------------------------------------------
 # Function-scoped session — each test gets its own rolled-back transaction
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="function")
 def db(engine) -> Generator[Session, None, None]:
@@ -152,6 +153,7 @@ def db(engine) -> Generator[Session, None, None]:
 # ---------------------------------------------------------------------------
 # Helper fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def sample_threat_log(db: Session) -> ThreatLog:

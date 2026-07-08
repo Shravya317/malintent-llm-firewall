@@ -2,20 +2,20 @@
 
 # Project Runbook (Weeks 1–7)
 
-This document contains everything required to execute, test, verify, and demonstrate the MalIntent project through Week 7.
+This document contains everything required to execute, test, verify, and demonstrate the MalIntent project through Phase 7.
 
 ---
 
 # Table of Contents
 
 1. Quick Start
-2. Week 1 Runbook
-3. Week 2 Runbook
-4. Week 3 Runbook
-5. Week 4 Runbook
-6. Week 5 Runbook
-7. Week 6 Runbook
-8. Week 7 Runbook
+2. Phase 1 Runbook
+3. Phase 2 Runbook
+4. Phase 3 Runbook
+5. Phase 4 Runbook
+6. Phase 5 Runbook
+7. Phase 6 Runbook
+8. Phase 7 Runbook
 9. Production Deployment
 10. Docker
 11. PostgreSQL Migration
@@ -43,30 +43,30 @@ This document contains everything required to execute, test, verify, and demonst
 From the backend directory:
 
 ```powershell
-.\run_tests.ps1
+.\malintent_full_validation.ps1
 ```
 
 This script automatically runs:
 
-- Week 1 – Pattern Engine Tests
-- Week 2 – ML Classifier Smoke Test
-- Week 3 – Semantic Engine
-- Week 3 – Risk Scorer
-- Week 3 – Integration Tests
-- Week 4 – Backend API Tests
-- Week 5 – Secret Protection Tests
-- Week 5 – Dynamic Data Masking Tests
-- Week 5 – Pipeline Profiler
-- Week 6 – Output Validator Tests
-- Week 6 – Output Validator Catch Rate
-- Week 6 – SEL End-to-End Tests
-- Week 7 – Week 7 Tests
-- Week 7 – Ablation Benchmark
-- Week 7 – Demo Event Seeding
+- Phase 1 – Pattern Engine Tests
+- Phase 2 – ML Classifier Smoke Test
+- Phase 3 – Semantic Engine
+- Phase 3 – Risk Scorer
+- Phase 3 – Integration Tests
+- Phase 4 – Backend API Tests
+- Phase 5 – Secret Protection Tests
+- Phase 5 – Dynamic Data Masking Tests
+- Phase 5 – Pipeline Profiler
+- Phase 6 – Output Validator Tests
+- Phase 6 – Output Validator Catch Rate
+- Phase 6 – SEL End-to-End Tests
+- Phase 7 – Phase 7 Tests
+- Phase 7 – Ablation Benchmark
+- Phase 7 – Demo Event Seeding
 
 ---
 
-## Start Backend Server (Week 4)
+## Start Backend Server (Phase 4)
 
 ```powershell
 cd backend
@@ -96,12 +96,12 @@ http://localhost:8000/docs
 
 ---
 
-## Week 7 Quick Start Commands
+## Phase 7 Quick Start Commands
 
-### Run Week 7 Tests
+### Run Phase 7 Tests
 
 ```powershell
-python -m pytest tests/test_week7.py -v
+python -m pytest tests/test_database.py -v
 ```
 
 Expected output:
@@ -130,10 +130,10 @@ Expected output:
 Verify the following CSV files are generated:
 
 ```text
-ablation_results_corpus1.csv
-ood_jailbreak.csv
-ood_notinject.csv
-ood_gandalf.csv
+docs/benchmark_logs/ablation_results_corpus1.csv
+docs/benchmark_logs/ood_jailbreak.csv
+docs/benchmark_logs/ood_notinject.csv
+docs/benchmark_logs/ood_gandalf.csv
 ```
 
 ---
@@ -152,7 +152,7 @@ Expected output:
 
 ---
 
-# Week 1 Runbook
+# Phase 1 Runbook
 
 ## Step 1 — Open Backend Directory
 
@@ -212,7 +212,7 @@ Current implementation:
 
 ---
 
-## Week 1 Deliverables
+## Phase 1 Deliverables
 
 Completed:
 
@@ -226,10 +226,10 @@ Completed:
 
 ---
 
-## Week 1 One Command
+## Phase 1 One Command
 
 ```powershell
-.\run_tests.ps1
+.\malintent_full_validation.ps1
 ```
 
 Automatically runs:
@@ -238,7 +238,7 @@ Automatically runs:
 
 ---
 
-# Week 2 Runbook
+# Phase 2 Runbook
 
 ## Step 1 — Open Backend Directory
 
@@ -346,7 +346,7 @@ Additional Out-of-Distribution Benchmarks:
 
 ---
 
-## Week 2 Deliverables
+## Phase 2 Deliverables
 
 Completed:
 
@@ -360,10 +360,10 @@ Completed:
 
 ---
 
-## Week 2 One Command
+## Phase 2 One Command
 
 ```powershell
-.\run_tests.ps1
+.\malintent_full_validation.ps1
 ```
 
 Automatically runs:
@@ -393,7 +393,7 @@ These files contain the fine-tuned PromptGuard model used by Layer B.
 
 ---
 
-# Week 3 Runbook
+# Phase 3 Runbook
 
 ## Step 1 — Open Backend Directory
 
@@ -504,7 +504,7 @@ ALLOW : Score < 25
 
 ---
 
-## Week 3 Deliverables
+## Phase 3 Deliverables
 
 Completed:
 
@@ -518,10 +518,10 @@ Completed:
 
 ---
 
-## Week 3 One Command
+## Phase 3 One Command
 
 ```powershell
-.\run_tests.ps1
+.\malintent_full_validation.ps1
 ```
 
 Automatically executes:
@@ -529,11 +529,11 @@ Automatically executes:
 1. Semantic Engine
 2. Risk Scorer
 3. Integration Tests
-4. Week 4 Backend Tests
+4. Phase 4 Backend Tests
 
 ---
 
-# Week 4 Runbook
+# Phase 4 Runbook
 
 ## Backend Startup
 
@@ -569,7 +569,7 @@ http://localhost:8000/docs
 
 ---
 
-## Week 4 Backend Tests
+## Phase 4 Backend Tests
 
 Open a second terminal.
 
@@ -578,7 +578,7 @@ Activate the virtual environment.
 Run:
 
 ```powershell
-pytest tests/test_week4.py -v
+pytest tests/test_core.py -v
 ```
 
 Expected:
@@ -589,7 +589,7 @@ Expected:
 
 ---
 
-# Week 4 Features
+# Phase 4 Features
 
 Backend components implemented:
 
@@ -599,16 +599,16 @@ Backend components implemented:
 - Dashboard Statistics
 - SHA-256 Payload Hashing
 - PII Scrubber
-- Fernet Encryption
-- SQLite Database
-- Permission Validator
+- pgcrypto Encryption
+- PostgreSQL Database
+- Permission Validator (Dynamic)
 - Tool Access Controller
-- Output Validator Stub
-- Document Scanner Stub
+- Output Validator Implemented
+- Document Scanner Implemented
 
 ---
 
-# Week 5 Runbook
+# Phase 5 Runbook
 
 ## Step 1 — Activate Virtual Environment
 
@@ -748,7 +748,7 @@ Ensure:
 
 ---
 
-## Week 5 Features
+## Phase 5 Features
 
 ### Dynamic Data Masking
 
@@ -779,7 +779,7 @@ Ensure:
 
 ---
 
-## Week 5 Deliverables
+## Phase 5 Deliverables
 
 Completed:
 
@@ -797,10 +797,10 @@ Completed:
 
 ---
 
-## Week 5 One Command
+## Phase 5 One Command
 
 ```powershell
-.\run_tests.ps1
+.\malintent_full_validation.ps1
 ```
 
 Automatically executes:
@@ -811,7 +811,7 @@ Automatically executes:
 
 ---
 
-# Week 6 Runbook
+# Phase 6 Runbook
 
 ## Step 1 — Activate Virtual Environment
 
@@ -927,7 +927,7 @@ Confirm the API returns:
 
 ---
 
-## Week 6 Features
+## Phase 6 Features
 
 - Output Consistency Validator
 - Semantic Similarity Validation
@@ -939,7 +939,7 @@ Confirm the API returns:
 
 ---
 
-## Week 6 Deliverables
+## Phase 6 Deliverables
 
 Completed:
 
@@ -953,10 +953,10 @@ Completed:
 
 ---
 
-## Week 6 One Command
+## Phase 6 One Command
 
 ```powershell
-.\run_tests.ps1
+.\malintent_full_validation.ps1
 ```
 
 Automatically executes:
@@ -967,7 +967,7 @@ Automatically executes:
 
 ---
 
-# Week 7 Runbook
+# Phase 7 Runbook
 
 ## Step 1 — Activate Virtual Environment
 
@@ -984,10 +984,10 @@ Expected:
 
 ---
 
-## Step 2 — Run Week 7 Tests
+## Step 2 — Run Phase 7 Tests
 
 ```powershell
-python -m pytest tests/test_week7.py -v
+python -m pytest tests/test_database.py -v
 ```
 
 Expected:
@@ -1028,10 +1028,10 @@ Expected:
 Verify the following output files exist after the script completes:
 
 ```text
-ablation_results_corpus1.csv
-ood_jailbreak.csv
-ood_notinject.csv
-ood_gandalf.csv
+docs/benchmark_logs/ablation_results_corpus1.csv
+docs/benchmark_logs/ood_jailbreak.csv
+docs/benchmark_logs/ood_notinject.csv
+docs/benchmark_logs/ood_gandalf.csv
 ```
 
 If any CSV is missing, re-run the script with verbose logging enabled and verify that the benchmark corpus files are present in the expected input directory.
@@ -1286,7 +1286,7 @@ cd ..\backend
 
 ---
 
-## Week 7 Features
+## Phase 7 Features
 
 ### Production Deployment
 
@@ -1331,7 +1331,7 @@ cd ..\backend
 
 ---
 
-## Week 7 Deliverables
+## Phase 7 Deliverables
 
 Completed:
 
@@ -1342,7 +1342,7 @@ Completed:
 - Database Seeded
 - Ablation Benchmark Executed
 - CSV Reports Generated
-- Week 7 Tests Passed
+- Phase 7 Tests Passed
 - Production Swagger Verified
 - Production Backend Verified
 - SDK Installed and Verified
@@ -1352,15 +1352,15 @@ Completed:
 
 ---
 
-## Week 7 One Command
+## Phase 7 One Command
 
 ```powershell
-.\run_tests.ps1
+.\malintent_full_validation.ps1
 ```
 
 Automatically executes:
 
-1. Week 7 Tests
+1. Phase 7 Tests
 2. Ablation Benchmark
 3. Demo Event Seeding
 
@@ -1393,8 +1393,8 @@ Expected:
 ```powershell
 docker run -p 8000:8000 \
   -e DATABASE_URL=$DATABASE_URL \
-  -e FERNET_KEY=$FERNET_KEY \
   -e PG_CRYPTO_KEY=$PG_CRYPTO_KEY \
+  -e SUPABASE_JWT_SECRET=$SUPABASE_JWT_SECRET \
   -e HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
   -e GROQ_API_KEY=$GROQ_API_KEY \
   malintent-backend
@@ -1427,8 +1427,8 @@ gcloud run deploy malintent-backend \
   --platform managed \
   --allow-unauthenticated \
   --set-env-vars DATABASE_URL=$DATABASE_URL \
-  --set-env-vars FERNET_KEY=$FERNET_KEY \
   --set-env-vars PG_CRYPTO_KEY=$PG_CRYPTO_KEY \
+  --set-env-vars SUPABASE_JWT_SECRET=$SUPABASE_JWT_SECRET \
   --set-env-vars HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
   --set-env-vars GROQ_API_KEY=$GROQ_API_KEY \
   --set-env-vars SUPABASE_DIRECT_URL=$SUPABASE_DIRECT_URL \
@@ -1526,10 +1526,11 @@ SUPABASE_TRANSACTION_POOLER_URL
 The PgBouncer-managed connection string used for all application-level database operations in production.
 
 ```text
-FERNET_KEY
-```
+SUPABASE_JWT_SECRET
 
-The symmetric Fernet key used by the configuration encryption layer to encrypt and decrypt stored configuration values such as API keys and system context.
+The secret key used to sign and verify JSON Web Tokens (JWT) for the backend authentication endpoints and landing page login.
+
+
 
 ```text
 PG_CRYPTO_KEY
@@ -1571,10 +1572,10 @@ python scripts/run_ablation_benchmark.py
 ### Output Files
 
 ```text
-ablation_results_corpus1.csv
-ood_jailbreak.csv
-ood_notinject.csv
-ood_gandalf.csv
+docs/benchmark_logs/ablation_results_corpus1.csv
+docs/benchmark_logs/ood_jailbreak.csv
+docs/benchmark_logs/ood_notinject.csv
+docs/benchmark_logs/ood_gandalf.csv
 ```
 
 Each CSV contains per-configuration precision, recall, F1, and accuracy metrics for the evaluated corpus.
@@ -1747,7 +1748,7 @@ Performs semantic consistency checking, high-risk pattern detection, AND-rule va
 
 Document Scanner.
 
-(Currently implemented as a Week 4 stub.)
+(Fully implemented with naive byte-level hidden text and pattern checking.)
 
 ---
 
@@ -2163,7 +2164,7 @@ Verify that the Cloud Run backend is live and reachable at the production URL. C
 ✓ Integration Tests Passed (200/200)
 ✓ Backend Running
 ✓ Swagger and custom page amalgamated with Swagger opens
-✓ Week 4 Backend Tests Passed (5/5)
+✓ Phase 4 Backend Tests Passed (5/5)
 ✓ Safe Prompt Verified
 ✓ Attack Prompt Verified
 ✓ Logs Endpoint Verified
@@ -2197,7 +2198,7 @@ Verify that the Cloud Run backend is live and reachable at the production URL. C
 ✓ CSV Reports Generated (corpus1, jailbreak, notinject, gandalf)
 ✓ Database Seeded (200 entries)
 ✓ Seeded Data Distribution Verified (ALLOW / FLAG / BLOCK)
-✓ Week 7 Tests Passed
+✓ Phase 7 Tests Passed
 ✓ SDK Installed (malintent-0.1.0)
 ✓ SDK Unit Tests Passed (4/4)
 ✓ SDK Clean Import Verified
@@ -2205,4 +2206,4 @@ Verify that the Cloud Run backend is live and reachable at the production URL. C
 
 ---
 
-**Last Updated:** Week 7 Complete
+**Last Updated:** Phase 7 Complete

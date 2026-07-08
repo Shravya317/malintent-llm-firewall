@@ -1,11 +1,8 @@
 """
-malintent/output_validator.py — Output Consistency Validator (Week 6)
+malintent/output_validator.py — Output Consistency Validator
 
-This is the project's second novel contribution (Contribution 2 in the
-research paper, project bible §Section 6): every previous detection layer
-(A/B/C, Weeks 1–3) inspects the INCOMING prompt. This module inspects the
-LLM's OUTGOING response instead, asking a different question — not "was the
-prompt malicious," but "does this response still look like it came from the
+This module inspects the LLM's OUTGOING response instead of the INCOMING prompt,
+asking a different question — "does this response still look like it came from the
 AI we configured."
 
 Why this catches things the input firewall can't:
@@ -14,7 +11,7 @@ Why this catches things the input firewall can't:
   behaviour. The output validator is the second line of defence: it doesn't
   re-score the prompt at all; it scores what the model actually said back.
 
-Decision rule — AND, not OR (project bible, Week 6 guide Day 1):
+Decision rule — AND, not OR:
   FLAGGED only when the response is BOTH semantically distant from the
   developer's stated system purpose AND contains a high-risk pattern
   (personal data / config disclosure / out-of-scope instruction compliance).
@@ -50,14 +47,16 @@ from typing import List, Optional
 
 # Reuse the Firewall Log's existing Presidio singleton rather than building a
 # second AnalyzerEngine (same rationale as sel/dynamic_data_masking.py).
-from pii_scrubber import _analyzer as _shared_pii_analyzer  # noqa: F401  (intentional reuse)
+from pii_scrubber import (
+    _analyzer as _shared_pii_analyzer,
+)  # noqa: F401  (intentional reuse)
 
 try:
     from sentence_transformers import SentenceTransformer, util
 except ImportError as exc:  # pragma: no cover
     raise ImportError(
         "OutputValidator requires sentence-transformers (already a project "
-        "dependency since Week 3's Layer C).\nRun: pip install sentence-transformers"
+        "dependency since Phase's Layer C).\nRun: pip install sentence-transformers"
     ) from exc
 
 logger = logging.getLogger("malintent.output_validator")
@@ -65,12 +64,10 @@ logger = logging.getLogger("malintent.output_validator")
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────
 
-MODEL_NAME = "all-MiniLM-L6-v2"   # same model family as Layer C, per the Week 6 guide
+MODEL_NAME = "all-MiniLM-L6-v2"  # same model family as Layer C
 
-# Calibrated starting point per the Week 6 guide's skeleton. Tune against your
-# own 10 adversarial examples (Day 3) and document any change alongside the
-# catch-rate in docs/output_validator_results.md — same discipline risk_scorer.py
-# already applies to SCORE_BLOCK / SCORE_FLAG.
+# Calibrated starting point for similarity threshold.
+# Document any change alongside the catch-rate in docs/evaluation_metrics.md.
 DEFAULT_SIMILARITY_THRESHOLD = 0.35
 
 # Entities checked for "personal data" disclosure in the response text.
@@ -113,21 +110,22 @@ _OOS_INSTRUCTION_PATTERNS = [
 ]
 
 # Sensitive data FORMAT disclosure — catches the "hypothetical framing" attack
-# strategy from the Week 6 guide's Day 3 table: the response never states a
-# real customer's actual account/card number, but reveals the *shape* of one
-# (e.g. "4521-XXXX-XXXX-1187"), which is itself a disclosure the deployment
+# strategy: the response never states a real customer's actual account/card
+# number, but reveals the *shape* of one (e.g. "4521-XXXX-XXXX-1187"), which
+# is itself a disclosure the deployment should never make.
 # should never make. Presidio's CREDIT_CARD recognizer requires an all-digit
 # string and will not catch a partially-masked placeholder pattern like this
 # — this regex exists specifically to cover that gap, the same "narrow
 # fallback for a structured-data path Presidio misses" pattern already used
 # in sel/dynamic_data_masking.py for bare card numbers.
 _SENSITIVE_FORMAT_PATTERNS = [
-    r"\b\d{4}[\s-]?[xX]{4}[\s-]?[xX]{4}[\s-]?\d{2,4}\b",   # masked card/account shape
-    r"\bstarts? with\b.{0,30}\bthe rest\b",                  # "starts with X, the rest..."
+    r"\b\d{4}[\s-]?[xX]{4}[\s-]?[xX]{4}[\s-]?\d{2,4}\b",  # masked card/account shape
+    r"\bstarts? with\b.{0,30}\bthe rest\b",  # "starts with X, the rest..."
 ]
 
 
 # ── RESULT TYPE ───────────────────────────────────────────────────────────────
+
 
 @dataclass
 class ValidationResult:
@@ -149,6 +147,7 @@ class ValidationResult:
     reason                    : human-readable explanation, mirroring the
                                  style of risk_scorer.RiskResult.explanation.
     """
+
     similarity_score: float
     high_risk_patterns_found: List[str] = field(default_factory=list)
     decision: str = "PASS"
@@ -156,6 +155,7 @@ class ValidationResult:
 
 
 # ── VALIDATOR ─────────────────────────────────────────────────────────────────
+
 
 class OutputValidator:
     """
@@ -210,9 +210,15 @@ class OutputValidator:
         self.threshold = similarity_threshold
         self.model = model if model is not None else SentenceTransformer(MODEL_NAME)
 
-        self._config_patterns = [re.compile(p, re.IGNORECASE) for p in _CONFIG_DISCLOSURE_PATTERNS]
-        self._oos_patterns = [re.compile(p, re.IGNORECASE) for p in _OOS_INSTRUCTION_PATTERNS]
-        self._format_patterns = [re.compile(p, re.IGNORECASE) for p in _SENSITIVE_FORMAT_PATTERNS]
+        self._config_patterns = [
+            re.compile(p, re.IGNORECASE) for p in _CONFIG_DISCLOSURE_PATTERNS
+        ]
+        self._oos_patterns = [
+            re.compile(p, re.IGNORECASE) for p in _OOS_INSTRUCTION_PATTERNS
+        ]
+        self._format_patterns = [
+            re.compile(p, re.IGNORECASE) for p in _SENSITIVE_FORMAT_PATTERNS
+        ]
 
         self.system_context: str = ""
         self.context_vector = None
@@ -229,7 +235,9 @@ class OutputValidator:
             raise ValueError("system_context must be a non-empty string.")
         self.system_context = system_context
         self.context_vector = self.model.encode(system_context, convert_to_tensor=True)
-        logger.debug("OutputValidator context vector updated (%d chars).", len(system_context))
+        logger.debug(
+            "OutputValidator context vector updated (%d chars).", len(system_context)
+        )
 
     def validate(self, response: str) -> ValidationResult:
         """
@@ -316,7 +324,9 @@ class OutputValidator:
                 text=text, entities=_PII_ENTITIES, language="en"
             )
         except Exception:  # pragma: no cover
-            logger.exception("PII scan failed inside OutputValidator — continuing without it.")
+            logger.exception(
+                "PII scan failed inside OutputValidator — continuing without it."
+            )
             pii_results = []
 
         if pii_results:

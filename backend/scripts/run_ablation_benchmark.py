@@ -1,7 +1,6 @@
 """
 backend/scripts/run_ablation_benchmark.py
 ==========================================
-Week 7 — Day 5.
 
 Layer ablation benchmark for the MalIntent three-layer detection pipeline.
 
@@ -14,27 +13,26 @@ For each configuration, computes precision / recall / F1 both:
   • Aggregate (binary macro)
   • Per OWASP LLM Top-10 attack category
 
-Output is a CSV file used directly in the Week 8 research paper's Evaluation
-section.
+Output is a CSV file used directly for evaluation.
 
 Usage
 -----
 # On Corpus 1 (700-sample manual annotation corpus):
 python scripts/run_ablation_benchmark.py \
     --dataset notebooks/manual_annotation_combined_corpus \
-    --output docs/ablation_results_corpus1.csv
+    --output docs/benchmark_logs/ablation_results_corpus1.csv
 
 # On each OOD benchmark:
-python scripts/run_ablation_benchmark.py --dataset data/jailbreak_classification --output docs/ood_jailbreak.csv
-python scripts/run_ablation_benchmark.py --dataset data/notinject            --output docs/ood_notinject.csv
-python scripts/run_ablation_benchmark.py --dataset data/gandalf               --output docs/ood_gandalf.csv
+python scripts/run_ablation_benchmark.py --dataset data/jailbreak_classification --output docs/benchmark_logs/ood_jailbreak.csv
+python scripts/run_ablation_benchmark.py --dataset data/notinject            --output docs/benchmark_logs/ood_notinject.csv
+python scripts/run_ablation_benchmark.py --dataset data/gandalf               --output docs/benchmark_logs/ood_gandalf.csv
 
 CSV column schema (output)
 --------------------------
 config, category, precision, recall, f1, support, threshold
 
-Week 7 — Day 5 update (this revision)
---------------------------------------
+Recent update
+-------------
 The scoring logic below no longer hand-reimplements the layer-weighted
 aggregation. It now calls RiskScorer.score_ablation(), the production
 ablation entry point added to risk_scorer.py. See the inline comments in
@@ -43,8 +41,8 @@ necessary — the short version is that this script's private copy of the
 weights/thresholds had drifted out of sync with production and was reading
 dataclass fields that no longer exist on the current layer results.
 
-Week 7 — Day 5 update #2 (loader fix)
---------------------------------------
+Loader fix
+----------
 load_dataset() previously assumed every corpus's `label` column was already
 clean, machine-written 0/1 data — true for the three OOD benchmarks (data/
 jailbreak_classification.csv, data/notinject.csv, data/gandalf.csv), which
@@ -97,7 +95,7 @@ from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 #
 # API CHANGE #1: we no longer import PatternEngine / MLClassifier /
 # SemanticEngine directly and construct them ourselves. RiskScorer already
-# owns "load all three layers once" as its job (and, as of Week 5, Layer B
+# owns "load all three layers once" as its job (and Layer B
 # is fetched through the get_classifier() process-wide singleton instead of
 # being constructed directly). Re-implementing that wiring here duplicated
 # logic that already lives in risk_scorer.py and is exactly the kind of
@@ -115,15 +113,16 @@ logger = logging.getLogger(__name__)
 # Layer configurations to ablate
 # ---------------------------------------------------------------------------
 CONFIGS = {
-    "layer_a_only":   ["A"],
+    "layer_a_only": ["A"],
     "layer_a_plus_b": ["A", "B"],
-    "full_a_b_c":     ["A", "B", "C"],
+    "full_a_b_c": ["A", "B", "C"],
 }
 
 
 # ---------------------------------------------------------------------------
 # Scoring function
 # ---------------------------------------------------------------------------
+
 
 def score_with_layers(prompt: str, active_layers: List[str], scorer: RiskScorer) -> int:
     """
@@ -201,9 +200,7 @@ def _clean_label_column(df: pd.DataFrame, source: Path) -> pd.DataFrame:
 
     # Step 1: strip whitespace on string-typed labels (e.g. "1 ", " 0").
     # Non-string values (already int/float) pass through unchanged.
-    df["label"] = df["label"].apply(
-        lambda v: v.strip() if isinstance(v, str) else v
-    )
+    df["label"] = df["label"].apply(lambda v: v.strip() if isinstance(v, str) else v)
 
     # Step 2: coerce to numeric. Anything that can't be parsed (empty
     # string, "NA", garbage text, etc.) becomes NaN rather than raising.
@@ -217,7 +214,10 @@ def _clean_label_column(df: pd.DataFrame, source: Path) -> pd.DataFrame:
         logger.warning(
             "Dataset %s: dropping %d/%d rows with missing/unparseable "
             "'label' values. First few:\n%s",
-            source, n_missing, n_before, dropped_preview.to_string(),
+            source,
+            n_missing,
+            n_before,
+            dropped_preview.to_string(),
         )
         df = df.loc[~missing_mask].copy()
 
@@ -242,7 +242,9 @@ def _clean_label_column(df: pd.DataFrame, source: Path) -> pd.DataFrame:
     if n_after != n_before:
         logger.info(
             "Dataset %s: %d rows after label cleaning (was %d).",
-            source, n_after, n_before,
+            source,
+            n_after,
+            n_before,
         )
 
     return df
@@ -331,6 +333,7 @@ def load_dataset(dataset_path: str) -> pd.DataFrame:
 # Main benchmark runner
 # ---------------------------------------------------------------------------
 
+
 def run_benchmark(dataset_path: str, output_path: str) -> pd.DataFrame:
     """
     Run the full layer ablation and write results to output_path.
@@ -379,30 +382,36 @@ def run_benchmark(dataset_path: str, output_path: str) -> pd.DataFrame:
         )
         tn, fp, fn, tp = confusion_matrix(labels, preds, labels=[0, 1]).ravel()
 
-        results.append({
-            "config":         config_name,
-            "category":       "_aggregate_",
-            "precision":      round(float(p_agg), 6),
-            "recall":         round(float(r_agg), 6),
-            "f1":             round(float(f1_agg), 6),
-            "support":        int(sum(labels)),
-            "true_positives": int(tp),
-            "false_positives":int(fp),
-            "true_negatives": int(tn),
-            "false_negatives":int(fn),
-            "avg_latency_ms": round(avg_ms, 3),
-        })
+        results.append(
+            {
+                "config": config_name,
+                "category": "_aggregate_",
+                "precision": round(float(p_agg), 6),
+                "recall": round(float(r_agg), 6),
+                "f1": round(float(f1_agg), 6),
+                "support": int(sum(labels)),
+                "true_positives": int(tp),
+                "false_positives": int(fp),
+                "true_negatives": int(tn),
+                "false_negatives": int(fn),
+                "avg_latency_ms": round(avg_ms, 3),
+            }
+        )
 
         logger.info(
             "  %s | aggregate — P=%.4f  R=%.4f  F1=%.4f  (%.1f ms/sample)",
-            config_name, p_agg, r_agg, f1_agg, avg_ms,
+            config_name,
+            p_agg,
+            r_agg,
+            f1_agg,
+            avg_ms,
         )
 
         # --- Per-OWASP-category metrics ---
         for category in sorted(df["owasp_category"].unique()):
             mask = df["owasp_category"] == category
             cat_labels = df.loc[mask, "label"].tolist()
-            cat_preds  = [preds[i] for i, m in enumerate(mask) if m]
+            cat_preds = [preds[i] for i, m in enumerate(mask) if m]
 
             if not cat_labels:
                 continue
@@ -411,23 +420,30 @@ def run_benchmark(dataset_path: str, output_path: str) -> pd.DataFrame:
                 cat_labels, cat_preds, average="binary", zero_division=0
             )
 
-            results.append({
-                "config":          config_name,
-                "category":        category,
-                "precision":       round(float(p_cat), 6),
-                "recall":          round(float(r_cat), 6),
-                "f1":              round(float(f1_cat), 6),
-                "support":         int(sum(cat_labels)),
-                "true_positives":  None,
-                "false_positives": None,
-                "true_negatives":  None,
-                "false_negatives": None,
-                "avg_latency_ms":  None,
-            })
+            results.append(
+                {
+                    "config": config_name,
+                    "category": category,
+                    "precision": round(float(p_cat), 6),
+                    "recall": round(float(r_cat), 6),
+                    "f1": round(float(f1_cat), 6),
+                    "support": int(sum(cat_labels)),
+                    "true_positives": None,
+                    "false_positives": None,
+                    "true_negatives": None,
+                    "false_negatives": None,
+                    "avg_latency_ms": None,
+                }
+            )
 
             logger.info(
                 "  %s | %-30s — P=%.4f  R=%.4f  F1=%.4f  (n=%d)",
-                config_name, category, p_cat, r_cat, f1_cat, len(cat_labels),
+                config_name,
+                category,
+                p_cat,
+                r_cat,
+                f1_cat,
+                len(cat_labels),
             )
 
     # --- Write output ---
@@ -443,6 +459,7 @@ def run_benchmark(dataset_path: str, output_path: str) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # CLI entry point
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -463,7 +480,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         required=True,
-        help="Output CSV file path, e.g. docs/ablation_results_corpus1.csv",
+        help="Output CSV file path, e.g. docs/benchmark_logs/ablation_results_corpus1.csv",
     )
     args = parser.parse_args()
 

@@ -1,12 +1,12 @@
 """
-sel/action_audit_logger.py — SEL Module 5: Action Audit Logger (Week 6, final module)
+sel/action_audit_logger.py — SEL Module 5: Action Audit Logger
 
 Completes the five-module Secure Execution Layer:
-  Module 1 — Tool Access Controller   (Week 4)
-  Module 2 — Dynamic Data Masking     (Week 5)
-  Module 3 — Secret Protection Engine (Week 5)
-  Module 4 — Permission Validator     (Week 4)
-  Module 5 — Action Audit Logger      (Week 6, this file)
+  Module 1 — Tool Access Controller
+  Module 2 — Dynamic Data Masking
+  Module 3 — Secret Protection Engine
+  Module 4 — Permission Validator
+  Module 5 — Action Audit Logger
 
 Writes one ActionLog row per SEL decision, recording what the LLM actually
 attempted to do after being allowed through the input firewall — this is the
@@ -23,7 +23,7 @@ ToolAccessController and PermissionValidator are stateless singletons:
   built fresh per request — exactly like ThreatLog writes already are in
   routers/scan.py's scan_input() — rather than being a process-wide singleton.
 
-Completeness requirement (Week 6 guide, Day 4 callout):
+Completeness requirement:
   Every decision branch — both "allowed through" AND "denied" — must produce
   a log row. A logger that only records denials is not a complete audit
   trail; the inverse-case test in test_sel_end_to_end.py exists specifically
@@ -75,6 +75,8 @@ class ActionAuditLogger:
         query_executed: Optional[str] = None,
         fields_masked: Optional[List[str]] = None,
         masking_rule: Optional[str] = None,
+        raw_response: Optional[str] = None,
+        masked_response: Optional[str] = None,
         denial_reason: Optional[str] = None,
         threat_log_id: Optional[int] = None,
     ) -> ActionLog:
@@ -121,6 +123,8 @@ class ActionAuditLogger:
             tool_called=tool_called,
             query_executed=query_executed,
             fields_masked=self._serialise_masked_fields(fields_masked, masking_rule),
+            raw_response=raw_response,
+            masked_response=masked_response,
             user_id=user_id,
             session_role=session_role,
             decision=outcome,
@@ -136,13 +140,20 @@ class ActionAuditLogger:
             self.db.rollback()
             logger.exception(
                 "Failed to write ActionLog row: tool=%s outcome=%s role=%s user_id=%s",
-                tool_called, outcome, session_role, user_id,
+                tool_called,
+                outcome,
+                session_role,
+                user_id,
             )
             raise
 
         logger.info(
             "ActionLog #%s: tool=%s outcome=%s role=%s user_id=%s",
-            entry.id, tool_called, outcome, session_role, user_id,
+            entry.id,
+            tool_called,
+            outcome,
+            session_role,
+            user_id,
         )
         return entry
 
@@ -161,7 +172,9 @@ class ActionAuditLogger:
         """
         if not fields_masked and not masking_rule:
             return None
-        return json.dumps({
-            "fields": fields_masked or [],
-            "rule": masking_rule or "none",
-        })
+        return json.dumps(
+            {
+                "fields": fields_masked or [],
+                "rule": masking_rule or "none",
+            }
+        )

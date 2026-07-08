@@ -40,13 +40,16 @@ logger = logging.getLogger("malintent.pii_scrubber")
 # the time any endpoint is called, so this init is safe.
 
 try:
-    _analyzer   = AnalyzerEngine()
+    _analyzer = AnalyzerEngine()
     _anonymizer = AnonymizerEngine()
-    logger.info("Presidio AnalyzerEngine and AnonymizerEngine initialised successfully.")
+    logger.info(
+        "Presidio AnalyzerEngine and AnonymizerEngine initialised successfully."
+    )
 except Exception as exc:  # pragma: no cover
     logger.error(
         "Failed to initialise Presidio engines.  "
-        "Have you run: python -m spacy download en_core_web_lg ?  Error: %s", exc
+        "Have you run: python -m spacy download en_core_web_lg ?  Error: %s",
+        exc,
     )
     raise
 
@@ -56,21 +59,22 @@ except Exception as exc:  # pragma: no cover
 # Adding new entity types here is sufficient — no other code changes required.
 
 _ENTITY_MAP: dict[str, str] = {
-    "PERSON":        "[NAME_REDACTED]",
+    "PERSON": "[NAME_REDACTED]",
     "EMAIL_ADDRESS": "[EMAIL_REDACTED]",
-    "PHONE_NUMBER":  "[PHONE_REDACTED]",
-    "CREDIT_CARD":   "[CARD_REDACTED]",
-    "IN_PAN":        "[PAN_REDACTED]",
-    "IN_AADHAAR":    "[AADHAAR_REDACTED]",
-    "IBAN_CODE":     "[IBAN_REDACTED]",
-    "LOCATION":      "[LOCATION_REDACTED]",
-    "DATE_TIME":     "[DATE_REDACTED]",
+    "PHONE_NUMBER": "[PHONE_REDACTED]",
+    "CREDIT_CARD": "[CARD_REDACTED]",
+    "IN_PAN": "[PAN_REDACTED]",
+    "IN_AADHAAR": "[AADHAAR_REDACTED]",
+    "IBAN_CODE": "[IBAN_REDACTED]",
+    "LOCATION": "[LOCATION_REDACTED]",
+    "DATE_TIME": "[DATE_REDACTED]",
 }
 
 _SUPPORTED_ENTITIES = list(_ENTITY_MAP.keys())
 
 
 # ── PUBLIC API ────────────────────────────────────────────────────────────────
+
 
 def scrub(text: str) -> str:
     """
@@ -140,6 +144,8 @@ def scrub_safe(text: str) -> str:
     except Exception as exc:
         logger.error(
             "PII scrubbing failed — storing safe placeholder instead of raw text.  "
-            "Error: %s", exc, exc_info=True
+            "Error: %s",
+            exc,
+            exc_info=True,
         )
         return "[PII_SCRUB_ERROR — scrubbing failed, raw text withheld]"

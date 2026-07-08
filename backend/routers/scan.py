@@ -2,9 +2,9 @@
 routers/scan.py — The central scan endpoints.
 
 Endpoints in this file:
-  POST /api/v1/scan/input    — main firewall (full pipeline, Week 4)
-  POST /api/v1/scan/output   — output consistency validator (REAL implementation, Week 6)
-  POST /api/v1/scan/document — RAG document pre-scanner (stub, full in Week 7)
+  POST /api/v1/scan/input    — main firewall (full pipeline)
+  POST /api/v1/scan/output   — output consistency validator
+  POST /api/v1/scan/document — RAG document pre-scanner
 
 Pipeline for /api/v1/scan/input (order is intentional and security-critical):
 
@@ -24,8 +24,8 @@ Order-of-operations note (from the project bible):
   which can change across library versions.  Hashing the original provides a
   stable, version-independent fingerprint.
 
-Week 5 changes
---------------
+Recent Architecture Updates
+---------------------------
 1. warm_up() — a public function main.py's lifespan calls at startup so the
    first /scan/input request after a server (re)start does not pay the cold
    model-load cost.  This simply forces _get_scorer() to run once, eagerly,
@@ -34,38 +34,25 @@ Week 5 changes
 2. process_tool_response() — wires the two SEL modules (dynamic_data_masking
    and secret_protection_engine) into the response path.  Any data coming back
    from an external tool call passes through here before the LLM (or the API
-   caller, while real LLM tool-calling is still a Week 7 item) ever sees it.
-   Order matters: structured PII fields are masked first (phone/card/email),
-   then any remaining free-text fields are scanned for secrets — a tool
-   response can legitimately contain both a masked card number AND a leaked
-   API key in an unrelated free-text field, and both protections must apply
-   independently.
+   caller) ever sees it. Order matters: structured PII fields are masked first
+   (phone/card/email), then any remaining free-text fields are scanned for
+   secrets — a tool response can legitimately contain both a masked card number
+   AND a leaked API key in an unrelated free-text field, and both protections
+   must apply independently.
 
-Week 6 changes
---------------
-1. POST /scan/output is now a REAL implementation, not a stub. It wraps
-   malintent.output_validator.OutputValidator, which is the project's second
-   novel contribution (Contribution 2 — dual-stage output consistency
-   validation). Validator instances are cached per system_context string so
-   the context vector is computed once and reused, per the Week 6 guide's
-   explicit "don't re-embed on every request" guidance — and the underlying
-   sentence-transformer model is shared with Layer C's already-loaded
-   instance whenever RiskScorer has been warmed, avoiding a second ~90MB
-   model load.
+3. Output Consistency Validator (POST /scan/output) — wraps
+   malintent.output_validator.OutputValidator. Validator instances are cached
+   per system_context string so the context vector is computed once and reused,
+   and the underlying sentence-transformer model is shared with Layer C's
+   already-loaded instance whenever RiskScorer has been warmed, avoiding a
+   second ~90MB model load.
 
-2. process_tool_call() — orchestrates SEL Module 1 (Tool Access Controller),
+4. process_tool_call() — orchestrates SEL Module 1 (Tool Access Controller),
    optionally SEL Module 4 (Permission Validator) for role-scoped resources,
    and SEL Module 5 (Action Audit Logger), completing all five SEL modules
    end to end. This mirrors the existing process_tool_response() pattern
    rather than embedding DB/logging concerns inside ToolAccessController or
-   PermissionValidator themselves — both of those classes are explicitly
-   documented as stateless, thread-safe singletons (no mutable state, no DB
-   session), and giving them a request-scoped Session would break that
-   invariant and the existing tests that call them directly. This function
-   is the integration point real LLM function-calling output will be routed
-   through once it exists (Week 7); for Week 6 it is exercised directly by
-   test_sel_end_to_end.py to prove whitelist check → decision → ActionLog
-   row works correctly end to end.
+   PermissionValidator themselves.
 """
 
 from __future__ import annotations
@@ -73,13 +60,15 @@ from __future__ import annotations
 import hashlib
 import logging
 import time
+import json
+import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
 
-from database import get_db
-from models import ThreatLog
+from database import get_db, decrypt_field
+from models import ThreatLog, Configuration
 from pii_scrubber import scrub_safe
 from schemas import (
     LayerCMatch,
@@ -108,7 +97,7 @@ _tool_access_controller = ToolAccessController()
 # once on first access (lazy) rather than at import time, so that running the
 # test suite or importing this module doesn't require the full ML environment.
 #
-# Week 5: in production, the lifespan handler in main.py calls warm_up() below
+# In production, the lifespan handler in main.py calls warm_up() below
 # during startup — so "lazy" in practice still means "warm before the first
 # real request," it just keeps pytest collection and standalone module imports
 # cheap by not forcing the load at `import routers.scan` time.
@@ -122,12 +111,13 @@ def _get_scorer():
     if _scorer is None:
         try:
             from malintent.risk_scorer import RiskScorer  # type: ignore[import]
+
             _scorer = RiskScorer()
             logger.info("RiskScorer loaded and warmed up.")
         except ImportError:
             logger.warning(
                 "malintent.risk_scorer not found — using StubScorer for development.  "
-                "Replace with the real implementation from Week 3."
+                "Replace with the real implementation."
             )
             _scorer = _StubScorer()
     return _scorer
@@ -148,67 +138,80 @@ def warm_up() -> None:
 
 
 class _StubResult:
-    """Minimal stand-in for RiskResult when the Week 3 package is not present.
+    """Minimal stand-in for RiskResult when the Phase package is not present.
 
     Field names mirror RiskResult exactly so that scan_input() can access
     every attribute without branching on scorer type.
     """
+
     def __init__(self, prompt: str):
         attack_keywords = [
-            "ignore previous", "ignore all", "disregard", "forget your instructions",
-            "reveal your system", "you are now", "act as", "jailbreak", "dan mode",
-            "pretend you", "override", "bypass", "unrestricted",
+            "ignore previous",
+            "ignore all",
+            "disregard",
+            "forget your instructions",
+            "reveal your system",
+            "you are now",
+            "act as",
+            "jailbreak",
+            "dan mode",
+            "pretend you",
+            "override",
+            "bypass",
+            "unrestricted",
         ]
         lower = prompt.lower()
         matched = any(kw in lower for kw in attack_keywords)
 
         # ── Core decision ─────────────────────────────────────────────────────
-        self.risk_score       = 85 if matched else 5
-        self.decision         = "BLOCK" if matched else "ALLOW"
+        self.risk_score = 85 if matched else 5
+        self.decision = "BLOCK" if matched else "ALLOW"
         self.primary_category = "direct_injection" if matched else "safe"
 
         # ── Layer membership ──────────────────────────────────────────────────
         self.layers_triggered = ["A"] if matched else []
 
         # ── Layer A ───────────────────────────────────────────────────────────
-        self.layer_a_fired            = matched
-        self.layer_a_confidence       = 1.0 if matched else 0.0
+        self.layer_a_fired = matched
+        self.layer_a_confidence = 1.0 if matched else 0.0
         self.layer_a_matched_patterns = ["direct_injection"] if matched else []
 
         # ── Layer B ───────────────────────────────────────────────────────────
-        self.layer_b_fired      = False
+        self.layer_b_fired = False
         self.layer_b_confidence = 0.0
 
         # ── Layer C ───────────────────────────────────────────────────────────
         # layer_c_top_matches must be a list of dicts: {phrase, category, similarity}
-        self.layer_c_fired       = False
-        self.layer_c_confidence  = 0.0
-        self.layer_c_top_matches = []   # list[dict]
+        self.layer_c_fired = False
+        self.layer_c_confidence = 0.0
+        self.layer_c_top_matches = []  # list[dict]
 
         # ── Metadata ──────────────────────────────────────────────────────────
-        self.explanation      = (
-            "Stub BLOCK: known injection keyword detected." if matched
+        self.explanation = (
+            "Stub BLOCK: known injection keyword detected."
+            if matched
             else "Stub ALLOW: no injection keywords detected."
         )
         self.total_latency_ms = 1.5
-        self.timestamp        = ""
-        self.prompt_preview   = None
+        self.timestamp = ""
+        self.prompt_preview = None
 
 
 class _StubScorer:
-    """Stub RiskScorer for use when the Week 3 ML package is not yet available."""
+    """Stub RiskScorer for use when the ML package is not yet available."""
+
     def score(self, prompt: str) -> _StubResult:  # noqa: D401
         return _StubResult(prompt)
 
 
-# ── SEL: TOOL RESPONSE PROCESSING (Week 5) ────────────────────────────────────
+# ── SEL: TOOL RESPONSE PROCESSING ─────────────────────────────────────────────
+
 
 def process_tool_response(raw_response: dict, session_id: str) -> dict:
     """
     Pass an external tool's response through SEL Modules 2 and 3 before it is
-    allowed to reach the LLM (or, until real tool-calling is wired in Week 7,
-    before it is returned to any caller exercising this function directly —
-    e.g. a forthcoming /scan/tool-response dev endpoint or test harness).
+    allowed to reach the LLM (or before it is returned to any caller exercising this function directly —
+    e.g. a /scan/tool-response dev endpoint or test harness).
 
     Order matters, and is intentional:
       1. dynamic_data_masking.mask() first — masks STRUCTURED PII fields
@@ -248,11 +251,10 @@ def process_tool_response(raw_response: dict, session_id: str) -> dict:
     return processed
 
 
-# ── SEL: TOOL CALL ORCHESTRATION (Week 6 — completes all five SEL modules) ────
+# ── SEL: TOOL CALL ORCHESTRATION ──────────────────────────────────────────────
 #
 # This is the integration point real LLM function-calling output will be
-# routed through once it exists (Week 7). For now it's the function
-# test_sel_end_to_end.py exercises directly to prove the chain works:
+# routed through. For now it's the function test_sel_end_to_end.py exercises
 # whitelist check (+ optional role-scope check) → decision → ActionLog row,
 # for BOTH the permitted and denied paths.
 
@@ -263,7 +265,7 @@ def process_tool_response(raw_response: dict, session_id: str) -> dict:
 # here are gated by the TAC whitelist alone (no additional per-role scope).
 _DB_TABLE_SCOPES: dict[str, str] = {
     "accounts": "db:accounts",
-    "users":    "db:users",
+    "users": "db:users",
 }
 
 
@@ -320,7 +322,9 @@ def process_tool_call(
     required_scope = _DB_TABLE_SCOPES.get(table) if tool == "database" else None
 
     if required_scope is not None:
-        role_permitted = _validator.check(role=session_role, requested_scope=required_scope)
+        role_permitted = _validator.check(
+            role=session_role, requested_scope=required_scope
+        )
         if not role_permitted:
             reason = (
                 f"Role '{session_role}' is not permitted scope '{required_scope}' "
@@ -328,11 +332,17 @@ def process_tool_call(
             )
             logger.warning(
                 "process_tool_call DENIED (role-scope): tool=%s table=%s role=%s — %s",
-                tool, table, session_role, reason,
+                tool,
+                table,
+                session_role,
+                reason,
             )
             decision = ToolCallDecision(
-                permitted=False, tool=tool, operation=operation,
-                denial_reason=reason, params=params,
+                permitted=False,
+                tool=tool,
+                operation=operation,
+                denial_reason=reason,
+                params=params,
             )
             audit_logger.log(
                 tool_called=tool,
@@ -346,7 +356,9 @@ def process_tool_call(
             return decision
 
     # ── Step 2: Tool Access Controller whitelist check (SEL Module 1) ───────
-    decision = _tool_access_controller.validate(tool=tool, operation=operation, params=params)
+    decision = _tool_access_controller.validate(
+        tool=tool, operation=operation, params=params
+    )
 
     # ── Step 3: log the outcome (SEL Module 5) — ALWAYS, permit or deny ─────
     audit_logger.log(
@@ -374,13 +386,12 @@ def _describe_query(tool: str, operation: str, params: Optional[dict]) -> str:
     return f"{tool}.{operation}()"
 
 
-# ── OUTPUT VALIDATOR: CACHE + SHARED MODEL (Week 6) ───────────────────────────
+# ── OUTPUT VALIDATOR: CACHE + SHARED MODEL ────────────────────────────────────
 #
 # Validator instances are cached per system_context string so the context
 # vector (the expensive part — one model.encode() call) is computed once and
-# reused across every /scan/output call for that deployment, per the Week 6
-# guide's explicit "cache this context vector — recompute only if context
-# changes" instruction. A soft cap keeps this from growing unbounded if a
+# reused across every /scan/output call for that deployment.
+# Recompute only if context changes. A soft cap keeps this from growing
 # caller sends many distinct context strings (e.g. misconfigured client);
 # normal usage has one or a small handful of context strings per deployment.
 
@@ -430,6 +441,7 @@ def _get_output_validator(system_context: str):
 
 # ── ENDPOINT: POST /scan/input ────────────────────────────────────────────────
 
+
 @router.post("/scan/input", response_model=ScanInputResponse, status_code=200)
 async def scan_input(
     body: ScanInputRequest,
@@ -455,9 +467,7 @@ async def scan_input(
         requested_scope="scan",
     )
     if not permitted:
-        logger.warning(
-            "Permission denied: role=%s scope=scan", body.session_role
-        )
+        logger.warning("Permission denied: role=%s scope=scan", body.session_role)
         raise HTTPException(
             status_code=403,
             detail=f"Role '{body.session_role}' is not permitted to submit scan requests.",
@@ -465,15 +475,54 @@ async def scan_input(
 
     # ── Step 1b: Dynamic Execution Mode Override (SEL) ───────────────────────
     if body.session_role == "employee":
-        logger.info("SEL Dynamic Override: Role '%s' assigned to 'Developer' mode.", body.session_role)
+        logger.info(
+            "SEL Dynamic Override: Role '%s' assigned to 'Developer' mode.",
+            body.session_role,
+        )
         execution_mode = "Developer"
     else:
-        logger.info("SEL Dynamic Override: Role '%s' assigned to 'Balanced' mode.", body.session_role)
+        logger.info(
+            "SEL Dynamic Override: Role '%s' assigned to 'Balanced' mode.",
+            body.session_role,
+        )
         execution_mode = "Balanced"
 
     # ── Step 2: Three-layer risk scoring ─────────────────────────────────────
     scorer = _get_scorer()
     result = scorer.score(body.prompt)
+
+    # ── Step 2.5: Custom Rules (Option B) ────────────────────────────────────
+    custom_rules_config = (
+        db.query(Configuration).filter(Configuration.key == "custom_rules").first()
+    )
+    if custom_rules_config:
+        try:
+            custom_rules = json.loads(
+                decrypt_field(db, custom_rules_config.encrypted_value)
+            )
+
+            # Check allowlist first
+            allow_matched = False
+            for rule in custom_rules.get("allowlist", []):
+                if re.search(rule, body.prompt, re.IGNORECASE):
+                    result.risk_score = 0
+                    result.decision = "ALLOW"
+                    result.primary_category = "custom_allowlist"
+                    result.explanation = f"Matched custom allowlist rule: {rule}"
+                    allow_matched = True
+                    break
+
+            # Check blocklist only if not already allowed
+            if not allow_matched:
+                for rule in custom_rules.get("blocklist", []):
+                    if re.search(rule, body.prompt, re.IGNORECASE):
+                        result.risk_score = 100
+                        result.decision = "BLOCK"
+                        result.primary_category = "custom_blocklist"
+                        result.explanation = f"Matched custom blocklist rule: {rule}"
+                        break
+        except Exception as e:
+            logger.error("Failed to parse or apply custom_rules: %s", e)
 
     # ── Step 3: PII scrubbing (BEFORE any storage) ────────────────────────────
     # scrub_safe never crashes — it falls back to a safe placeholder on error.
@@ -495,9 +544,9 @@ async def scan_input(
     layer_c_matches_raw = getattr(result, "layer_c_top_matches", None) or []
     layer_c_matches = [
         LayerCMatch(
-            phrase     = m["phrase"],
-            category   = m["category"],
-            similarity = float(m["similarity"]),
+            phrase=m["phrase"],
+            category=m["category"],
+            similarity=float(m["similarity"]),
         )
         for m in layer_c_matches_raw
     ]
@@ -505,20 +554,22 @@ async def scan_input(
     total_latency_ms = (time.perf_counter() - wall_start) * 1000
 
     log_entry = ThreatLog(
-        payload_hash       = payload_hash,
-        payload_length     = len(body.prompt),
-        scrubbed_text      = store_scrubbed,
-        risk_score         = float(result.risk_score),
-        decision           = result.decision,
-        attack_category    = result.primary_category,
-        layers_triggered   = ",".join(result.layers_triggered) if result.layers_triggered else "",
+        payload_hash=payload_hash,
+        payload_length=len(body.prompt),
+        scrubbed_text=store_scrubbed,
+        risk_score=float(result.risk_score),
+        decision=result.decision,
+        attack_category=result.primary_category,
+        layers_triggered=(
+            ",".join(result.layers_triggered) if result.layers_triggered else ""
+        ),
         # layer_a_fired is the correct RiskResult field (not layer_a_matched)
-        layer_a_matched    = bool(result.layer_a_fired),
-        layer_b_confidence = float(result.layer_b_confidence),
-        user_id            = body.user_id,
-        session_role       = body.session_role,
-        privacy_mode       = body.privacy_mode,
-        latency_ms         = total_latency_ms,
+        layer_a_matched=bool(result.layer_a_fired),
+        layer_b_confidence=float(result.layer_b_confidence),
+        user_id=body.user_id,
+        session_role=body.session_role,
+        privacy_mode=body.privacy_mode,
+        latency_ms=total_latency_ms,
     )
 
     try:
@@ -529,7 +580,9 @@ async def scan_input(
         db.rollback()
         logger.exception(
             "Failed to write ThreatLog row: payload_hash=%s decision=%s role=%s",
-            payload_hash, result.decision, body.session_role,
+            payload_hash,
+            result.decision,
+            body.session_role,
         )
         raise
 
@@ -545,25 +598,26 @@ async def scan_input(
 
     # ── Step 6: Return analysis to caller ─────────────────────────────────────
     return ScanInputResponse(
-        decision            = result.decision,
-        risk_score          = float(result.risk_score),
-        attack_category     = result.primary_category,
-        layers_triggered    = result.layers_triggered or [],
+        decision=result.decision,
+        risk_score=float(result.risk_score),
+        attack_category=result.primary_category,
+        layers_triggered=result.layers_triggered or [],
         # layer_a_fired is the correct RiskResult field (not layer_a_matched)
-        layer_a_matched     = bool(result.layer_a_fired),
-        layer_b_confidence  = float(result.layer_b_confidence),
-        layer_c_top_matches = layer_c_matches,
-        latency_ms          = round(total_latency_ms, 2),
-        log_id              = log_entry.id,
+        layer_a_matched=bool(result.layer_a_fired),
+        layer_b_confidence=float(result.layer_b_confidence),
+        layer_c_top_matches=layer_c_matches,
+        latency_ms=round(total_latency_ms, 2),
+        log_id=log_entry.id,
     )
 
 
 # ── ENDPOINT: POST /scan/output ───────────────────────────────────────────────
 
+
 @router.post("/scan/output", response_model=ScanOutputResponse, status_code=200)
 async def scan_output(body: ScanOutputRequest) -> ScanOutputResponse:
     """
-    Output Consistency Validator (Week 6 — Contribution 2).
+    Output Consistency Validator.
 
     Encodes body.system_context into a (cached, reused) vector, encodes
     body.llm_response into a vector, computes cosine similarity, and runs the
@@ -585,7 +639,9 @@ async def scan_output(body: ScanOutputRequest) -> ScanOutputResponse:
 
     logger.info(
         "Output scan complete: decision=%s similarity=%.3f patterns=%d",
-        result.decision, result.similarity_score, len(result.high_risk_patterns_found),
+        result.decision,
+        result.similarity_score,
+        len(result.high_risk_patterns_found),
     )
 
     return ScanOutputResponse(
@@ -598,19 +654,57 @@ async def scan_output(body: ScanOutputRequest) -> ScanOutputResponse:
 
 # ── ENDPOINT: POST /scan/document ─────────────────────────────────────────────
 
-@router.post("/scan/document", status_code=200)
-async def scan_document() -> dict:
-    """
-    RAG Document Pre-Scanner — stub for Week 4.
 
-    Full implementation in Week 7:
-      - Accept a document upload (PDF / txt / docx).
-      - Detect hidden text (white-on-white, zero-font-size).
-      - Detect semantic instruction patterns embedded in document body text.
-      - Detect metadata-level injections.
-      - Return a risk assessment for the document before it enters the RAG pipeline.
+@router.post("/scan/document", response_model=ScanDocumentResponse, status_code=200)
+async def scan_document(file: UploadFile = File(...)) -> ScanDocumentResponse:
     """
-    return {
-        "status": "stub",
-        "message": "Document scanning will be fully implemented in Week 7.",
-    }
+    RAG Document Pre-Scanner — naive byte-level implementation.
+    """
+    content = await file.read()
+
+    hidden_text_detected = False
+    decision = "ALLOW"
+    risk_score = 0.0
+
+    # Check for hidden text patterns in raw bytes
+    hidden_patterns = [
+        b"color: transparent",
+        b"color: white",
+        b"font-size: 0",
+        b"display: none",
+        b"visibility: hidden",
+    ]
+
+    content_lower = content.lower()
+    for pattern in hidden_patterns:
+        if pattern in content_lower:
+            hidden_text_detected = True
+            decision = "BLOCK"
+            risk_score = 90.0
+            break
+
+    # Check for semantic instruction patterns
+    instruction_patterns = [
+        b"ignore previous instructions",
+        b"system prompt",
+        b"you are now",
+        b"bypass security",
+        b"ignore all",
+    ]
+    for pattern in instruction_patterns:
+        if pattern in content_lower:
+            decision = "BLOCK"
+            risk_score = max(risk_score, 95.0)
+            break
+
+    message = "Document scanning completed."
+    if decision == "BLOCK":
+        message = "High risk document detected."
+
+    return ScanDocumentResponse(
+        status="success",
+        message=message,
+        risk_score=risk_score,
+        decision=decision,
+        hidden_text_detected=hidden_text_detected,
+    )

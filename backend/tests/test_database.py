@@ -1,7 +1,7 @@
 """
-backend/tests/test_week7.py
+backend/tests/test_database.py
 ============================
-Week 7 test suite.
+Database test suite.
 
 Covers:
   1. pgcrypto encrypt/decrypt round-trip
@@ -16,7 +16,7 @@ All tests use the function-scoped `db` fixture from conftest.py — each test
 runs inside its own rolled-back transaction, so there is no state pollution
 between tests.
 
-Corrections made after Week 7 review
+Corrections made after initial review
 -------------------------------------
   - ThreatLog.layers_triggered is a comma-joined String column on the real
     schema (models.py), not a JSON list — tests and seed-script assertions
@@ -58,6 +58,7 @@ if TYPE_CHECKING:
 # 1. pgcrypto primitive round-trip
 # =============================================================================
 
+
 class TestPgCryptoRoundTrip:
 
     def test_encrypt_returns_bytes(self, db: "Session") -> None:
@@ -72,7 +73,9 @@ class TestPgCryptoRoundTrip:
         recovered = decrypt_field(db, ciphertext)
         assert recovered == plaintext
 
-    def test_encrypt_produces_different_ciphertext_each_time(self, db: "Session") -> None:
+    def test_encrypt_produces_different_ciphertext_each_time(
+        self, db: "Session"
+    ) -> None:
         """
         pgp_sym_encrypt uses a random session key internally — encrypting the
         same plaintext twice must produce different ciphertext (IND-CPA property).
@@ -105,6 +108,7 @@ class TestPgCryptoRoundTrip:
 # 2. Wrong-key decryption raises an error
 # =============================================================================
 
+
 class TestWrongKeyDecryption:
 
     def test_wrong_key_raises_dbapiError(self, db: "Session") -> None:
@@ -122,15 +126,16 @@ class TestWrongKeyDecryption:
             )
 
         # Postgres raises "Wrong key or corrupt data" — verify the message.
-        assert "wrong key" in str(exc_info.value).lower() or \
-               "corrupt" in str(exc_info.value).lower(), (
-            f"Expected 'Wrong key or corrupt data' error, got: {exc_info.value}"
-        )
+        assert (
+            "wrong key" in str(exc_info.value).lower()
+            or "corrupt" in str(exc_info.value).lower()
+        ), f"Expected 'Wrong key or corrupt data' error, got: {exc_info.value}"
 
 
 # =============================================================================
 # 3. Configuration model — encrypted storage
 # =============================================================================
+
 
 class TestConfigurationModel:
 
@@ -196,6 +201,7 @@ class TestConfigurationModel:
 # 4. ThreatLog model — breach-resilient hash storage
 # =============================================================================
 
+
 class TestThreatLogModel:
 
     def test_threat_log_block_decision(
@@ -221,9 +227,7 @@ class TestThreatLogModel:
         assert len(h) == 64
         assert all(c in "0123456789abcdef" for c in h)
 
-    def test_raw_prompt_not_recoverable_from_hash(
-        self, db: "Session"
-    ) -> None:
+    def test_raw_prompt_not_recoverable_from_hash(self, db: "Session") -> None:
         """
         Demonstrate the breach-resilient property: given a ThreatLog row,
         the original prompt cannot be recovered from payload_hash alone.
@@ -287,7 +291,7 @@ class TestThreatLogModel:
         """Risk scores must fall within expected ranges per decision."""
         cases = [
             ("ALLOW", 15),
-            ("FLAG",  50),
+            ("FLAG", 50),
             ("BLOCK", 85),
         ]
         for decision, score in cases:
@@ -305,6 +309,7 @@ class TestThreatLogModel:
 # =============================================================================
 # 5. ActionLog model — SEL audit record
 # =============================================================================
+
 
 class TestActionLogModel:
 
@@ -359,6 +364,7 @@ class TestActionLogModel:
 # 6. Seed script — idempotency and distribution
 # =============================================================================
 
+
 class TestSeedScript:
     """
     Tests for the seed_demo_events.py seeder.
@@ -375,11 +381,11 @@ class TestSeedScript:
 
         total = len(DECISIONS_WEIGHTED)
         allow_pct = DECISIONS_WEIGHTED.count("ALLOW") / total
-        flag_pct  = DECISIONS_WEIGHTED.count("FLAG")  / total
+        flag_pct = DECISIONS_WEIGHTED.count("FLAG") / total
         block_pct = DECISIONS_WEIGHTED.count("BLOCK") / total
 
         assert 0.65 <= allow_pct <= 0.75, f"ALLOW pct out of range: {allow_pct:.2%}"
-        assert 0.14 <= flag_pct  <= 0.22, f"FLAG pct out of range: {flag_pct:.2%}"
+        assert 0.14 <= flag_pct <= 0.22, f"FLAG pct out of range: {flag_pct:.2%}"
         assert 0.10 <= block_pct <= 0.16, f"BLOCK pct out of range: {block_pct:.2%}"
 
     def test_all_owasp_categories_present(self) -> None:
@@ -417,14 +423,20 @@ class TestSeedScript:
 
         event = _build_event(0, "BLOCK", datetime.utcnow())
         assert event["attack_category"] is not None
-        assert len(event["layers_triggered"].split(",")) >= 2  # BLOCK triggers ≥2 layers
+        assert (
+            len(event["layers_triggered"].split(",")) >= 2
+        )  # BLOCK triggers ≥2 layers
 
     def test_build_event_risk_score_in_range(self) -> None:
         """Risk scores must fall within the correct range for each decision."""
         from scripts.seed_demo_events import _build_event
 
         for _ in range(50):  # randomised — run multiple times
-            for decision, lo, hi in [("ALLOW", 0, 29), ("FLAG", 30, 70), ("BLOCK", 71, 100)]:
+            for decision, lo, hi in [
+                ("ALLOW", 0, 29),
+                ("FLAG", 30, 70),
+                ("BLOCK", 71, 100),
+            ]:
                 event = _build_event(0, decision, datetime.utcnow())
                 assert lo <= event["risk_score"] <= hi, (
                     f"risk_score {event['risk_score']} out of range [{lo},{hi}] "
@@ -445,11 +457,10 @@ class TestSeedScript:
 # 7. verify_pgcrypto helper
 # =============================================================================
 
+
 class TestVerifyPgCrypto:
 
-    def test_verify_pgcrypto_passes_when_extension_active(
-        self, db: "Session"
-    ) -> None:
+    def test_verify_pgcrypto_passes_when_extension_active(self, db: "Session") -> None:
         """verify_pgcrypto must return True when pgcrypto is installed."""
         assert verify_pgcrypto(db) is True
 

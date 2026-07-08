@@ -1,4 +1,206 @@
-## Week 1 – Pattern Engine (Layer A)
+<div align="center">
+
+<img src="https://img.shields.io/badge/PHASE_2-BACKEND-ff2d55?style=for-the-badge" alt="Phase 2" />
+
+# MalIntent: Core Engine & API
+
+**Enterprise-Grade LLM Security Firewall Backend**<br/>
+*Real-time prompt injection detection and prevention middleware for LLM applications.*
+
+<a href="#about">About</a> •
+<a href="#key-features">Key Features</a> •
+<a href="#architecture">Architecture</a> •
+<a href="#quick-start--proxy-mode">Quick Start</a> •
+<a href="#owasp-llm-top-10-coverage--detection-engine">OWASP Coverage</a> •
+<a href="#configuration">Configuration</a> •
+<a href="#docs--benchmarks">Docs</a> •
+<a href="#roadmap">Roadmap</a>
+
+---
+
+<img src="https://img.shields.io/badge/FASTAPI-FRAMEWORK-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+<img src="https://img.shields.io/badge/PYTHON-LANGUAGE-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+<img src="https://img.shields.io/badge/PYTORCH-ML_ENGINE-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch" />
+<img src="https://img.shields.io/badge/POSTGRESQL-DATABASE-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+
+</div>
+
+---
+
+## About
+
+The **MalIntent Backend** serves as the central brain of the enterprise-grade LLM security firewall. It operates as an inline proxy inspection layer between client applications and the LLM endpoint, adding sub-100ms latency overhead while processing complex prompts through a multi-tiered security pipeline.
+
+---
+
+## Architecture
+
+MalIntent is built as a modular, layered system following defense-in-depth principles:
+
+```text
+                  MalIntent Firewall (Backend)
+ ┌─────────────────────────────────────────────────────────────┐
+ │                                                             │
+ │  ┌─────────┐    ┌─────────────────┐    ┌───────────────┐    │
+ │  │ Client  │───▶│ FastAPI Gateway │───▶│ LLM API       │    │
+ │  │ App     │◀───│ (Reverse Proxy) │◀───│ (OpenAI/Groq) │    │
+ │  └─────────┘    └────────┬────────┘    └───────────────┘    │
+ │                          │                                  │
+ │                 ┌────────▼────────┐                         │
+ │                 │ Scan Middleware │                         │
+ │                 ├─────────────────┤                         │
+ │                 │ 1. JWT Auth     │                         │
+ │                 │ 2. Extractor    │                         │
+ │                 │ 3. Enforcement  │                         │
+ │                 └────────┬────────┘                         │
+ │                          │                                  │
+ │                 ┌────────▼────────┐                         │
+ │                 │ Unified Scorer  │                         │
+ │                 │ (Aggregator)    │                         │
+ │                 ├────────┬────────┴────────┐                │
+ │                 │        │                 │                │
+ │       ┌─────────▼─┐ ┌────▼────────┐ ┌──────▼──────┐         │
+ │       │ Layer A   │ │ Layer B     │ │ Layer C     │         │
+ │       │ Pattern   │ │ ML Engine   │ │ Semantic    │         │
+ │       │ (Regex)   │ │ PromptGuard │ │ (FAISS)     │         │
+ │       └───────────┘ └─────────────┘ └─────────────┘         │
+ │                                                             │
+ │                 ┌─────────────────┐                         │
+ │                 │ Security (SEL)  │                         │
+ │                 │ • PII Masking   │                         │
+ │                 │ • Secret Filter │                         │
+ │                 │ • RAG Engine    │                         │
+ │                 └─────────────────┘                         │
+ └─────────────────────────────────────────────────────────────┘
+```
+
+### Package Structure
+
+```text
+malintent/backend/
+├── main.py                     # FastAPI entry point & startup ML warm-up
+├── authentication.py           # User Registration, OTP Verification, and JWT Login
+├── pii_scrubber.py             # Basic PII extraction and scrubbing utilities
+├── database.py                 # SQLAlchemy session management and pooling
+├── models.py                   # PostgreSQL schema (User, OTP, ThreatLog, ActionLog)
+├── schemas.py                  # Pydantic validation contracts
+├── routers/                    # API Endpoints
+│   ├── scan.py                 # Input/output scanning & RAG document integration
+│   ├── config.py               # Encrypted configuration management
+│   ├── logs.py                 # Threat telemetry history
+│   ├── stats.py                # Dashboard analytics
+│   └── llm.py                  # Raw LLM proxy logic for Comparison Mode
+├── malintent/                  # Core Detection Engine
+│   ├── pattern_engine.py       # Layer A: Regex (47 patterns)
+│   ├── ml_classifier.py        # Layer B: PromptGuard (328k corpus)
+│   ├── semantic_engine.py      # Layer C: FAISS Semantic (206 phrases)
+│   ├── risk_scorer.py          # Unified aggregation logic
+│   └── output_validator.py     # Post-generation semantic checker
+└── sel/                        # Security Enforcement Layer
+    ├── dynamic_data_masking.py # PII anonymiser (Presidio)
+    ├── secret_protection_engine.py # Credential extraction
+    ├── action_audit_logger.py  # Structured audit logging for SEL actions
+    ├── permission_validator.py # Validates API keys and RBAC rules
+    └── tool_access_controller.py # Controls tool access based on user roles
+```
+
+### Data Flow
+
+```text
+1. Client Registration    ──▶ Registers user account with email/phone OTP verification
+2. Client Authentication  ──▶ Authenticates via JWT Token to access secure endpoints
+3. Client sends request   ──▶ FastAPI receives POST /api/v1/scan/input
+4. Auth & Extraction      ──▶ Validates JWT permission and extracts prompt
+5. Detection Layers       ──▶ Scans via Layer A (Regex), B (ML), C (Semantic)
+6. Unified Risk Scorer    ──▶ Aggregates signals (A:30%, B:45%, C:25%)
+7. Security Enforcement   ──▶ Masks PII (Emails, Phones) and redacts secrets
+8. Action enforced:
+   ├── BLOCK ──▶ HTTP 403 + Threat Details
+   ├── FLAG  ──▶ Forward with warnings
+   └── ALLOW ──▶ Forward safely
+9. Output Validation      ──▶ (Post-generation) Checks LLM response for leaks
+```
+
+---
+
+## Key Features
+
+- **Multi-Layer Threat Detection**: Three-layer deterministic and probabilistic pipeline.
+- **Secure Authentication System**: Full DB-backed User registration, login, and Email OTP verification.
+- **Security Enforcement Layer (SEL)**: Dynamic PII masking and hardcoded secret extraction.
+- **Output Consistency Validation**: Halts out-of-context LLM hallucination and data leaks.
+- **Real-time Analytics**: Sub-100ms processing with detailed threat auditing.
+- **Secure Persistence**: PostgreSQL storage with AES field-level encryption via pgcrypto.
+
+---
+
+## OWASP LLM Top 10 Coverage & Detection Engine
+
+The Pattern Engine and Semantic Pipeline protect against all primary OWASP injection categories.
+
+<div align="center">
+
+### Attack Categories & Pattern Counts
+
+```text
+Attack Categories               Regex Patterns (Layer A)
+────────────────────────────────────────────────────────
+Context Manipulation            ████████████████  8
+Harmful Elicitation             ██████████████    7
+Persona Override / Jailbreak    ██████████████    7
+Direct Injection                ██████████████    7
+Data Exfiltration               ████████████      6
+Encoding Obfuscation            ██████████        5
+Indirect / RAG Injection        ██████████        5
+────────────────────────────────────────────────────────
+Total Regex Patterns:           47
+
+* Layer C (Semantic FAISS) covers an additional 206 dense paraphrase variants.
+```
+
+</div>
+
+---
+
+## Configuration
+The backend uses secure environment variables (e.g. SMTP credentials) and Fernet/pgcrypto encryption. All sensitive info has been safely moved to `.env`. (See endpoints documentation below).
+
+---
+
+## 📚 Docs & Benchmarks
+All out-of-distribution (OOD) benchmark test results and ablation studies are logged extensively.
+
+---
+
+## 🚀 Quick Start & Proxy Mode
+
+### Local Setup
+```bash
+# 1. Activate the backend directory
+cd malintent/backend
+python -m venv venv
+venv\Scripts\activate  # Windows
+
+# 2. Install dependencies
+pip install -r requirements.txt
+python -m spacy download en_core_web_lg
+
+# 3. Start the FastAPI Proxy Server
+uvicorn main:app --reload
+```
+API Documentation is available at **`http://localhost:8000/docs`**.
+
+---
+
+## 🗺️ Roadmap
+- Future Output Validator rule expansions
+- Extended document scanning (`/api/v1/scan/document`) implementation.
+
+---
+
+## 🏗️ Architecture & Detection Engine Details
+
+## Phase – Pattern Engine (Layer A)
 
 ### What's Built
 
@@ -40,7 +242,7 @@ The regex engine was developed and validated using a **700-sample manually annot
 > This 700-sample corpus is a **Layer A (Pattern Engine) validation artifact only**.
 > It is used exclusively in `dataset_exploration.ipynb` (Section 10–13) to measure regex
 > pattern coverage and detection rates across OWASP attack categories.
-> It does **not** feed into the Week 2 ML training pipeline.
+> It does **not** feed into the Phase ML training pipeline.
 > The ML classifier (Layer B) is trained on the full ~328k-sample HuggingFace corpus,
 > assembled separately inside `malintent_promptguard_training.ipynb`.
 
@@ -89,7 +291,7 @@ The Pattern Engine was successfully validated against manually curated malicious
 
 ---
 
-### Week 1 Deliverables
+### Phase Deliverables
 
 - ✅ Layer A Pattern Engine implemented
 - ✅ 47 curated regex detection patterns
@@ -101,7 +303,7 @@ The Pattern Engine was successfully validated against manually curated malicious
 
 ---
 
-## Week 2 – ML Classifier (Layer B)
+## Phase – ML Classifier (Layer B)
 
 ### What's Built
 
@@ -146,7 +348,7 @@ Evaluated against 3 independent OOD benchmarks: Jailbreak Classification, NotInj
 
 ---
 
-### Week 2 Deliverables
+### Phase Deliverables
 
 - ✅ PromptGuard-86M fine-tuned on 328k-sample corpus
 - ✅ ~99.96% F1 on internal test split
@@ -157,7 +359,7 @@ Evaluated against 3 independent OOD benchmarks: Jailbreak Classification, NotInj
 
 ---
 
-## Week 3 – Semantic Similarity Engine (Layer C) + Unified Risk Scorer
+## Phase – Semantic Similarity Engine (Layer C) + Unified Risk Scorer
 
 ### What's Built
 
@@ -184,7 +386,7 @@ Evaluated against 3 independent OOD benchmarks: Jailbreak Classification, NotInj
   - Semantic override: `max_similarity ≥ 0.90` forces `risk_score = max(risk_score, 70)` → guaranteed BLOCK
   - `score_ablation(prompt, layers="ABC")` — re-normalised weight ablation for research paper Table 1
   - Decision thresholds: BLOCK ≥ 70 / FLAG ≥ 25 / ALLOW < 25
-  - Full `RiskResult` dataclass — JSON-serialisable contract for FastAPI (Week 4) and frontend (Week 5)
+  - Full `RiskResult` dataclass — JSON-serialisable contract for FastAPI (Phase) and frontend (Phase)
 
 - `tests/test_pipeline.py`
   - 3 integration tests: accuracy (200 prompts), latency (20 prompts), schema validation
@@ -192,7 +394,7 @@ Evaluated against 3 independent OOD benchmarks: Jailbreak Classification, NotInj
 
 - `docs/ablation_results.md`
   - Layer-by-layer ablation table with real numbers from integration test runs
-  - Week 3 tuning notes documenting every parameter change and rationale
+  - Phase tuning notes documenting every parameter change and rationale
 
 ---
 
@@ -248,7 +450,7 @@ python -m pytest tests/test_pipeline.py -v -s
 
 ---
 
-### Week 3 Deliverables
+### Phase Deliverables
 
 - ✅ Layer C Semantic Similarity Engine implemented (`semantic_engine.py`)
 - ✅ 206 attack phrases across 7 OWASP categories (`attack_phrases.json` v1.1)
@@ -263,7 +465,7 @@ python -m pytest tests/test_pipeline.py -v -s
 
 ---
 
-## Week 4 – FastAPI Backend API + Secure Configuration Management
+## Phase – FastAPI Backend API + Secure Configuration Management
 
 ### What's Built
 
@@ -283,11 +485,11 @@ python -m pytest tests/test_pipeline.py -v -s
     - Threat logging
     - Privacy-preserving hashing
   - `POST /api/v1/scan/output`
-    - Week 4 placeholder endpoint for Output Consistency Validator
-    - Full implementation scheduled for Week 7
+    - Phase placeholder endpoint for Output Consistency Validator
+    - Full implementation scheduled for Phase
   - `POST /api/v1/scan/document`
-    - Week 4 placeholder endpoint for Document Scanner
-    - Full implementation scheduled for Week 7
+    - Phase placeholder endpoint for Document Scanner
+    - Full implementation scheduled for Phase
 
 - `routers/logs.py`
   - `GET /api/v1/logs`
@@ -344,6 +546,9 @@ python -m pytest tests/test_pipeline.py -v -s
 | GET    | `/api/v1/stats`         | Dashboard statistics             |
 | PUT    | `/api/v1/config`        | Store encrypted configuration    |
 | GET    | `/api/v1/config/{key}`  | Retrieve decrypted configuration |
+| POST   | `/register`             | Register a new user account      |
+| POST   | `/verify-otp`           | Verify email OTP and activate    |
+| POST   | `/login`                | Authenticate and receive JWT     |
 
 ---
 
@@ -363,7 +568,7 @@ python -m pytest tests/test_pipeline.py -v -s
 
 ### Backend Validation
 
-Week 4 backend was validated using:
+Phase backend was validated using:
 
 ```bash
 pytest tests/test_week4.py -v
@@ -408,7 +613,7 @@ Verified endpoints:
 
 ---
 
-### Week 4 Deliverables
+### Phase Deliverables
 
 - ✅ FastAPI backend completed
 - ✅ REST API implemented
@@ -426,17 +631,17 @@ Verified endpoints:
 
 ---
 
-# Week 5 – Security Enforcement Layer (SEL) + Pipeline Optimisation
+# Phase – Security Enforcement Layer (SEL) + Pipeline Optimisation
 
 ## What's Built
 
 ### Security Enforcement Layer (SEL)
 
-Week 5 introduces the Security Enforcement Layer (SEL), an additional protection layer positioned around the existing three-layer detection pipeline.
+Phase introduces the Security Enforcement Layer (SEL), an additional protection layer positioned around the existing three-layer detection pipeline.
 
 Unlike Layers A–C, which focus on detecting prompt injection attempts, SEL protects sensitive information before it reaches the Large Language Model.
 
-The Week 5 implementation introduces two new security modules:
+The Phase implementation introduces two new security modules:
 
 ---
 
@@ -494,7 +699,7 @@ Detected secrets are automatically replaced with:
 
 ### Pipeline Warm-Up
 
-Week 5 introduces startup warm-up to eliminate first-request latency.
+Phase introduces startup warm-up to eliminate first-request latency.
 
 Instead of loading models lazily during the first API request, FastAPI now warms the complete detection pipeline during application startup.
 
@@ -528,7 +733,7 @@ Runtime verification confirmed that repeated API requests reuse the same in-memo
 
 ### Performance Profiling
 
-Week 5 introduces:
+Phase introduces:
 
 - `scripts/profile_pipeline.py`
 
@@ -571,7 +776,7 @@ Result:
 
 ## Integration Changes
 
-Week 5 integrates the Security Enforcement Layer into the existing FastAPI pipeline.
+Phase integrates the Security Enforcement Layer into the existing FastAPI pipeline.
 
 `routers/scan.py`
 
@@ -635,7 +840,7 @@ Verified:
 
 ---
 
-## Week 5 Deliverables
+## Phase Deliverables
 
 - ✅ Security Enforcement Layer (SEL) implemented
 - ✅ Dynamic Data Masking module completed
@@ -652,11 +857,11 @@ Verified:
 
 ---
 
-# Week 6 – Output Consistency Validation + Action Audit Logging
+# Phase – Output Consistency Validation + Action Audit Logging
 
 ## What's Built
 
-Week 6 extends MalIntent beyond input prompt detection by introducing
+Phase extends MalIntent beyond input prompt detection by introducing
 post-generation output validation and execution audit capabilities.
 
 Unlike Layers A–C, which analyse user prompts before they reach the LLM,
@@ -754,7 +959,7 @@ disclosure.
 
 ### `routers/scan.py`
 
-Week 6 integrates the Output Validator and Action Audit Logger into the
+Phase integrates the Output Validator and Action Audit Logger into the
 existing FastAPI pipeline.
 
 Updated processing sequence:
@@ -867,7 +1072,7 @@ Confirmed:
 
 ## Output Validator Evaluation
 
-Week 6 includes an adversarial evaluation consisting of ten simulated LLM
+Phase includes an adversarial evaluation consisting of ten simulated LLM
 responses designed to assess the effectiveness of the Output Validator.
 
 Evaluation summary:
@@ -885,7 +1090,7 @@ AND-rule.
 
 ---
 
-## Week 6 Deliverables
+## Phase Deliverables
 
 - ✅ Output Consistency Validator implemented
 - ✅ Semantic response validation completed
@@ -901,7 +1106,7 @@ AND-rule.
 
 ---
 
-# Week 7 – PostgreSQL Migration, Production Deployment & Benchmark Evaluation
+# Phase – PostgreSQL Migration, Production Deployment & Benchmark Evaluation
 
 ## Production Deployment
 
@@ -934,7 +1139,7 @@ https://malintent-backend-261681342014.asia-south1.run.app/openapi.json
 
 ## What's Built
 
-Week 7 upgrades MalIntent from a local development environment to a
+Phase upgrades MalIntent from a local development environment to a
 production-ready deployment using **PostgreSQL**, **Supabase**, **Google Cloud
 Run**, and **Docker**.
 
@@ -967,7 +1172,7 @@ deployment using Supabase PostgreSQL.
 
 ### PostgreSQL `pgcrypto`
 
-Week 7 introduces PostgreSQL field-level encryption using the
+Phase introduces PostgreSQL field-level encryption using the
 `pgcrypto` extension.
 
 Sensitive configuration values are encrypted before storage and can only
@@ -980,14 +1185,14 @@ Verification included:
 - Failed decryption using an incorrect key
 - Database cleanup verification
 
-Application-level Fernet encryption introduced in Week 4 remains fully
+Application-level Fernet encryption introduced in Phase remains fully
 integrated alongside PostgreSQL encryption.
 
 ---
 
 ## Docker Environment
 
-Week 7 introduces a complete Docker development environment.
+Phase introduces a complete Docker development environment.
 
 New components include:
 
@@ -1068,7 +1273,7 @@ PostgreSQL connection.
 
 ### `scripts/run_ablation_benchmark.py`
 
-Week 7 introduces a reproducible benchmark framework for evaluating the
+Phase introduces a reproducible benchmark framework for evaluating the
 complete MalIntent detection pipeline.
 
 Evaluation supports:
@@ -1107,7 +1312,7 @@ training distribution.
 
 ### `scripts/seed_demo_events.py`
 
-Week 7 introduces an automated database seeding utility for frontend
+Phase introduces an automated database seeding utility for frontend
 demonstrations.
 
 Features include:
@@ -1148,7 +1353,7 @@ All verification steps completed successfully.
 
 ## Testing
 
-Week 7 validation included:
+Phase validation included:
 
 ```bash
 python scripts/run_ablation_benchmark.py
@@ -1168,7 +1373,7 @@ Additional verification:
 
 ---
 
-## Week 7 Deliverables
+## Phase Deliverables
 
 - ✅ SQLite migrated to PostgreSQL
 - ✅ Supabase PostgreSQL integration completed
@@ -1182,7 +1387,7 @@ Additional verification:
 - ✅ Benchmark CSV reports generated
 - ✅ Production database seeded with 200 demo events
 - ✅ Production backend verified
-- ✅ Week 7 implementation completed
+- ✅ Phase implementation completed
 
 ---
 
@@ -1192,7 +1397,7 @@ Additional verification:
 
 ### `sdk/`
 
-Week 7 introduces an official Python SDK for the MalIntent API, enabling
+Phase introduces an official Python SDK for the MalIntent API, enabling
 developers to integrate the firewall into their own applications without
 writing raw HTTP calls.
 

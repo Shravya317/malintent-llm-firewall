@@ -5,7 +5,7 @@ This file:
   - Loads .env before anything reads environment variables
   - Initialises the database (creates tables on startup)
   - Warms the three-layer detection pipeline — including PromptGuard-86M —
-    BEFORE accepting traffic (Week 5)
+    BEFORE accepting traffic (Phase)
   - Registers all middleware: CORS, rate limiting, request logging
   - Mounts all four routers under the /api/v1 prefix
 
@@ -22,29 +22,16 @@ silent integration failures.
 Rate limit: 200/minute for development (raised from the 60/minute production
 default).  Lower it to 60/minute before the demo.
 
-Week 5 change — model warm-up at startup
------------------------------------------
-Before Week 5, RiskScorer (and therefore the PromptGuard-86M model inside it)
-was lazily constructed by routers/scan.py on the FIRST call to /api/v1/scan/input.
-That meant whichever user happened to send the first prompt after a server
-restart paid the full cold-load cost (hundreds of milliseconds to a few
-seconds, depending on hardware) on top of the actual inference time — directly
-visible to Shravya as a one-off slow request while she's testing live.
+Model Warm-up
+-------------
+The lifespan handler explicitly warms the three-layer pipeline during startup.
+"Server is ready" genuinely means every layer, including the ML model, is
+already resident in memory. This prevents cold-load latency on the first request.
 
-The lifespan handler below now explicitly warms the pipeline during startup,
-so "server is ready" genuinely means "every layer, including the ML model, is
-already resident in memory."  Restart the server and watch the logs: you
-should see the model-load line and a single warm-up confirmation BEFORE the
-"Database tables created / verified. Server is ready." line, and you should
-never see a second model-load line no matter how many requests follow.
-
-Week 8 change — custom API docs page
---------------------------------------
-Default Swagger UI replaced with a custom branded docs page served from
-static/docs.html.  The page uses Space Grotesk + Syne + JetBrains Mono fonts,
-matches the dashboard dark theme, and pulls live stats from /api/v1/stats
-automatically on load.  docs_url and redoc_url are set to None to disable
-FastAPI's auto-generated pages; /docs is now a custom FileResponse route.
+Custom API Docs
+---------------
+Default Swagger UI is replaced with a custom branded docs page served from
+static/docs.html to match the dashboard dark theme.
 """
 
 from __future__ import annotations
@@ -55,6 +42,7 @@ from contextlib import asynccontextmanager
 
 # Load .env BEFORE anything else reads os.getenv — order is critical here.
 from dotenv import load_dotenv
+
 load_dotenv()  # looks for backend/.env by default when run from backend/
 
 from fastapi import FastAPI, Request, Response
@@ -67,6 +55,8 @@ from slowapi.util import get_remote_address
 
 from database import init_db
 from routers import scan, logs, stats, config as config_router, llm
+from authentication import verify_jwt_token, router as auth_router
+from fastapi import Depends
 
 # ── LOGGING ──────────────────────────────────────────────────────────────────
 
@@ -91,6 +81,7 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 # decorator.  Base.metadata.create_all is idempotent — safe to run on every
 # startup whether or not the tables already exist.
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -107,7 +98,7 @@ async def lifespan(app: FastAPI):
     try:
         # scan.warm_up() triggers routers/scan.py's cached scorer accessor,
         # which in turn calls malintent.ml_classifier.get_classifier() — the
-        # Week 5 singleton.  This is the ONLY place in the request lifecycle
+        # Phase singleton.  This is the ONLY place in the request lifecycle
         # where the model should ever be loaded from disk.
         scan.warm_up()
         warmup_ms = (time.perf_counter() - warmup_start) * 1000
@@ -136,7 +127,7 @@ app = FastAPI(
     description=(
         "LLM Prompt Injection Firewall — REST API.  "
         "Three-layer detection engine (Pattern + ML + Semantic), "
-        "PII-scrubbed logging, Fernet-encrypted configuration, "
+        "PII-scrubbed logging, pgcrypto-encrypted configuration, "
         "and a Secure Execution Layer with permission validation, tool "
         "whitelisting, dynamic PII masking, and secret redaction."
     ),
@@ -169,8 +160,8 @@ async def custom_docs():
 # If Shravya uses a different port, add it here before Sunday's sync.
 
 ALLOWED_ORIGINS = [
-    "http://localhost:5173",   # Vite default (Shravya's dev server)
-    "http://localhost:3000",   # CRA / Next.js fallback
+    "http://localhost:5173",  # Vite default (Shravya's dev server)
+    "http://localhost:3000",  # CRA / Next.js fallback
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
 ]
@@ -196,6 +187,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # The prompt payload is NOT logged here — it is PII-scrubbed separately in the
 # scan router before any storage.
 
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next) -> Response:
     """
@@ -217,14 +209,40 @@ async def log_requests(request: Request, call_next) -> Response:
 
 # ── ROUTERS ───────────────────────────────────────────────────────────────────
 
-app.include_router(scan.router,          prefix="/api/v1", tags=["scan"])
-app.include_router(logs.router,          prefix="/api/v1", tags=["logs"])
-app.include_router(stats.router,         prefix="/api/v1", tags=["stats"])
-app.include_router(config_router.router, prefix="/api/v1", tags=["config"])
-app.include_router(llm.router,           prefix="/api/v1", tags=["llm"])
+# Auth router doesn't need JWT protection
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
+
+app.include_router(
+    scan.router,
+    prefix="/api/v1",
+    tags=["scan"],
+    dependencies=[Depends(verify_jwt_token)],
+)
+app.include_router(
+    logs.router,
+    prefix="/api/v1",
+    tags=["logs"],
+    dependencies=[Depends(verify_jwt_token)],
+)
+app.include_router(
+    stats.router,
+    prefix="/api/v1",
+    tags=["stats"],
+    dependencies=[Depends(verify_jwt_token)],
+)
+app.include_router(
+    config_router.router,
+    prefix="/api/v1",
+    tags=["config"],
+    dependencies=[Depends(verify_jwt_token)],
+)
+app.include_router(
+    llm.router, prefix="/api/v1", tags=["llm"], dependencies=[Depends(verify_jwt_token)]
+)
 
 
 # ── ROOT HEALTH CHECK ────────────────────────────────────────────────────────
+
 
 @app.get("/", tags=["health"])
 async def root():
@@ -240,9 +258,9 @@ async def health():
     """
     Explicit health endpoint — useful for Docker health checks and uptime monitors.
 
-    Week 5: also reports whether the ML classifier singleton is warm, so a
-    monitoring dashboard (or Shravya, mid-debugging) can distinguish "server up
-    but model still cold/stub" from "fully warm and ready for live traffic."
+    Also reports whether the ML classifier singleton is warm, so a
+    monitoring dashboard can distinguish "server up but model still cold"
+    from "fully warm and ready for live traffic."
     """
     from malintent.ml_classifier import is_classifier_loaded
 

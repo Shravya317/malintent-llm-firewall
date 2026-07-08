@@ -11,7 +11,7 @@ covering the last 24 hours in 1-hour buckets.
 
 Also returns a threat_distribution list for the Threat Distribution doughnut
 chart, computed from attack_category counts across all ThreatLog rows.
-pct is a float (1 decimal place) — see schemas.py Week 6 change (2).
+pct is a float (1 decimal place).
 """
 
 from __future__ import annotations
@@ -55,17 +55,30 @@ async def get_stats(db: Session = Depends(get_db)) -> StatsResponse:
       total_flagged  — scans with decision=FLAG
       total_allowed  — scans with decision=ALLOW
       avg_risk_score — mean risk_score across all entries
-      avg_latency_ms — mean latency_ms (full tracking in Week 7, 0.0 for now)
+      avg_latency_ms — mean latency_ms
       hourly_trend   — list of 24 hourly buckets (total + blocked per hour)
       threat_distribution — list of attack category slices for the doughnut chart
     """
     # ── Aggregate counts ──────────────────────────────────────────────────────
-    total   = db.query(func.count(ThreatLog.id)).scalar() or 0
-    blocked = db.query(func.count(ThreatLog.id)).filter(ThreatLog.decision == "BLOCK").scalar() or 0
-    flagged = db.query(func.count(ThreatLog.id)).filter(ThreatLog.decision == "FLAG").scalar() or 0
-    allowed = db.query(func.count(ThreatLog.id)).filter(ThreatLog.decision == "ALLOW").scalar() or 0
+    total = db.query(func.count(ThreatLog.id)).scalar() or 0
+    blocked = (
+        db.query(func.count(ThreatLog.id))
+        .filter(ThreatLog.decision == "BLOCK")
+        .scalar()
+        or 0
+    )
+    flagged = (
+        db.query(func.count(ThreatLog.id)).filter(ThreatLog.decision == "FLAG").scalar()
+        or 0
+    )
+    allowed = (
+        db.query(func.count(ThreatLog.id))
+        .filter(ThreatLog.decision == "ALLOW")
+        .scalar()
+        or 0
+    )
 
-    avg_risk    = float(db.query(func.avg(ThreatLog.risk_score)).scalar() or 0.0)
+    avg_risk = float(db.query(func.avg(ThreatLog.risk_score)).scalar() or 0.0)
     avg_latency = float(db.query(func.avg(ThreatLog.latency_ms)).scalar() or 0.0)
 
     # ── Hourly trend (last 24 hours) ──────────────────────────────────────────
@@ -117,12 +130,12 @@ async def get_stats(db: Session = Depends(get_db)) -> StatsResponse:
     ]
 
     return StatsResponse(
-        total_requests = total,
-        total_blocked  = blocked,
-        total_flagged  = flagged,
-        total_allowed  = allowed,
-        avg_risk_score = round(avg_risk, 2),
-        avg_latency_ms = round(avg_latency, 2),
-        hourly_trend   = hourly_trend,
-        threat_distribution = threat_distribution,
+        total_requests=total,
+        total_blocked=blocked,
+        total_flagged=flagged,
+        total_allowed=allowed,
+        avg_risk_score=round(avg_risk, 2),
+        avg_latency_ms=round(avg_latency, 2),
+        hourly_trend=hourly_trend,
+        threat_distribution=threat_distribution,
     )

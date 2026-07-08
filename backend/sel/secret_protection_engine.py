@@ -44,17 +44,23 @@ _REDACTION = "[SECRET REDACTED]"
 
 # ── Known secret formats ──────────────────────────────────────────────────────
 # Extend this list as new formats are encountered during testing or in real
-# tool integrations (Week 7+). Patterns are intentionally specific (anchored to
+# tool integrations. Patterns are intentionally specific (anchored to
 # known prefixes/structures) to keep this pass high-precision; the entropy pass
 # below is the catch-all for anything novel.
 _SECRET_PATTERNS = [
-    re.compile(r"AKIA[0-9A-Z]{16}"),                            # AWS access key ID
-    re.compile(r"sk-[a-zA-Z0-9]{32,}"),                         # generic "sk-" API secret key prefix
-    re.compile(r"Bearer\s+[a-zA-Z0-9\-_\.]{20,}"),              # bearer / JWT-style tokens
-    re.compile(r"postgres(?:ql)?://[^\s]+:[^\s]+@[^\s]+"),      # Postgres connection string w/ creds
-    re.compile(r"mongodb(?:\+srv)?://[^\s]+:[^\s]+@[^\s]+"),    # MongoDB connection string w/ creds
-    re.compile(r"mysql://[^\s]+:[^\s]+@[^\s]+"),                 # MySQL connection string w/ creds
-    re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),  # PEM private key header
+    re.compile(r"AKIA[0-9A-Z]{16}"),  # AWS access key ID
+    re.compile(r"sk-[a-zA-Z0-9]{32,}"),  # generic "sk-" API secret key prefix
+    re.compile(r"Bearer\s+[a-zA-Z0-9\-_\.]{20,}"),  # bearer / JWT-style tokens
+    re.compile(
+        r"postgres(?:ql)?://[^\s]+:[^\s]+@[^\s]+"
+    ),  # Postgres connection string w/ creds
+    re.compile(
+        r"mongodb(?:\+srv)?://[^\s]+:[^\s]+@[^\s]+"
+    ),  # MongoDB connection string w/ creds
+    re.compile(r"mysql://[^\s]+:[^\s]+@[^\s]+"),  # MySQL connection string w/ creds
+    re.compile(
+        r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"
+    ),  # PEM private key header
 ]
 
 # ── Entropy pass tuning ────────────────────────────────────────────────────────
@@ -131,17 +137,23 @@ def redact(
 
     def _entropy_check(match: re.Match) -> str:
         token = match.group(0)
-        return _REDACTION if _looks_like_secret(token, min_length, min_entropy) else token
+        return (
+            _REDACTION if _looks_like_secret(token, min_length, min_entropy) else token
+        )
 
     redacted = _ENTROPY_TOKEN_PATTERN.sub(_entropy_check, redacted)
     return redacted
 
 
-def contains_secret(text: str, min_length: int = _DEFAULT_MIN_LENGTH, min_entropy: float = _DEFAULT_MIN_ENTROPY) -> bool:
+def contains_secret(
+    text: str,
+    min_length: int = _DEFAULT_MIN_LENGTH,
+    min_entropy: float = _DEFAULT_MIN_ENTROPY,
+) -> bool:
     """
     Lightweight boolean check — True if redact() would change ``text``.
 
-    Useful for the Action Audit Logger (Week 7) to record "secret_redacted: true"
+    Useful for the Action Audit Logger to record "secret_redacted: true"
     without needing to diff the before/after strings itself.
     """
     if not text:
