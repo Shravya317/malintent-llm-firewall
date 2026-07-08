@@ -726,7 +726,7 @@ export default function LandingPage() {
             >Testimonials</a>
 
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/login')}
               style={{
                 fontFamily: 'var(--font-sidebar)',
                 fontSize: '0.85rem',
@@ -739,31 +739,6 @@ export default function LandingPage() {
               onMouseEnter={e => e.target.style.color = 'var(--text-primary)'}
               onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
             >Log In</button>
-
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                fontFamily: 'var(--font-sidebar)',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#fff',
-                background: 'var(--accent-threat)',
-                border: 'none',
-                borderRadius: 999,
-                padding: '8px 20px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 12px rgba(229, 9, 20, 0.3)',
-              }}
-              onMouseEnter={e => {
-                e.target.style.boxShadow = '0 4px 20px rgba(229, 9, 20, 0.5)'
-                e.target.style.transform = 'translateY(-1px)'
-              }}
-              onMouseLeave={e => {
-                e.target.style.boxShadow = '0 2px 12px rgba(229, 9, 20, 0.3)'
-                e.target.style.transform = 'translateY(0)'
-              }}
-            >Get Started</button>
           </div>
 
           {/* Mobile Hamburger */}
@@ -804,11 +779,11 @@ export default function LandingPage() {
           <a href="#features" onClick={() => setMobileMenuOpen(false)} style={{ fontFamily: 'var(--font-sidebar)', fontSize: '1.1rem', color: 'var(--text-primary)', textDecoration: 'none' }}>Features</a>
           <a href="#deep-dive" onClick={() => setMobileMenuOpen(false)} style={{ fontFamily: 'var(--font-sidebar)', fontSize: '1.1rem', color: 'var(--text-primary)', textDecoration: 'none' }}>Use Cases</a>
           <a href="#social-proof" onClick={() => setMobileMenuOpen(false)} style={{ fontFamily: 'var(--font-sidebar)', fontSize: '1.1rem', color: 'var(--text-primary)', textDecoration: 'none' }}>Testimonials</a>
-          <button onClick={() => { setMobileMenuOpen(false); navigate('/dashboard') }} style={{
+          <button onClick={() => { setMobileMenuOpen(false); navigate('/login') }} style={{
             fontFamily: 'var(--font-sidebar)', fontSize: '1rem', fontWeight: 600,
             color: '#fff', background: 'var(--accent-threat)', border: 'none',
             borderRadius: 999, padding: '12px 32px', cursor: 'pointer',
-          }}>Get Started</button>
+          }}>Log In</button>
         </div>
       )}
 
@@ -861,9 +836,9 @@ export default function LandingPage() {
             </p>
           </AnimatedSection>
 
-          <AnimatedSection delay={0.2}>
+          <AnimatedSection delay={0.3}>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/login')}
               style={{
                 fontFamily: 'var(--font-sidebar)',
                 fontSize: '0.9rem',
@@ -1208,7 +1183,7 @@ export default function LandingPage() {
               Join the developers building secure LLM applications. Free to start.
             </p>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/login')}
               style={{
                 fontFamily: 'var(--font-sidebar)',
                 fontSize: '0.95rem',

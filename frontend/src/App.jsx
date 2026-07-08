@@ -15,6 +15,7 @@
  */
 import { Routes, Route } from 'react-router-dom'
 import LandingPage from './views/LandingPage'
+import AuthPage from './views/AuthPage'
 import Dashboard from './views/Dashboard'
 import ThreatAnalysis from './views/ThreatAnalysis'
 import Configuration from './views/Configuration'
@@ -32,6 +33,7 @@ export default function App() {
     <Routes>
       {/* Public landing page — no sidebar, no Layout */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<AuthPage />} />
 
       {/* Internal dashboard pages — wrapped in Layout with sidebar */}
       <Route element={<Layout />}>
