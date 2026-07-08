@@ -465,3 +465,28 @@ print(result.decision, result.risk_score)
 | `client.health()` | `GET /health` |
 
 **Deliverables:** ✅ Python SDK · ✅ typed response models for all endpoints · ✅ unit tests passing (4/4) · ✅ live quickstart verified against production · ✅ `BlockedPromptException` pattern · ✅ zero backend dependencies (only `requests`)
+
+---
+
+## Deployment & Redeployment Cheat Sheet
+
+If you ever need to completely wipe your local Docker build and redeploy a fresh version of the backend to Google Cloud Run, run these exact commands from the `backend/` directory:
+
+### 1. Wipe Local Docker Clean
+```powershell
+docker compose down -v
+docker rmi backend-api
+docker system prune -f
+```
+
+### 2. Rebuild & Test Locally
+```powershell
+docker compose build --no-cache
+docker compose up -d
+```
+
+### 3. Deploy to Google Cloud Run
+```powershell
+gcloud run deploy malintent-backend --source . --region asia-south1 --allow-unauthenticated
+```
+*(Remember: Add or update any new Environment Variables directly in the Google Cloud Console web UI after the deployment finishes!)*
