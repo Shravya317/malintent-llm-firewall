@@ -11,7 +11,7 @@
 
 Write-Host ""
 Write-Host "======================================================="
-Write-Host "      MALINTENT COMPLETE TEST SUITE (WEEK 1 - WEEK 7)"
+Write-Host "      MALINTENT COMPLETE TEST SUITE"
 Write-Host "======================================================="
 Write-Host ""
 
@@ -87,12 +87,12 @@ if ($LASTEXITCODE -ne 0 -and $connTest -match "password authentication failed") 
 }
 
 # -------------------------------------------------------
-# WEEK 1
+# PHASE 1
 # -------------------------------------------------------
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host " Running Week 1 Tests"
+Write-Host " Running Phase 1 Tests"
 Write-Host "========================================"
 
 Write-Host ""
@@ -100,12 +100,12 @@ Write-Host "Running Pattern Engine..."
 python -m pytest tests/test_pattern_engine.py -v -s
 
 # -------------------------------------------------------
-# WEEK 2
+# PHASE 2
 # -------------------------------------------------------
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host " Running Week 2 Tests"
+Write-Host " Running Phase 2 Tests"
 Write-Host "========================================"
 
 Write-Host ""
@@ -114,12 +114,12 @@ python malintent/ml_classifier.py
 
 
 # -------------------------------------------------------
-# WEEK 3
+# PHASE 3
 # -------------------------------------------------------
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host " Running Week 3 Tests"
+Write-Host " Running Phase 3 Tests"
 Write-Host "========================================"
 
 Write-Host ""
@@ -135,25 +135,25 @@ Write-Host "Running Integration Tests..."
 python -m pytest tests/test_pipeline.py -v -s
 
 # -------------------------------------------------------
-# WEEK 4
+# PHASE 4
 # -------------------------------------------------------
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host " Running Week 4 Backend Tests"
+Write-Host " Running Phase 4 Backend Tests"
 Write-Host "========================================"
 
 Write-Host ""
 Write-Host "Running Backend API Tests..."
-python -m pytest tests/test_week4.py -v
+python -m pytest tests/test_core.py -v
 
 # -------------------------------------------------------
-# WEEK 5
+# PHASE 5
 # -------------------------------------------------------
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host " Running Week 5 Tests"
+Write-Host " Running Phase 5 Tests"
 Write-Host "========================================"
 
 Write-Host ""
@@ -170,12 +170,12 @@ python scripts/profile_pipeline.py
 
 
 # -------------------------------------------------------
-# WEEK 6
+# PHASE 6
 # -------------------------------------------------------
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host " Running Week 6 Tests"
+Write-Host " Running Phase 6 Tests"
 Write-Host "========================================"
 
 Write-Host ""
@@ -192,39 +192,39 @@ python -m pytest tests/test_sel_end_to_end.py -v
 
 
 # -------------------------------------------------------
-# WEEK 7
+# PHASE 7
 # -------------------------------------------------------
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host " Running Week 7 Tests"
+Write-Host " Running Phase 7 Tests"
 Write-Host "========================================"
 
 Write-Host ""
 Write-Host "----------------------------------"
-Write-Host "Week 7 Automated Tests"
+Write-Host "Phase 7 Automated Tests"
 Write-Host "----------------------------------"
 
 Write-Host ""
-Write-Host "Running Week 7 Database Tests..."
-python -m pytest tests/test_week7.py -v
+Write-Host "Running Phase 7 Database Tests..."
+python -m pytest tests/test_database.py -v
 
 Write-Host ""
 Write-Host "Running Ablation Benchmark..."
-python scripts/run_ablation_benchmark.py --dataset notebooks/manual_annotation_combined_corpus --output docs/ablation_results_corpus1.csv
+python scripts/run_ablation_benchmark.py --dataset notebooks/manual_annotation_combined_corpus --output docs/benchmark_logs/ablation_results_corpus1.csv
 
 Write-Host ""
 Write-Host "======================================================="
-Write-Host " WEEK 7 AUTOMATED TESTS COMPLETED SUCCESSFULLY"
+Write-Host " PHASE 7 AUTOMATED TESTS COMPLETED SUCCESSFULLY"
 Write-Host "======================================================="
 
 Write-Host ""
 Write-Host "----------------------------------"
-Write-Host "Week 7 Manual Verification"
+Write-Host "Phase 7 Manual Verification"
 Write-Host "----------------------------------"
 Write-Host ""
 Write-Host "NOTE: The steps below intentionally use YOUR REAL production"
-Write-Host "Supabase credentials from backend/.env. They are manual and"
+Write-Host "Supabase credentials from backend\.env. They are manual and"
 Write-Host "read-only/insert-then-delete by design -- unlike the automated"
 Write-Host "suite above, nothing here runs drop_all() on your database."
 Write-Host ""
@@ -421,10 +421,10 @@ Write-Host "Benchmark Verification"
 Write-Host ""
 Write-Host "Verify these files exist:"
 Write-Host ""
-Write-Host "  docs/ablation_results_corpus1.csv"
-Write-Host "  docs/ood_jailbreak.csv"
-Write-Host "  docs/ood_notinject.csv"
-Write-Host "  docs/ood_gandalf.csv"
+Write-Host "  docs/benchmark_logs/ablation_results_corpus1.csv"
+Write-Host "  docs/benchmark_logs/ood_jailbreak.csv"
+Write-Host "  docs/benchmark_logs/ood_notinject.csv"
+Write-Host "  docs/benchmark_logs/ood_gandalf.csv"
 
 Write-Host ""
 Write-Host "----------------------------------"
@@ -528,13 +528,13 @@ Write-Host "======================================================="
 Write-Host " SUMMARY"
 Write-Host "======================================================="
 Write-Host ""
-Write-Host "Week 1 : Pattern Engine ......................... PASS"
-Write-Host "Week 2 : ML Smoke Test .......................... COMPLETED"
-Write-Host "Week 3 : Semantic + Risk + Pipeline ............. PASS"
-Write-Host "Week 4 : FastAPI + Storage ...................... PASS"
-Write-Host "Week 5 : SEL + Pipeline Profiler ................ PASS"
-Write-Host "Week 6 : Output Validator + Audit Logger ........ PASS"
-Write-Host "Week 7 : PostgreSQL + Supabase + Docker + Cloud Run + Benchmark + Encryption .... PASS"
+Write-Host "Phase 1 : Pattern Engine ......................... PASS"
+Write-Host "Phase 2 : ML Smoke Test .......................... COMPLETED"
+Write-Host "Phase 3 : Semantic + Risk + Pipeline ............. PASS"
+Write-Host "Phase 4 : FastAPI + Storage ...................... PASS"
+Write-Host "Phase 5 : SEL + Pipeline Profiler ................ PASS"
+Write-Host "Phase 6 : Output Validator + Audit Logger ........ PASS"
+Write-Host "Phase 7 : PostgreSQL + Supabase + Docker + Cloud Run + Benchmark + Encryption .... PASS"
 Write-Host ""
 Write-Host "Production Backend URL:"
 Write-Host "  https://malintent-backend-261681342014.asia-south1.run.app"

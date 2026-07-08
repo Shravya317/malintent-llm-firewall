@@ -1,6 +1,6 @@
 # Database Encryption Verification
 
-**Week 7 — MalIntent Breach-Resilient Storage**
+**MalIntent Breach-Resilient Storage**
 
 This document provides evidence that pgcrypto field-level encryption is active and
 effective on the `configuration` table in both the local development environment
@@ -8,14 +8,14 @@ effective on the `configuration` table in both the local development environment
 
 It directly supports **Section 4 — Breach-Resilient Storage Design** in the project
 documentation and the **"Breach-Resilient Storage and Runtime Enforcement Architecture"**
-subsection of the Week 8 research paper.
+subsection of the research paper.
 
 ---
 
 ## Architecture note: SQLCipher → pgcrypto
 
 The original plan called for SQLCipher (AES-256 full-file encryption on SQLite for dev)
-plus pgcrypto column encryption for Postgres production. Week 7 revised this to a single
+plus pgcrypto column encryption for Postgres production. This was revised to a single
 implementation: **PostgreSQL with pgcrypto in both environments**. The threat model is
 identical — an attacker who exfiltrates the database file or table gets unreadable
 ciphertext without the symmetric key — but the verification is now reproducible directly
@@ -182,11 +182,7 @@ ERROR:  Wrong key or corrupt data
    `pgp_sym_encrypt(plaintext, PG_CRYPTO_KEY)` ciphertext. An attacker who
    exfiltrates the `configuration` table receives bytea blobs they cannot read
    without `PG_CRYPTO_KEY`.
-3. **Fernet application-layer encryption** (Week 4) — values are additionally
-   encrypted at the application layer before being passed to pgcrypto. Both keys
-   (`FERNET_KEY` and `PG_CRYPTO_KEY`) must be compromised for plaintext to be
-   recoverable.
-4. **PII scrubbing before ThreatLog writes** — raw prompt text is discarded after
+3. **PII scrubbing before ThreatLog writes** — raw prompt text is discarded after
    presidio-analyzer redacts PII; only a SHA-256 hash is stored. A breach of the
    `threat_logs` table exposes hashes and metadata, not user prompts.
 
@@ -197,5 +193,5 @@ data, no credentials, no readable prompts."_
 
 ---
 
-_Last updated: Week 7 — replace the placeholder psql output blocks above with actual
-output from your local and Supabase runs before submitting the Week 8 paper._
+_Last updated: replace the placeholder psql output blocks above with actual
+output from your local and Supabase runs before submitting the research paper._

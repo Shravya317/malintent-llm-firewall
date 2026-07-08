@@ -12,23 +12,27 @@ CRITICAL DESIGN PRINCIPLE:
 
   This is the third breach-resilient mechanism in MalIntent's architecture.
 
-Role hierarchy (Week 4 defaults — made configurable via the Permission Roles UI in Week 6):
+Role hierarchy:
 
   customer   : can only submit prompts for scanning
   employee   : can scan + read logs + read stats + query the accounts table
   admin      : full access — all scopes including config writes and user data
 
-Week 6 will replace ROLE_PERMISSIONS with a runtime-loaded dict from the Configuration
-table so administrators can adjust roles without a server restart.
+ROLE_PERMISSIONS acts as a fallback. Administrators can adjust roles at runtime
+via the Configuration table without a server restart.
 """
 
 from __future__ import annotations
 
 from typing import Dict, Set
+import json
+import logging
+
+logger = logging.getLogger("malintent.sel.permission_validator")
 
 
 # ── ROLE → PERMITTED SCOPES ───────────────────────────────────────────────────
-# This dict is the source of truth for access control in Week 4.
+# This dict acts as the default access control matrix.
 # Keys: role names (normalised to lowercase)
 # Values: set of scope strings this role is permitted to access.
 #
@@ -59,11 +63,11 @@ ROLE_PERMISSIONS: Dict[str, Set[str]] = {
         "scan",
         "logs:read",
         "stats",
-        "db:accounts",        # can query accounts, not users
+        "db:accounts",  # can query accounts, not users
         # config:read / config:write — intentionally excluded for employees
     },
     "customer": {
-        "scan",               # customers can only submit prompts — nothing else
+        "scan",  # customers can only submit prompts — nothing else
     },
 }
 
@@ -82,6 +86,27 @@ class PermissionValidator:
             raise HTTPException(status_code=403, detail="Permission denied")
     """
 
+    def _get_roles(self) -> Dict[str, Set[str]]:
+        """
+        Attempt to load roles dynamically from the Configuration table.
+        Fallback to hardcoded ROLE_PERMISSIONS if the DB fetch fails or key is not set.
+        """
+        try:
+            from database import get_db_context, decrypt_field
+            from models import Configuration
+
+            with get_db_context() as db:
+                config = (
+                    db.query(Configuration).filter(Configuration.key == "roles").first()
+                )
+                if config:
+                    roles_dict = json.loads(decrypt_field(db, config.encrypted_value))
+                    return {k.lower().strip(): set(v) for k, v in roles_dict.items()}
+        except Exception as e:
+            logger.error("Failed to load dynamic roles from Configuration: %s", e)
+
+        return ROLE_PERMISSIONS
+
     def check(self, role: str, requested_scope: str) -> bool:
         """
         Return True (permit) if role is allowed to access requested_scope.
@@ -95,7 +120,8 @@ class PermissionValidator:
         does not inspect any prompt text — that coupling is forbidden by design.
         """
         normalised = role.lower().strip()
-        permitted_scopes = ROLE_PERMISSIONS.get(normalised)
+        roles_map = self._get_roles()
+        permitted_scopes = roles_map.get(normalised)
 
         if permitted_scopes is None:
             # Unknown role — deny by default (fail-closed security posture)
@@ -107,14 +133,14 @@ class PermissionValidator:
         """
         Return the full set of permitted scopes for a role.
 
-        Used by the Permission Roles tab in the frontend (Week 6) to display
+        Used by the Permission Roles tab in the frontend to display
         which tool permissions are active for each role card.
 
         Returns an empty set for unknown roles rather than raising, so the UI
         can display "no permissions" gracefully.
         """
-        return frozenset(ROLE_PERMISSIONS.get(role.lower().strip(), set()))
+        return frozenset(self._get_roles().get(role.lower().strip(), set()))
 
     def get_all_roles(self) -> list[str]:
         """Return all defined role names.  Used by the Config UI to list roles."""
-        return list(ROLE_PERMISSIONS.keys())
+        return list(self._get_roles().keys())

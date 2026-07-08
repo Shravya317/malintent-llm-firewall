@@ -37,11 +37,13 @@ if api_key:
 
 class LLMRequest(BaseModel):
     """Request body for POST /api/v1/llm/raw."""
+
     prompt: str = Field(..., min_length=1, max_length=10_000)
 
 
 class LLMResponse(BaseModel):
     """Response body for POST /api/v1/llm/raw."""
+
     response: str
 
 
@@ -63,22 +65,18 @@ async def generate_raw_response(req: LLMRequest):
         # Generate the response
         response = client.chat.completions.create(
             messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful AI assistant."
-                },
-                {
-                    "role": "user",
-                    "content": req.prompt
-                }
+                {"role": "system", "content": "You are a helpful AI assistant."},
+                {"role": "user", "content": req.prompt},
             ],
             model="openai/gpt-oss-20b",
             temperature=0.7,
             max_tokens=300,
         )
-        
+
         answer = response.choices[0].message.content
-        logger.info("LLM raw response generated via Groq (prompt_len=%d)", len(req.prompt))
+        logger.info(
+            "LLM raw response generated via Groq (prompt_len=%d)", len(req.prompt)
+        )
         return LLMResponse(response=answer)
 
     except Exception as e:

@@ -1,8 +1,7 @@
 """
 backend/database.py
 =======================
-Week 7 revision: single PostgreSQL engine across dev (local Docker) and prod (Supabase).
-SQLite / SQLCipher removed entirely.
+Uses a single PostgreSQL engine across dev (local Docker) and prod (Supabase).
 
 Environment variables required
 -------------------------------
@@ -10,17 +9,15 @@ DATABASE_URL   - SQLAlchemy-compatible Postgres URL.
                  Dev:  postgresql://malintent:<password>@localhost:5432/malintent
                  Prod: Supabase Transaction Pooler URL (port 6543)
 PG_CRYPTO_KEY  - 32-byte hex secret for pgcrypto field-level encryption on the
-                 configuration table. Completely separate from the Week 4 FERNET_KEY.
+                 configuration table.
 
 Encryption layers
 -----------------
-Layer 1 (app-layer):   Week 4 Fernet symmetric encryption via config.py/crud.py.
-Layer 2 (DB-layer):    pgcrypto pgp_sym_encrypt / pgp_sym_decrypt on the
-                       configuration.value_encrypted bytea column (this file).
+Layer (DB-layer): pgcrypto pgp_sym_encrypt / pgp_sym_decrypt on the
+                       configuration.value_encrypted bytea column.
 
-Both layers must be in place for a breach of the database file to be useful to
-an attacker — they would need the PG_CRYPTO_KEY AND the FERNET_KEY, both of
-which are environment-only secrets that never touch disk.
+An attacker would need the PG_CRYPTO_KEY, which is an environment-only secret
+that never touches disk.
 """
 
 import os
@@ -55,7 +52,7 @@ if not _raw_db_url:
 # Guard against accidental "DATABASE_URL=postgresql://..." in the value
 # (Render env var value should NOT include the key name).
 if _raw_db_url.startswith("DATABASE_URL="):
-    _raw_db_url = _raw_db_url[len("DATABASE_URL="):]
+    _raw_db_url = _raw_db_url[len("DATABASE_URL=") :]
 
 # Fix Render/Supabase postgres:// -> postgresql:// for SQLAlchemy 1.4+
 _raw_db_url = _raw_db_url.replace("postgres://", "postgresql://", 1)
@@ -101,6 +98,7 @@ SessionLocal = sessionmaker(
 # FastAPI dependency
 # ---------------------------------------------------------------------------
 
+
 def get_db():
     """
     FastAPI dependency that yields a SQLAlchemy session and guarantees cleanup.
@@ -140,6 +138,7 @@ def get_db_context():
 # ---------------------------------------------------------------------------
 # pgcrypto field-level encryption helpers
 # ---------------------------------------------------------------------------
+
 
 def encrypt_field(session: Session, plaintext: str) -> bytes:
     """
@@ -204,9 +203,7 @@ def verify_pgcrypto(session: Session) -> bool:
         )
         value = result.scalar()
         if value != "malintent-pgcrypto-ok":
-            raise RuntimeError(
-                f"pgcrypto round-trip mismatch: got {value!r}"
-            )
+            raise RuntimeError(f"pgcrypto round-trip mismatch: got {value!r}")
         logger.info("pgcrypto verification: OK")
         return True
     except Exception as exc:
@@ -219,6 +216,7 @@ def verify_pgcrypto(session: Session) -> bool:
 # ---------------------------------------------------------------------------
 # Startup helper (called from main.py lifespan)
 # ---------------------------------------------------------------------------
+
 
 def init_db() -> None:
     """

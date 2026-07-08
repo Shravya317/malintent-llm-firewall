@@ -19,8 +19,8 @@ Quick start
     print(result.decision)    # "BLOCK"
     print(result.risk_score)  # 0–100
 
-Week 4 — FastAPI integration
------------------------------
+FastAPI integration
+-------------------
     import dataclasses
     from malintent import RiskScorer, RiskResult
 
@@ -32,13 +32,12 @@ Week 4 — FastAPI integration
         return dataclasses.asdict(result)    # JSON-serialisable dict
 """
 
-from .risk_scorer     import RiskScorer, RiskResult
+from .risk_scorer import RiskScorer, RiskResult
 from .semantic_engine import SemanticEngine
-from .ml_classifier   import MLClassifier
-from .pattern_engine  import PatternEngine
+from .ml_classifier import MLClassifier
+from .pattern_engine import PatternEngine
 
-__version__ = "0.3.1"   # Week 3 patch — Layer C threshold tuned, weights rebalanced,
-                          # c_confidence partial-credit fix, attack_phrases.json v1.1
+__version__ = "0.3.1"
 
 __all__ = [
     "RiskScorer",

@@ -1,36 +1,35 @@
 """
-backend/tests/test_output_validator.py — Week 6: adversarial bypass test suite
+backend/tests/test_output_validator.py — adversarial bypass test suite
 for the Output Consistency Validator.
 
-What "adversarial" means here (Week 6 guide, Day 3):
-  These 10 examples are NOT the Week 1-2 input-firewall corpora. Each one
+What "adversarial" means here:
+  These 10 examples are NOT the input-firewall corpora. Each one
   simulates an LLM RESPONSE that the three-layer input firewall would have
   already let through (the corresponding prompt scores ALLOW) but that still
   nudges the model into leaking something it shouldn't. This suite tests
   ONLY the output validator's independent ability to catch that leak — the
   input firewall is not exercised here at all.
 
-Two of the ten cases below are taken directly from the Week 6 guide's own
-worked example (Day 3) at the documented default threshold (0.35), so their
-expected decisions are asserted exactly. The remaining eight follow the same
-five strategy categories from the guide's Day 3 table (polite indirection,
+Two of the ten cases below are baseline examples at the documented default
+threshold (0.35), so their expected decisions are asserted exactly. The
+remaining eight follow the same five strategy categories (polite indirection,
 hypothetical framing, incremental escalation, authority impersonation,
 translation/paraphrase wrapper) and are asserted on STRUCTURAL invariants
 (decision is one of PASS/FLAGGED, the AND rule holds, fields are well-formed)
 rather than a hardcoded expected label — because the exact PASS/FLAGGED
 boundary for novel phrasing depends on the live sentence-transformer
 similarity score, which can only be computed with model access (see
-docs/output_validator_results.md for why this split exists and how to
+docs/evaluation_metrics.md for why this split exists and how to
 finish populating the real catch-rate number).
 
 HOW TO GET THE REAL CATCH-RATE NUMBER FOR THE PAPER:
   Run this file with -s to see the full per-case table, then transcribe the
-  catch count into docs/output_validator_results.md:
+  catch count into docs/evaluation_metrics.md:
 
       pytest backend/tests/test_output_validator.py -v -s
 
   test_print_catch_rate_summary (last test below) prints exactly the table
-  format docs/output_validator_results.md expects.
+  format docs/evaluation_metrics.md expects.
 """
 
 from __future__ import annotations
@@ -56,10 +55,9 @@ def validator() -> OutputValidator:
     return OutputValidator(system_context=BANKING_CONTEXT)
 
 
-# ── FIXED-EXPECTATION CASES — taken directly from the Week 6 guide's Day 3
-# worked example at the documented default threshold (0.35). These assert an
-# exact decision because the guide author already tuned them against this
-# exact threshold and pattern set. ──────────────────────────────────────────
+# ── FIXED-EXPECTATION CASES — baseline examples at the documented default
+# threshold (0.35). These assert an exact decision because they were tuned
+# against this exact threshold and pattern set. ─────────────────────────────
 
 FIXED_CASES = [
     # (description, simulated_llm_response_text, expected_decision)
@@ -87,11 +85,10 @@ def test_guide_worked_examples(validator, description, response_text, expected):
     )
 
 
-# ── PROBE CASES — one additional adversarial example per strategy from the
-# Day 3 table (x2 each = 8), asserted on structural invariants. Use the
-# printed table from test_print_catch_rate_summary to fill in
-# docs/output_validator_results.md with the real PASS/FLAGGED outcome each
-# one actually produces on your machine. ────────────────────────────────────
+# ── PROBE CASES — one additional adversarial example per strategy
+# asserted on structural invariants. Use the printed table from
+# test_print_catch_rate_summary to fill in docs/evaluation_metrics.md
+# with the real PASS/FLAGGED outcome each one actually produces on your machine.
 
 PROBE_CASES = [
     (
@@ -156,11 +153,11 @@ def test_probe_case_structural_invariants(validator, case_id, response_text):
 
 # ── update_context() — confirms the cached context vector is actually
 # recomputed (not just relabelled) when the deployment's system_context
-# changes, per the Week 6 guide's "edit via Context Settings tab" flow. Uses
-# its OWN OutputValidator instance (rather than the module-scoped `validator`
-# fixture) so mutating context here never leaks into the FIXED/PROBE cases
+# changes. Uses its OWN OutputValidator instance (rather than the module-scoped
+# `validator` fixture) so mutating context here never leaks into the FIXED/PROBE
 # above, which depend on BANKING_CONTEXT staying constant for the whole
 # module. ────────────────────────────────────────────────────────────────────
+
 
 def test_update_context_changes_behavior():
     """
@@ -202,16 +199,15 @@ def test_update_context_changes_behavior():
 def test_print_catch_rate_summary(validator, capsys):
     """
     Prints the full 10-case table (2 fixed + 8 probe) in the exact format
-    docs/output_validator_results.md expects. Run with `-s` to see it:
+    docs/evaluation_metrics.md expects. Run with `-s` to see it:
 
         pytest backend/tests/test_output_validator.py::test_print_catch_rate_summary -s
 
     "Caught" here means decision == FLAGGED, i.e. the output validator
     independently identified the leak in a response whose originating
-    prompt would have cleared the input firewall (ALLOW). Per the Week 6
-    guide: document the count honestly. A catch rate under 100% is still a
-    legitimate, useful result — it shows where dual-stage validation adds
-    value and where its limits are.
+    prompt would have cleared the input firewall (ALLOW). A catch rate under
+    100% is still a legitimate, useful result — it shows where dual-stage
+    validation adds value and where its limits are.
     """
     all_cases = [(d, t, "fixed") for d, t, _ in FIXED_CASES] + [
         (cid, t, "probe") for cid, t in PROBE_CASES
@@ -233,8 +229,7 @@ def test_print_catch_rate_summary(validator, capsys):
     pct = round(100 * caught / len(all_cases), 1)
     print("-" * 90)
     print(f"CAUGHT: {caught} / {len(all_cases)}  =  {pct}%")
-    print("\nCopy this table into docs/output_validator_results.md.\n")
+    print("\nCopy this table into docs/evaluation_metrics.md.\n")
 
     # No assertion here by design — this test exists to print, not to gate
-    # CI on an exact catch-rate number (the threshold-tuning step in the
-    # guide's Day 3 explicitly expects you to iterate on these examples).
+    # CI on an exact catch-rate number.

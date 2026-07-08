@@ -35,7 +35,11 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from .exceptions import BlockedPromptException, MalIntentAPIError, MalIntentConnectionError
+from .exceptions import (
+    BlockedPromptException,
+    MalIntentAPIError,
+    MalIntentConnectionError,
+)
 from .models import (
     ConfigGetResponse,
     ConfigSetResponse,
@@ -96,7 +100,9 @@ class Client:
     def _request(self, method: str, path: str, **kwargs) -> Any:
         url = f"{self.base_url}{path}"
         try:
-            response = self._session.request(method, url, timeout=self.timeout, **kwargs)
+            response = self._session.request(
+                method, url, timeout=self.timeout, **kwargs
+            )
         except requests.exceptions.RequestException as exc:
             raise MalIntentConnectionError(
                 f"Could not reach MalIntent API at {url}: {exc}"
@@ -195,7 +201,7 @@ class Client:
         POST /api/v1/scan/document — RAG document pre-scanner.
 
         NOTE: this is a stub on the live API today (returns
-        {"status": "stub", ...}) pending the Week 7 implementation. Wired
+        {"status": "stub", ...}) pending the Phase 7 implementation. Wired
         up here now so call sites don't need to change once it goes live.
         """
         return self._request("POST", "/api/v1/scan/document")
@@ -227,7 +233,9 @@ class Client:
         data = self._request("GET", "/api/v1/logs", params=params)
         return [ThreatLogEntry.from_dict(row) for row in data]
 
-    def update_log_decision(self, log_id: int, human_decision: str) -> LogDecisionUpdateResponse:
+    def update_log_decision(
+        self, log_id: int, human_decision: str
+    ) -> LogDecisionUpdateResponse:
         """
         PUT /api/v1/logs/{log_id}/decision — False Positive Review Queue:
         submit a human analyst's final decision, overriding the firewall's
@@ -254,7 +262,7 @@ class Client:
 
     def set_config(self, key: str, value: str) -> ConfigSetResponse:
         """
-        PUT /api/v1/config — write a Fernet-encrypted config value.
+        PUT /api/v1/config — write an encrypted config value.
         Upsert: creates the key if missing, overwrites if present.
         """
         body = {"key": key, "value": value}

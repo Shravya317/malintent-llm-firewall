@@ -1,5 +1,5 @@
 MALINTENT — SYSTEM ARCHITECTURE
-(Paper Section 3 — Week 5 Draft)
+(Paper Section 3 — Phase 5 Draft)
 =========================================================
 
 
@@ -62,9 +62,9 @@ architecture itself, not the performance numbers.
         v
     STAGE 3 — Secure Execution Layer (SEL)
         - Tool Access Controller        (whitelist enforcement)
-        - Dynamic Data Masking          <-- built in Week 5
-        - Secret Protection Engine      <-- built in Week 5
-        - Action Audit Logger           (full version coming Week 7)
+        - Dynamic Data Masking          <-- built in Phase 5
+        - Secret Protection Engine      <-- built in Phase 5
+        - Action Audit Logger           (full version coming Phase 7)
         |
         v
     External Tools / Databases / APIs
@@ -81,7 +81,7 @@ architecture itself, not the performance numbers.
 
 The two boxes built this week — Dynamic Data Masking and Secret Protection
 Engine — should be visually highlighted in the diagram (different color)
-since that's the new work for Week 5.
+since that's the new work for Phase 5.
 
 The whole point of drawing it this way: a failure at any ONE stage doesn't
 break the whole system, because the next stage downstream still catches
@@ -181,15 +181,15 @@ The SEL has four parts. Two of them were built and tested this week.
     unlikely to accidentally flag normal text as a secret, as long as the
     threshold is tuned carefully (which it was, and is covered by tests).
 
-  ACTION AUDIT LOGGER (partially built — full version in Week 7)
+  ACTION AUDIT LOGGER (partially built — full version in Phase 7)
     Every decision made by the three modules above is supposed to get
     written to a dedicated log — separate from the main Firewall Log. The
     Firewall Log answers "was this prompt dangerous?" The Action Log
     answers "what did the LLM actually try to do once it was let
-    through?" Right now, both new Week 5 modules are wired into the
+    through?" Right now, both new Phase 5 modules are wired into the
     response flow, but their results only go to the regular application
     log, not yet to a permanent database table — that full version is
-    planned for Week 7, once the LLM can actually call real tools.
+    planned for Phase 7, once the LLM can actually call real tools.
 
 
 3.6 OUTPUT VALIDATION (Stage 4, briefly)
@@ -207,7 +207,7 @@ The design for this stage is finalized, and the API endpoint for it
 already exists in the backend, but right now it just returns a placeholder
 "all good" response so the frontend isn't blocked from being built around
 it. The real version — actually doing the embedding comparison — is
-scheduled for Week 7.
+scheduled for Phase 7.
 
 This stage matters for the paper specifically because it's one of the
 things that makes MalIntent different from other tools, most of which only

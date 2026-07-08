@@ -1,7 +1,6 @@
 """
 backend/scripts/seed_demo_events.py
 =====================================
-Week 7 — Day 6.
 
 Seeds the Supabase production database (or any configured DATABASE_URL) with
 200 realistic simulated threat events so that Shravya's dashboard charts look
@@ -103,11 +102,7 @@ ATTACK_CATEGORIES = [
 ]
 
 # Weighted to produce ~140 ALLOW, ~35 FLAG, ~25 BLOCK out of 200
-DECISIONS_WEIGHTED = (
-    ["ALLOW"] * 140
-    + ["FLAG"] * 35
-    + ["BLOCK"] * 25
-)
+DECISIONS_WEIGHTED = ["ALLOW"] * 140 + ["FLAG"] * 35 + ["BLOCK"] * 25
 
 # ThreatLog.session_role — matches the "admin / employee / customer" contract
 # documented on the model.
@@ -116,7 +111,7 @@ USER_ROLES = ["customer"] * 60 + ["employee"] * 30 + ["admin"] * 10
 # Realistic prompt lengths in characters
 PROMPT_LENGTH_RANGES = {
     "ALLOW": (8, 180),
-    "FLAG":  (25, 350),
+    "FLAG": (25, 350),
     "BLOCK": (40, 500),
 }
 
@@ -124,7 +119,7 @@ PROMPT_LENGTH_RANGES = {
 # deeper analysis by layers B and C.
 LATENCY_RANGES = {
     "ALLOW": (48, 72),
-    "FLAG":  (65, 90),
+    "FLAG": (65, 90),
     "BLOCK": (70, 100),
 }
 
@@ -206,35 +201,34 @@ def _build_event(index: int, decision: str, now: datetime) -> dict:
     elif decision == "BLOCK" and risk_score < 71:
         risk_score = random.randint(71, 100)
 
-    category = (
-        random.choice(ATTACK_CATEGORIES) if decision != "ALLOW" else None
-    )
+    category = random.choice(ATTACK_CATEGORIES) if decision != "ALLOW" else None
     length_lo, length_hi = PROMPT_LENGTH_RANGES[decision]
     lat_lo, lat_hi = LATENCY_RANGES[decision]
 
     triggered_layers = _build_triggered_layers(decision)
 
     return {
-        "timestamp":          now - timedelta(hours=random.uniform(0, 168)),
-        "payload_hash":       _make_payload_hash(index),
-        "payload_length":     random.randint(length_lo, length_hi),
-        "scrubbed_text":      None,  # Tokenised Logging mode: no summary stored
-        "risk_score":         risk_score,
-        "decision":           decision,
-        "attack_category":    category,
-        "layers_triggered":   ",".join(triggered_layers),
-        "layer_a_matched":    "A" in triggered_layers,
+        "timestamp": now - timedelta(hours=random.uniform(0, 168)),
+        "payload_hash": _make_payload_hash(index),
+        "payload_length": random.randint(length_lo, length_hi),
+        "scrubbed_text": None,  # Tokenised Logging mode: no summary stored
+        "risk_score": risk_score,
+        "decision": decision,
+        "attack_category": category,
+        "layers_triggered": ",".join(triggered_layers),
+        "layer_a_matched": "A" in triggered_layers,
         "layer_b_confidence": lb,
-        "user_id":            _make_user_id(index),
-        "session_role":       random.choice(USER_ROLES),
-        "privacy_mode":       "tokenised",
-        "latency_ms":         random.randint(lat_lo, lat_hi),
+        "user_id": _make_user_id(index),
+        "session_role": random.choice(USER_ROLES),
+        "privacy_mode": "tokenised",
+        "latency_ms": random.randint(lat_lo, lat_hi),
     }
 
 
 # ---------------------------------------------------------------------------
 # Main seeding logic
 # ---------------------------------------------------------------------------
+
 
 def seed_events(target_count: int = 200, dry_run: bool = False) -> int:
     """
@@ -252,7 +246,9 @@ def seed_events(target_count: int = 200, dry_run: bool = False) -> int:
             .filter(ThreatLog.payload_hash.like("seed-%"))
             .count()
         )
-        logger.info("Existing seed events: %d / %d target", existing_count, target_count)
+        logger.info(
+            "Existing seed events: %d / %d target", existing_count, target_count
+        )
 
         if existing_count >= target_count:
             logger.info(
@@ -267,7 +263,9 @@ def seed_events(target_count: int = 200, dry_run: bool = False) -> int:
         now = datetime.utcnow()
         # Shuffle the decision pool so the time-ordered events have a realistic
         # random mix rather than all ALLOWs first.
-        decision_pool = DECISIONS_WEIGHTED * ((to_insert // len(DECISIONS_WEIGHTED)) + 1)
+        decision_pool = DECISIONS_WEIGHTED * (
+            (to_insert // len(DECISIONS_WEIGHTED)) + 1
+        )
         random.shuffle(decision_pool)
 
         inserted = 0
@@ -308,6 +306,7 @@ def seed_events(target_count: int = 200, dry_run: bool = False) -> int:
 # CLI entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
@@ -342,7 +341,7 @@ def main() -> None:
         logger.info(
             "Done. Run this to verify:\n"
             "  psql $DATABASE_URL -c "
-            "\"SELECT decision, COUNT(*) FROM threat_log GROUP BY decision;\""
+            '"SELECT decision, COUNT(*) FROM threat_log GROUP BY decision;"'
         )
 
 

@@ -52,13 +52,15 @@ import os
 
 from pathlib import Path
 
+
 def dataset_exists(path: str) -> bool:
     return Path(path).exists()
+
 
 def main():
     # Ensure the output directory exists
     os.makedirs("backend/data", exist_ok=True)
-    
+
     # =============================================================================
     # Dataset 1 — Jailbreak Classification
     # =============================================================================
@@ -76,20 +78,18 @@ def main():
     print("Processing jailbreak-classification...")
     ds_jb = load_dataset("jackhhao/jailbreak-classification", split="test")
     df_jb = ds_jb.to_pandas()
-    
+
     # Keep ONLY rows where type == "jailbreak"
     df_jb = df_jb[df_jb["type"] == "jailbreak"].copy()
-    
+
     # Create required schema
-    out_jb = pd.DataFrame({
-        "text": df_jb["prompt"],
-        "label": 1,
-        "owasp_category": "jailbreak"
-    })
+    out_jb = pd.DataFrame(
+        {"text": df_jb["prompt"], "label": 1, "owasp_category": "jailbreak"}
+    )
     jb_path = "backend/data/jailbreak_classification.csv"
 
     if dataset_exists(jb_path):
-      print("✓ jailbreak_classification.csv already exists. Skipping generation.")
+        print("✓ jailbreak_classification.csv already exists. Skipping generation.")
     else:
         out_jb.to_csv(jb_path, index=False)
         print("✓ Generated jailbreak_classification.csv")
@@ -106,23 +106,23 @@ def main():
 
     print("Processing NotInject...")
     ds_ni = load_dataset("leolee99/NotInject")
-    
+
     # Merge every split
     dfs_ni = []
     for split in ds_ni.keys():
         dfs_ni.append(ds_ni[split].to_pandas())
     df_ni = pd.concat(dfs_ni, ignore_index=True)
-    
+
     # Create required schema
     out_ni = pd.DataFrame()
     out_ni["text"] = df_ni["prompt"]
     out_ni["label"] = 0
-    
+
     if "category" in df_ni.columns:
         out_ni["owasp_category"] = df_ni["category"]
     else:
         out_ni["owasp_category"] = "benign"
-        
+
     ni_path = "backend/data/notinject.csv"
 
     if dataset_exists(ni_path):
@@ -146,15 +146,13 @@ def main():
     print("Processing gandalf...")
     ds_gd = load_dataset("Lakera/gandalf_ignore_instructions", split="test")
     df_gd = ds_gd.to_pandas()
-    
+
     # Create required schema
-    out_gd = pd.DataFrame({
-        "text": df_gd["text"],
-        "label": 1,
-        "owasp_category": "instruction_override"
-    })
+    out_gd = pd.DataFrame(
+        {"text": df_gd["text"], "label": 1, "owasp_category": "instruction_override"}
+    )
     gd_path = "backend/data/gandalf.csv"
-    
+
     if dataset_exists(gd_path):
         print("✓ gandalf.csv already exists. Skipping generation.")
     else:
@@ -169,6 +167,7 @@ def main():
     print("  • notinject.csv")
     print("  • gandalf.csv")
     print("======================================================")
+
 
 if __name__ == "__main__":
     main()

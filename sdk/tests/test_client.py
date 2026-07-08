@@ -25,17 +25,20 @@ def _mock_response(status_code=200, json_data=None):
 
 @patch("malintent.client.requests.Session.request")
 def test_scan_input_allow(mock_request):
-    mock_request.return_value = _mock_response(200, {
-        "decision": "ALLOW",
-        "risk_score": 4.0,
-        "attack_category": None,
-        "layers_triggered": [],
-        "layer_a_matched": False,
-        "layer_b_confidence": 0.0,
-        "layer_c_top_matches": [],
-        "latency_ms": 12.3,
-        "log_id": 101,
-    })
+    mock_request.return_value = _mock_response(
+        200,
+        {
+            "decision": "ALLOW",
+            "risk_score": 4.0,
+            "attack_category": None,
+            "layers_triggered": [],
+            "layer_a_matched": False,
+            "layer_b_confidence": 0.0,
+            "layer_c_top_matches": [],
+            "latency_ms": 12.3,
+            "log_id": 101,
+        },
+    )
 
     client = Client(base_url="https://example.test")
     result = client.scan_input("What's my account balance?")
@@ -47,17 +50,20 @@ def test_scan_input_allow(mock_request):
 
 @patch("malintent.client.requests.Session.request")
 def test_scan_input_block_raises_when_requested(mock_request):
-    mock_request.return_value = _mock_response(200, {
-        "decision": "BLOCK",
-        "risk_score": 92.0,
-        "attack_category": "direct_injection",
-        "layers_triggered": ["A", "B"],
-        "layer_a_matched": True,
-        "layer_b_confidence": 0.98,
-        "layer_c_top_matches": [],
-        "latency_ms": 15.0,
-        "log_id": 202,
-    })
+    mock_request.return_value = _mock_response(
+        200,
+        {
+            "decision": "BLOCK",
+            "risk_score": 92.0,
+            "attack_category": "direct_injection",
+            "layers_triggered": ["A", "B"],
+            "layer_a_matched": True,
+            "layer_b_confidence": 0.98,
+            "layer_c_top_matches": [],
+            "latency_ms": 15.0,
+            "log_id": 202,
+        },
+    )
 
     client = Client(base_url="https://example.test")
 
@@ -82,15 +88,26 @@ def test_api_error_raised_on_non_2xx(mock_request):
 
 @patch("malintent.client.requests.Session.request")
 def test_get_logs_parses_list(mock_request):
-    mock_request.return_value = _mock_response(200, [
-        {
-            "id": 1, "timestamp": "2026-07-01T00:00:00Z", "payload_hash": "abc",
-            "payload_length": 10, "risk_score": 5.0, "decision": "ALLOW",
-            "attack_category": None, "layers_triggered": "", "layer_a_matched": False,
-            "layer_b_confidence": 0.0, "session_role": "customer", "latency_ms": 10.0,
-            "privacy_mode": "tokenised",
-        }
-    ])
+    mock_request.return_value = _mock_response(
+        200,
+        [
+            {
+                "id": 1,
+                "timestamp": "2026-07-01T00:00:00Z",
+                "payload_hash": "abc",
+                "payload_length": 10,
+                "risk_score": 5.0,
+                "decision": "ALLOW",
+                "attack_category": None,
+                "layers_triggered": "",
+                "layer_a_matched": False,
+                "layer_b_confidence": 0.0,
+                "session_role": "customer",
+                "latency_ms": 10.0,
+                "privacy_mode": "tokenised",
+            }
+        ],
+    )
 
     client = Client(base_url="https://example.test")
     logs = client.get_logs(limit=1)

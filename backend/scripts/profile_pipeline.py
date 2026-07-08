@@ -12,13 +12,13 @@ Prints a per-layer (and end-to-end) latency table — mean / p95 / max — acros
 a batch of sample prompts, then a verdict against the project's <100ms p95
 budget. This is both:
 
-  1. A debugging tool for Week 5 Day 2 — find which layer is the bottleneck if
+  1. A debugging tool — find which layer is the bottleneck if
      total latency is creeping over budget.
-  2. The source of the latency numbers cited in paper/03_system_architecture.tex
+  2. The source of the latency numbers cited in docs/system_architecture.md
      and the Sunday sync evidence that the backend is fast enough for Shravya's
      3-second live polling.
 
-IMPORTANT — profile p95, not just mean (see Week 5 guide, Day 2).  A pipeline
+IMPORTANT — profile p95, not just mean.  A pipeline
 that's fast on average but spikes to 400ms on 1 in 20 requests will still fail
 visibly during a live demo.  This script reports both, and treats p95 as the
 pass/fail criterion against the 100ms budget — matching how the project bible's
@@ -44,14 +44,12 @@ from malintent.ml_classifier import get_classifier
 from malintent.semantic_engine import SemanticEngine
 from sel.permission_validator import PermissionValidator
 
-
 # ── DEFAULT SAMPLE PROMPTS ────────────────────────────────────────────────────
 # A small built-in fallback set (mix of attacks + safe prompts spanning all
 # seven OWASP categories from pattern_engine.py) used when --corpus is not
 # supplied or the corpus file can't be found.  For the real evaluation numbers
 # used in the paper, run with --corpus pointing at
-# notebooks/manual_annotation_combined_corpus.csv (the 700-sample Week 1
-# validation set) and --n 50 (or higher) to draw from it.
+# notebooks/manual_annotation_combined_corpus.csv (the 700-sample validation set) and --n 50 (or higher) to draw from it.
 
 DEFAULT_PROMPTS: List[str] = [
     "What's the weather like today?",
@@ -110,14 +108,16 @@ DEFAULT_PROMPTS: List[str] = [
 
 def load_corpus_prompts(csv_path: Path, n: int) -> List[str]:
     """
-    Load up to ``n`` prompts from the Week 1 manual annotation corpus CSV.
+    Load up to ``n`` prompts from the manual annotation corpus CSV.
 
     Expects a 'text' (or 'prompt') column — falls back to the first column if
     neither header is found.  Returns DEFAULT_PROMPTS unchanged if the file is
     missing or can't be parsed, so the script always runs without extra setup.
     """
     if not csv_path.exists():
-        print(f"[profile_pipeline] Corpus not found at {csv_path} — using built-in sample set.")
+        print(
+            f"[profile_pipeline] Corpus not found at {csv_path} — using built-in sample set."
+        )
         return DEFAULT_PROMPTS[:n]
 
     prompts: List[str] = []
@@ -137,7 +137,9 @@ def load_corpus_prompts(csv_path: Path, n: int) -> List[str]:
                 break
 
     if not prompts:
-        print(f"[profile_pipeline] Corpus at {csv_path} produced no usable rows — using built-in sample set.")
+        print(
+            f"[profile_pipeline] Corpus at {csv_path} produced no usable rows — using built-in sample set."
+        )
         return DEFAULT_PROMPTS[:n]
 
     print(f"[profile_pipeline] Loaded {len(prompts)} prompts from {csv_path}.")
@@ -164,7 +166,9 @@ def summarise(values: List[float]) -> dict:
 
 
 def print_table(timings: dict) -> None:
-    print(f"{'Layer':<14}{'Mean (ms)':>12}{'p95 (ms)':>12}{'Max (ms)':>12}{'Min (ms)':>12}")
+    print(
+        f"{'Layer':<14}{'Mean (ms)':>12}{'p95 (ms)':>12}{'Max (ms)':>12}{'Min (ms)':>12}"
+    )
     print("-" * 62)
     for layer, values in timings.items():
         s = summarise(values)
@@ -181,21 +185,29 @@ def profile(prompts: List[str]) -> dict:
     four steps run back-to-back — this combined number is the one to compare
     against the <100ms p95 budget, since that's what a real request pays.
 
-    Layers are constructed ONCE before the loop starts (mirroring the Week 5
-    fix: model/engine construction must never happen inside a per-request hot
+    Layers are constructed ONCE before the loop starts (
+    model/engine construction must never happen inside a per-request hot
     path) and timing starts only once every layer is already warm — so these
     numbers measure steady-state inference latency, not cold-start cost.
     """
-    print("[profile_pipeline] Warming all layers (this happens once, not per-prompt)...")
+    print(
+        "[profile_pipeline] Warming all layers (this happens once, not per-prompt)..."
+    )
     warm_start = time.perf_counter()
     pattern_engine = PatternEngine()
-    classifier = get_classifier()          # singleton — instant if main.py already warmed it
+    classifier = get_classifier()  # singleton — instant if main.py already warmed it
     semantic_engine = SemanticEngine()
     validator = PermissionValidator()
     warm_elapsed = (time.perf_counter() - warm_start) * 1000
     print(f"[profile_pipeline] All layers warm ({warm_elapsed:.0f}ms one-time cost).\n")
 
-    timings = {"pattern_a": [], "ml_b": [], "semantic_c": [], "permission": [], "total_pipeline": []}
+    timings = {
+        "pattern_a": [],
+        "ml_b": [],
+        "semantic_c": [],
+        "permission": [],
+        "total_pipeline": [],
+    }
 
     for prompt in prompts:
         t_start = time.perf_counter()
@@ -217,13 +229,17 @@ def profile(prompts: List[str]) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Profile MalIntent's per-layer pipeline latency.")
-    parser.add_argument("--n", type=int, default=50, help="Number of prompts to profile (default 50).")
+    parser = argparse.ArgumentParser(
+        description="Profile MalIntent's per-layer pipeline latency."
+    )
+    parser.add_argument(
+        "--n", type=int, default=50, help="Number of prompts to profile (default 50)."
+    )
     parser.add_argument(
         "--corpus",
         type=str,
         default="notebooks/manual_annotation_combined_corpus.csv",
-        help="Path to a CSV with a 'text' column (defaults to the Week 1 validation corpus).",
+        help="Path to a CSV with a 'text' column (defaults to the validation corpus).",
     )
     args = parser.parse_args()
 
@@ -243,8 +259,12 @@ def main() -> None:
 
     total_summary = summarise(timings["total_pipeline"])
     print("\n-- BUDGET CHECK --\n")
-    print(f"Target  : < 100ms on the p95 (Layer A ~2ms target, Layer B ~50ms target, Layer C ~20ms target)")
-    print(f"Measured: p95={total_summary['p95']:.2f}ms  mean={total_summary['mean']:.2f}ms  max={total_summary['max']:.2f}ms")
+    print(
+        f"Target  : < 100ms on the p95 (Layer A ~2ms target, Layer B ~50ms target, Layer C ~20ms target)"
+    )
+    print(
+        f"Measured: p95={total_summary['p95']:.2f}ms  mean={total_summary['mean']:.2f}ms  max={total_summary['max']:.2f}ms"
+    )
 
     if total_summary["p95"] < 100.0:
         print("\n[OK] PASS - pipeline p95 latency is under the 100ms budget.")
@@ -252,7 +272,7 @@ def main() -> None:
         print("\n[FAIL] OVER BUDGET - pipeline p95 latency exceeds 100ms.")
         print("  Use the per-layer table above to identify the bottleneck layer,")
         print("  then check it against the 'Common Remaining Bottlenecks' table")
-        print("  in the Week 5 guide (Day 2) before re-running this script.")
+        print("  before re-running this script.")
 
 
 if __name__ == "__main__":

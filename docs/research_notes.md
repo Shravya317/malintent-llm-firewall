@@ -1,6 +1,6 @@
-﻿## Core Security Risks (Primary Focus)
-
 # OWASP LLM01:2025 — Prompt Injection Detection Intelligence
+
+## Core Security Risks (Primary Focus)
 
 ---
 

@@ -1,6 +1,6 @@
 """
-backend/tests/test_sel_end_to_end.py — Week 6: the single most important test
-of the week (per the Week 6 guide, Day 5).
+backend/tests/test_sel_end_to_end.py — the single most important test
+for the SEL.
 
 Proves the full SEL chain works together, not just each module in isolation:
 
@@ -11,10 +11,9 @@ Proves the full SEL chain works together, not just each module in isolation:
      user ID, session role, timestamp, outcome).
   3. The inverse case — a PERMITTED call for the same role — is ALSO logged,
      proving the Action Audit Logger is a complete audit trail and not a
-     denial-only logger (see the Week 6 guide's Day 4 callout: "a logger
-     that only logs denials isn't a complete audit trail").
+     denial-only logger.
 
-This exercises routers.scan.process_tool_call(), the Week 6 orchestration
+This exercises routers.scan.process_tool_call(), the orchestration
 function that ties together SEL Module 4 (role-scope check, where
 applicable), SEL Module 1 (Tool Access Controller whitelist), and SEL
 Module 5 (Action Audit Logger) — see that function's docstring for why the
@@ -24,7 +23,7 @@ Validator classes themselves.
 Self-contained DB fixture: this file builds its own in-memory SQLite session
 via models.Base rather than assuming a project-wide `db_session` fixture
 exists in conftest.py, so it runs correctly regardless of what earlier
-weeks' conftest.py does or doesn't define. If your project already has a
+conftest.py does or doesn't define. If your project already has a
 shared `db_session` fixture, swap the local one below for that — the test
 bodies don't need to change either way.
 """
@@ -47,7 +46,9 @@ def db_session():
     Fresh in-memory SQLite database per test — fast, isolated, no cross-test
     state leakage. Mirrors the schema in models.py exactly via Base.metadata.
     """
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    engine = create_engine(
+        "sqlite:///:memory:", connect_args={"check_same_thread": False}
+    )
     Base.metadata.create_all(bind=engine)
     SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
     session = SessionLocal()
@@ -59,6 +60,7 @@ def db_session():
 
 
 # ── THE CORE TEST — unpermitted tool call denied and logged ──────────────────
+
 
 def test_unpermitted_tool_call_is_denied_and_logged(db_session):
     """
@@ -131,10 +133,11 @@ def test_unpermitted_tool_call_denied_by_role_scope_before_reaching_tac(db_sessi
 
 # ── THE INVERSE CASE — a permitted call is logged too ─────────────────────────
 
+
 def test_permitted_tool_call_is_logged_too(db_session):
     """
-    A logger that only logs denials is not a complete audit trail (Week 6
-    guide, Day 4 callout). "employee" has db:accounts scope
+    A logger that only logs denials is not a complete audit trail.
+    "employee" has db:accounts scope
     (sel/permission_validator.py) and "accounts" is TAC-whitelisted for
     SELECT — this call should be permitted AND logged.
     """
@@ -195,13 +198,18 @@ def test_admin_permitted_for_users_table_scope_but_still_denied_by_tac(db_sessio
 
 
 # ── SANITY: the TAC itself still behaves correctly in isolation ──────────────
-# (Not a SEL-chain test — confirms Week 4's module wasn't broken by Week 6's
+# (Not a SEL-chain test — confirms the module wasn't broken by the
 # orchestration layer sitting on top of it.)
+
 
 def test_tool_access_controller_standalone_still_works():
     tac = ToolAccessController()
-    permitted = tac.validate(tool="database", operation="SELECT", params={"table": "accounts"})
-    denied = tac.validate(tool="database", operation="DELETE", params={"table": "accounts"})
+    permitted = tac.validate(
+        tool="database", operation="SELECT", params={"table": "accounts"}
+    )
+    denied = tac.validate(
+        tool="database", operation="DELETE", params={"table": "accounts"}
+    )
 
     assert permitted.permitted is True
     assert denied.permitted is False

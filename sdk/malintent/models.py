@@ -26,6 +26,7 @@ def _only_known_fields(cls, data: dict) -> dict:
 @dataclass
 class LayerCMatch:
     """One semantically similar attack phrase returned by the FAISS layer."""
+
     phrase: str
     category: str
     similarity: float
@@ -38,7 +39,8 @@ class LayerCMatch:
 @dataclass
 class ScanInputResponse:
     """Response body for POST /api/v1/scan/input."""
-    decision: str                      # "ALLOW" | "FLAG" | "BLOCK"
+
+    decision: str  # "ALLOW" | "FLAG" | "BLOCK"
     risk_score: float
     attack_category: Optional[str]
     layers_triggered: List[str]
@@ -72,6 +74,7 @@ class ScanInputResponse:
 @dataclass
 class ScanOutputResponse:
     """Response body for POST /api/v1/scan/output."""
+
     consistent: bool
     similarity_score: float
     flag_reason: Optional[str]
@@ -85,6 +88,7 @@ class ScanOutputResponse:
 @dataclass
 class ThreatLogEntry:
     """Single row from ThreatLog, as returned by GET /api/v1/logs."""
+
     id: int
     timestamp: str
     payload_hash: str
@@ -112,6 +116,7 @@ class ThreatLogEntry:
 @dataclass
 class LogDecisionUpdateResponse:
     """Response body for PUT /api/v1/logs/{log_id}/decision."""
+
     status: str
     log_id: int
     decision: str
@@ -124,6 +129,7 @@ class LogDecisionUpdateResponse:
 @dataclass
 class HourlyBucket:
     """One hourly data point for the dashboard trend sparkline."""
+
     hour: str
     total: int
     blocked: int
@@ -136,6 +142,7 @@ class HourlyBucket:
 @dataclass
 class ThreatDistributionItem:
     """One slice of the Threat Distribution doughnut chart."""
+
     label: str
     pct: float
     color: str
@@ -148,6 +155,7 @@ class ThreatDistributionItem:
 @dataclass
 class StatsResponse:
     """Response body for GET /api/v1/stats."""
+
     total_requests: int
     total_blocked: int
     total_flagged: int
@@ -164,7 +172,8 @@ class StatsResponse:
             HourlyBucket.from_dict(h) for h in data.get("hourly_trend", [])
         ]
         payload["threat_distribution"] = [
-            ThreatDistributionItem.from_dict(t) for t in data.get("threat_distribution", [])
+            ThreatDistributionItem.from_dict(t)
+            for t in data.get("threat_distribution", [])
         ]
         return cls(**payload)
 
@@ -172,6 +181,7 @@ class StatsResponse:
 @dataclass
 class ConfigGetResponse:
     """Response body for GET /api/v1/config/{key}. Always decrypted plaintext."""
+
     key: str
     value: str
 
@@ -183,6 +193,7 @@ class ConfigGetResponse:
 @dataclass
 class ConfigSetResponse:
     """Response body for PUT /api/v1/config."""
+
     status: str
     key: str
 

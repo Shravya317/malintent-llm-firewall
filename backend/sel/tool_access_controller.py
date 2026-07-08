@@ -13,13 +13,9 @@ Design principle:
   "An injected prompt that commands the LLM to 'dump the users table' hits this
   wall regardless of how convincingly it was phrased." — Project Bible, §Feature 10
 
-Week 4 scope:
-  This file builds the core whitelist logic and validate() method.  Integration
+  This file builds the core whitelist logic and validate() method. Integration
   with actual LLM function-calling output (i.e. intercepting real tool call
-  JSON from the LLM) happens in Week 7 when the full SEL pipeline is wired.
-
-  The validate() method is complete and tested now.  Week 7 is wiring, not
-  invention.
+  JSON from the LLM) is handled by the SEL middleware.
 
 Tool whitelist structure:
   {
@@ -43,22 +39,20 @@ logger = logging.getLogger("malintent.sel.tac")
 
 
 # ── TOOL WHITELIST ────────────────────────────────────────────────────────────
-# Developer-defined at deployment time.  In Week 6 this will be loadable from
-# the Configuration table so administrators can adjust it via the UI without a
-# server restart.  For now it is hardcoded to sensible, conservative defaults.
+# Developer-defined default. Administrators can adjust configurations at runtime.
 #
 # Security rationale for the database whitelist:
 #   - Only SELECT is permitted (never INSERT / UPDATE / DELETE / DROP).
 #   - Only "accounts", "products", and "faq" tables are accessible.
 #   - "users" table is intentionally excluded — it contains personal data that
 #     the LLM should never see in full.
-#   - Dynamic Data Masking (Week 7) will further redact sensitive fields even in
+#   - Dynamic Data Masking will further redact sensitive fields even in
 #     the allowed tables before the LLM receives the response.
 
 TOOL_WHITELIST: Dict[str, Dict[str, Set[str]]] = {
     "database": {
         "allowed_operations": {"SELECT"},
-        "allowed_tables":     {"accounts", "products", "faq"},
+        "allowed_tables": {"accounts", "products", "faq"},
         # NOT included: "users", "admin_config", "audit_log" — too sensitive
     },
     "web_search": {
@@ -76,6 +70,7 @@ TOOL_WHITELIST: Dict[str, Dict[str, Set[str]]] = {
 
 # ── RESULT TYPE ───────────────────────────────────────────────────────────────
 
+
 @dataclass
 class ToolCallDecision:
     """
@@ -89,14 +84,16 @@ class ToolCallDecision:
                    Used in ActionLog and in the API response.
     params       : the original params dict, attached for logging convenience.
     """
-    permitted:     bool
-    tool:          str
-    operation:     str
-    denial_reason: Optional[str]      = None
-    params:        Optional[dict]     = field(default=None, repr=False)
+
+    permitted: bool
+    tool: str
+    operation: str
+    denial_reason: Optional[str] = None
+    params: Optional[dict] = field(default=None, repr=False)
 
 
 # ── CONTROLLER ────────────────────────────────────────────────────────────────
+
 
 class ToolAccessController:
     """
@@ -108,7 +105,7 @@ class ToolAccessController:
     The validate() method is the single entry point.  It makes a binary
     PERMITTED / DENIED decision in O(1) time (dict lookup + set membership).
 
-    In Week 7 this class will be called by the SEL middleware that intercepts
+    This class is called by the SEL middleware that intercepts
     the LLM's function-calling output JSON before it is dispatched to the
     actual tool.  The LLM never receives the TAC's deny response — the SEL
     handles it and returns an appropriate error to the LLM instead.
@@ -116,9 +113,9 @@ class ToolAccessController:
 
     def validate(
         self,
-        tool:      str,
+        tool: str,
         operation: str,
-        params:    Optional[dict] = None,
+        params: Optional[dict] = None,
     ) -> ToolCallDecision:
         """
         Check whether a tool call is permitted under the whitelist.
@@ -141,7 +138,9 @@ class ToolAccessController:
         # ── Check 1: Tool in whitelist ────────────────────────────────────────
         if tool not in TOOL_WHITELIST:
             reason = f"Tool '{tool}' is not in the whitelist"
-            logger.warning("TAC DENIED: tool=%s operation=%s — %s", tool, operation, reason)
+            logger.warning(
+                "TAC DENIED: tool=%s operation=%s — %s", tool, operation, reason
+            )
             return ToolCallDecision(
                 permitted=False,
                 tool=tool,
@@ -156,7 +155,9 @@ class ToolAccessController:
         allowed_ops: Set[str] = tool_config.get("allowed_operations", set())
         if operation.upper() not in {op.upper() for op in allowed_ops}:
             reason = f"Operation '{operation}' not permitted for tool '{tool}'"
-            logger.warning("TAC DENIED: tool=%s operation=%s — %s", tool, operation, reason)
+            logger.warning(
+                "TAC DENIED: tool=%s operation=%s — %s", tool, operation, reason
+            )
             return ToolCallDecision(
                 permitted=False,
                 tool=tool,
@@ -179,7 +180,10 @@ class ToolAccessController:
                     )
                     logger.warning(
                         "TAC DENIED: tool=%s operation=%s table=%s — %s",
-                        tool, operation, table, reason,
+                        tool,
+                        operation,
+                        table,
+                        reason,
                     )
                     return ToolCallDecision(
                         permitted=False,
@@ -203,13 +207,13 @@ class ToolAccessController:
     def get_whitelist_summary(self) -> dict:
         """
         Return a JSON-serialisable summary of the whitelist.
-        Used by the Permission Roles tab in the frontend (Week 6) to display
+        Used by the Permission Roles tab in the frontend to display
         which tools are enabled and their permitted operations.
         """
         return {
             tool: {
                 "allowed_operations": sorted(cfg.get("allowed_operations", set())),
-                "allowed_tables":     sorted(cfg.get("allowed_tables", set())),
+                "allowed_tables": sorted(cfg.get("allowed_tables", set())),
             }
             for tool, cfg in TOOL_WHITELIST.items()
         }
