@@ -58,8 +58,7 @@ export default function Registration() {
         password: formData.password,
       };
 
-      const baseURL =
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
+      const baseURL = "https://malintent-backend-261681342014.asia-south1.run.app/api/v1";
       // Adjust endpoint based on backend setup, authentication.py routes are typically mounted at /api/v1 or root depending on main.py
       // Assuming they are mounted cleanly:
       await axios.post(`${baseURL}/register`, payload);
@@ -80,8 +79,7 @@ export default function Registration() {
     setLoading(true);
 
     try {
-      const baseURL =
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
+      const baseURL = "https://malintent-backend-261681342014.asia-south1.run.app/api/v1";
       const res = await axios.post(`${baseURL}/verify-otp`, {
         email: formData.email,
         otp_code: otpCode,
