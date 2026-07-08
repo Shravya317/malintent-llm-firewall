@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/layout/Logo';
 import { registerUser, verifyOTP } from '../api/client';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function AuthPage() {
   const [otpStep, setOtpStep] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     first_name: '', middle_name: '', last_name: '',
@@ -19,6 +21,13 @@ export default function AuthPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const extractError = (err) => {
+    const detail = err.response?.data?.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) return detail.map(e => `${e.loc?.[e.loc.length - 1]}: ${e.msg}`).join(', ');
+    return "An error occurred. Please check your connection.";
   };
 
   const handleSubmit = async (e) => {
@@ -36,7 +45,7 @@ export default function AuthPage() {
         setOtpStep(true);
       }
     } catch (err) {
-      setError(err.response?.data?.detail || "An error occurred");
+      setError(extractError(err));
     } finally {
       setLoading(false);
     }
@@ -53,7 +62,7 @@ export default function AuthPage() {
       setOtp('');
       alert("Registration successful! You can now log in.");
     } catch (err) {
-      setError(err.response?.data?.detail || "Invalid OTP");
+      setError(extractError(err));
     } finally {
       setLoading(false);
     }
@@ -79,7 +88,6 @@ export default function AuthPage() {
     color: 'var(--text-secondary)'
   };
 
-  // Helper for generating standard text inputs
   const renderInput = (name, label, type = "text", required = true) => (
     <div style={{ marginBottom: '16px' }}>
       <label style={labelStyle}>
@@ -97,6 +105,92 @@ export default function AuthPage() {
       />
     </div>
   );
+
+  const renderSelect = (name, label, options, required = true) => (
+    <div style={{ marginBottom: '16px' }}>
+      <label style={labelStyle}>{label}</label>
+      <select
+        name={name}
+        value={formData[name]}
+        onChange={handleChange}
+        required={required}
+        style={{ ...inputStyle, cursor: 'pointer', appearance: 'none' }}
+        onFocus={(e) => e.target.style.borderColor = 'var(--accent-threat)'}
+        onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
+      >
+        <option value="" disabled>Select {label}</option>
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const renderPassword = (name, label) => (
+    <div style={{ marginBottom: '16px', position: 'relative' }}>
+      <label style={labelStyle}>{label}</label>
+      <div style={{ position: 'relative' }}>
+        <input
+          type={showPassword ? "text" : "password"}
+          name={name}
+          value={formData[name]}
+          onChange={handleChange}
+          required
+          style={{ ...inputStyle, paddingRight: '40px' }}
+          onFocus={(e) => e.target.style.borderColor = 'var(--accent-threat)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          style={{
+            position: 'absolute',
+            right: '10px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </div>
+    </div>
+  );
+
+  const sexOptions = [
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
+    { label: 'Other', value: 'Other' },
+    { label: 'Prefer not to say', value: 'Prefer not to say' }
+  ];
+
+  const countryOptions = [
+    { label: 'United States', value: 'United States' },
+    { label: 'United Kingdom', value: 'United Kingdom' },
+    { label: 'Canada', value: 'Canada' },
+    { label: 'Australia', value: 'Australia' },
+    { label: 'India', value: 'India' },
+    { label: 'Germany', value: 'Germany' },
+    { label: 'Other', value: 'Other' }
+  ];
+
+  const stateOptions = [
+    { label: 'California', value: 'California' },
+    { label: 'New York', value: 'New York' },
+    { label: 'Texas', value: 'Texas' },
+    { label: 'London', value: 'London' },
+    { label: 'Ontario', value: 'Ontario' },
+    { label: 'Delhi', value: 'Delhi' },
+    { label: 'Maharashtra', value: 'Maharashtra' },
+    { label: 'Other', value: 'Other' }
+  ];
 
   return (
     <div style={{
@@ -150,7 +244,7 @@ export default function AuthPage() {
         borderRadius: 'var(--card-radius)',
         padding: '32px',
         width: '100%',
-        maxWidth: isLogin || otpStep ? '380px' : '600px', // Wider card for Sign Up
+        maxWidth: isLogin || otpStep ? '380px' : '640px', // Wider card for Sign Up
         boxShadow: 'var(--card-shadow)',
         display: 'flex',
         flexDirection: 'column',
@@ -215,7 +309,7 @@ export default function AuthPage() {
             {isLogin ? (
               <>
                 {renderInput('email', 'Email address', 'email')}
-                {renderInput('password', 'Password', 'password')}
+                {renderPassword('password', 'Password')}
               </>
             ) : (
               /* Sign Up Mode Fields (2-Column Grid) */
@@ -227,17 +321,17 @@ export default function AuthPage() {
                   {renderInput('middle_name', 'Middle Name', 'text', false)}
                 </div>
 
-                {renderInput('dob', 'Date of Birth')}
-                {renderInput('sex', 'Sex')}
+                {renderInput('dob', 'Date of Birth', 'date')}
+                {renderSelect('sex', 'Sex', sexOptions)}
                 
-                {renderInput('country', 'Country')}
-                {renderInput('state', 'State')}
+                {renderSelect('country', 'Country', countryOptions)}
+                {renderSelect('state', 'State', stateOptions)}
 
                 {renderInput('phone', 'Phone Number', 'tel')}
                 {renderInput('email', 'Email Address', 'email')}
                 
                 <div style={{ gridColumn: '1 / -1' }}>
-                  {renderInput('password', 'Password', 'password')}
+                  {renderPassword('password', 'Password')}
                 </div>
               </div>
             )}
