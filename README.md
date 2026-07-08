@@ -1,12 +1,12 @@
 <div align="center">
 
 ```
-███╗   ███╗ █████╗ ██╗     ██╗███╗   ██╗████████╗███████╗███╗   ██╗████████╗
-████╗ ████║██╔══██╗██║     ██║████╗  ██║╚══██╔══╝██╔════╝████╗  ██║╚══██╔══╝
-██╔████╔██║███████║██║     ██║██╔██╗ ██║   ██║   █████╗  ██╔██╗ ██║   ██║   
-██║╚██╔╝██║██╔══██║██║     ██║██║╚██╗██║   ██║   ██╔══╝  ██║╚██╗██║   ██║   
-██║ ╚═╝ ██║██║  ██║███████╗██║██║ ╚████║   ██║   ███████╗██║ ╚████║   ██║   
-╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝   
+                                                                              ███╗   ███╗ █████╗ ██╗     ██╗███╗   ██╗████████╗███████╗███╗   ██╗████████╗
+                                                                              ████╗ ████║██╔══██╗██║     ██║████╗  ██║╚══██╔══╝██╔════╝████╗  ██║╚══██╔══╝
+                                                                              ██╔████╔██║███████║██║     ██║██╔██╗ ██║   ██║   █████╗  ██╔██╗ ██║   ██║   
+                                                                              ██║╚██╔╝██║██╔══██║██║     ██║██║╚██╗██║   ██║   ██╔══╝  ██║╚██╗██║   ██║   
+                                                                              ██║ ╚═╝ ██║██║  ██║███████╗██║██║ ╚████║   ██║   ███████╗██║ ╚████║   ██║   
+                                                                              ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝   
 ```
 
 **Enterprise-Grade Multi-Layer LLM Security Firewall**
@@ -263,9 +263,12 @@ ThreatLog · Configuration · ActionLog
 | `SUPABASE_DIRECT_URL`            | Direct PostgreSQL (admin/maintenance)      |
 | `SUPABASE_TRANSACTION_POOLER_URL`| App connection (pooled)                    |
 | `PG_CRYPTO_KEY`                  | pgcrypto field-level decryption key        |
-| `FERNET_KEY`                     | Application-layer symmetric encryption key |
 | `HUGGINGFACE_TOKEN`              | PromptGuard model download                 |
 | `CORS_ALLOWED_ORIGINS`           | Allowed frontend origins                   |
+| `GROQ_API_KEY`                   | Comparison Mode raw LLM proxy (Groq)       |
+| `SUPABASE_JWT_SECRET`            | Verify JWT tokens for landing page login   |
+| `SMTP_EMAIL`                     | Email OTP sender address                   |
+| `SMTP_PASSWORD`                  | Email OTP sender app password              |
 
 > **Redeployment note:** If the backend is redeployed as a new Cloud Run service, update the base URL throughout the project before creating a release.
 
@@ -513,16 +516,17 @@ Drawing from the taxonomy established by [HackAPrompt (arXiv:2311.16119)](https:
 
 ## Roadmap
 
-| Week | Status | Deliverable                                             |
-|:-----|:-------|:--------------------------------------------------------|
-| 1    | ✅     | Pattern Detection Engine (Layer A)                      |
-| 2    | ✅     | ML Detection Engine (Layer B) — PromptGuard fine-tuning |
-| 3    | ✅     | Semantic Engine (Layer C) + Unified Risk Scorer         |
-| 4    | ✅     | FastAPI Backend + SEL Skeleton + Breach-Resilient Storage|
-| 5    | ✅     | Dynamic Data Masking + Secret Protection + Pipeline Opt.|
-| 6    | ✅     | Output Consistency Validation + Action Audit Logging    |
+| Week | Status | Deliverable                                               |
+|:-----|:-------|:--------------------------------------------------------  |
+| 1    | ✅     | Pattern Detection Engine (Layer A)                        |
+| 2    | ✅     | ML Detection Engine (Layer B) — PromptGuard fine-tuning   |
+| 3    | ✅     | Semantic Engine (Layer C) + Unified Risk Scorer           |
+| 4    | ✅     | FastAPI Backend + SEL Skeleton + Breach-Resilient Storage  |
+| 5    | ✅     | Dynamic Data Masking + Secret Protection + Pipeline Opt.  |
+| 6    | ✅     | Output Consistency Validation + Action Audit Logging      |
 | 7    | ✅     | PostgreSQL Migration + Supabase + Cloud Run + Docker + SDK|
-| 8–9  | 🚧     | RAG Document Pre-Scanner + `/scan/document` full impl.  |
+| 8    | ✅     | RAG Document Pre-Scanner + Dashboard and Other Backend Integrations (Authorization/Authentication) + `/scan/document` full impl.    |
+| 9    | ✅     | A research paper written for the entire project    |
 
 ---
 
