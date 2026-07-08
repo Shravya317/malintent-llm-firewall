@@ -182,4 +182,27 @@ export async function updateLogDecision(logId, decision) {
   }
 }
 
+/**
+ * AUTHENTICATION
+ */
+export async function registerUser(userData) {
+  try {
+    const response = await apiClient.post('/auth/register', userData)
+    return response.data
+  } catch (error) {
+    console.error('Error in registerUser:', error)
+    throw error
+  }
+}
+
+export async function verifyOTP(email, otp) {
+  try {
+    const response = await apiClient.post('/auth/verify-otp', { email, otp })
+    return response.data
+  } catch (error) {
+    console.error('Error in verifyOTP:', error)
+    throw error
+  }
+}
+
 export default apiClient
