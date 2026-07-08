@@ -33,10 +33,14 @@ class MalIntentAPIError(MalIntentError):
         (FastAPI validation errors, custom detail messages, etc.).
     """
 
-    def __init__(self, status_code: int, detail: Any = None, message: Optional[str] = None):
+    def __init__(
+        self, status_code: int, detail: Any = None, message: Optional[str] = None
+    ):
         self.status_code = status_code
         self.detail = detail
-        super().__init__(message or f"MalIntent API returned HTTP {status_code}: {detail}")
+        super().__init__(
+            message or f"MalIntent API returned HTTP {status_code}: {detail}"
+        )
 
 
 class BlockedPromptException(MalIntentError):

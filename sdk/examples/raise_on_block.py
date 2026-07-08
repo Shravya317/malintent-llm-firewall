@@ -11,7 +11,9 @@ client = Client(base_url="https://malintent-backend-261681342014.asia-south1.run
 
 def handle_user_message(prompt: str, session_role: str = "customer") -> str:
     try:
-        result = client.scan_input(prompt, session_role=session_role, raise_on_block=True)
+        result = client.scan_input(
+            prompt, session_role=session_role, raise_on_block=True
+        )
     except BlockedPromptException as exc:
         return (
             f"Request blocked (risk_score={exc.risk_score}, "

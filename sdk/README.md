@@ -1,3 +1,88 @@
+<div align="center">
+
+<img src="https://img.shields.io/badge/PHASE_2-SDK-009688?style=for-the-badge" alt="Phase 2" />
+
+# MalIntent: Python SDK
+
+**The Official Client Integration Library**<br/>
+*Seamlessly connect your GenAI applications to the MalIntent security firewall.*
+
+<a href="#about">About</a> •
+<a href="#key-features">Key Features</a> •
+<a href="#architecture--data-flow">Architecture</a> •
+<a href="#quick-start">Quick Start</a> •
+<a href="#examples">Examples</a>
+
+---
+
+<img src="https://img.shields.io/badge/PYTHON-LANGUAGE-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+<img src="https://img.shields.io/badge/REQUESTS-HTTP_CLIENT-009688?style=for-the-badge&logo=pypi&logoColor=white" alt="Requests" />
+<img src="https://img.shields.io/badge/STATUS-OPERATIONAL-22c55e?style=for-the-badge" alt="Status" />
+
+</div>
+
+---
+
+## About
+The **MalIntent Python SDK** is the official, zero-dependency integration library for developers routing their LLM traffic through the MalIntent Firewall. It intercepts user inputs and scans them via our robust REST API before they ever reach the Language Model.
+
+---
+
+## Architecture & Data Flow
+
+```text
+                  Client Application
+ ┌─────────────────────────────────────────────────────────────┐
+ │                                                             │
+ │  ┌─────────┐                                ┌───────────┐   │
+ │  │ User    │                                │ LLM API   │   │
+ │  │ Prompt  │                                │ (OpenAI)  │   │
+ │  └────┬────┘                                └─────▲─────┘   │
+ │       │        ┌─────────────────────────┐        │         │
+ │       │        │  MalIntent Python SDK   │        │         │
+ │       └───────▶│  client.scan_input()    │────────┘         │
+ │                └───────────┬─────────────┘                  │
+ │                            │                                │
+ └────────────────────────────┼────────────────────────────────┘
+                              │
+                    REST HTTP │ JSON (with JWT Auth)
+                              ▼
+                  ┌───────────────────────┐
+                  │   MalIntent Backend   │
+                  │   (Cloud Run API)     │
+                  └───────────────────────┘
+```
+
+### SDK Package Structure
+
+```text
+malintent/sdk/
+├── setup.py                    # Package configuration
+├── malintent/                  # Core SDK Module
+│   ├── __init__.py             
+│   ├── client.py               # The Client HTTP Wrapper (Handles JWT)
+│   ├── models.py               # Dataclass definitions (RiskResult)
+│   └── exceptions.py           # BlockedPromptException
+├── examples/                   # Implementation Patterns
+│   ├── quickstart.py           # Basic integration script
+│   └── raise_on_block.py       # Exception-flow pattern
+└── tests/                      # Pytest Suite
+    └── test_client.py          # Client unit validation
+```
+
+---
+
+## Key Features
+- **Zero heavy dependencies** (only requires `requests`).
+- **Clean, strongly-typed interface** over the REST API.
+- **Native `BlockedPromptException`** for easy "fail-fast" integration.
+- **Full support for the unified `RiskResult` contract**.
+- **Authentication Ready:** Seamlessly passes your JWT tokens to the backend.
+
+---
+
+## Architecture & Original Docs
+
 # malintent
 
 Official Python SDK for **MalIntent** — an AI-powered LLM prompt injection firewall.
@@ -69,8 +154,8 @@ More examples in [`examples/`](./examples), including `quickstart.py` (live demo
 The SDK lives inside the main MalIntent repository, under `sdk/`.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/malintent.git
-cd malintent/sdk
+git clone https://github.com/tusharr-mishra/malintent-llm-firewall.git
+cd malintent-llm-firewall/sdk
 pip install -e .
 python -m pytest tests/ -v
 python examples/quickstart.py
