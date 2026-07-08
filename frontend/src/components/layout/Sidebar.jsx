@@ -32,7 +32,7 @@ import Logo from './Logo'
 export const SIDEBAR_WIDTH = '240px'
 
 const navItems = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Threats', path: '/threats', icon: ShieldAlert },
   { label: 'Comparison Mode', path: '/comparison', icon: GitCompare },
   { label: 'Deep Scan Sandbox', path: '/sandbox', icon: Search },

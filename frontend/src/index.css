@@ -535,3 +535,29 @@ h1, h2, h3, h4, h5, h6 {
     padding: 20px !important;
   }
 }
+
+/* ── Marquee Animation ── */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - 10px)); } /* 10px accounts for half the 20px gap */
+}
+
+.marquee-container {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  padding: 0 0 20px;
+}
+
+.marquee-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+  padding-left: 20px; /* match the gap so it loops cleanly */
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}

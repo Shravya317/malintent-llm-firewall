@@ -17,7 +17,7 @@
  * @param {React.ReactNode} props.children - The specific page content rendered inside the main content area.
  */
 import React, { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import { Menu } from 'lucide-react'
 import { useTheme } from '../../ThemeContext'
@@ -87,7 +87,7 @@ export default function Layout({ children }) {
 
       {/* Main Content */}
       <main className="main-content">
-        {children}
+        {children || <Outlet />}
       </main>
     </div>
   )
