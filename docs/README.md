@@ -1,48 +1,51 @@
-<div align="center">
-  <h1>MalIntent Documentation Hub</h1>
-  <p><b>Comprehensive system architecture, research notes, and cryptographic validation logs.</b></p>
-</div>
+# Documentation
 
-> [!NOTE]
-> This directory contains in-depth documentation and evaluation results. For setup instructions, please see the respective `frontend/`, `backend/`, and `sdk/` directories.
-
-## Index
-
-### Architecture & System Design
-- **[System Architecture](system_architecture.md)**: A complete, 14-page breakdown of the entire MalIntent framework. Covers the Secure Execution Layer (SEL), 3-Layer Detection Engine, Tool Access Controllers, and dynamic PII masking strategies.
-
-### Research & Evaluation
-- **[Research Notes](research_notes.md)**: Design rationale behind using FAISS vs. raw cosine similarity, benchmarking decisions, and security tradeoffs made during the PromptGuard model selection.
-- **[Benchmark Logs (`benchmark_logs/`)](benchmark_logs/)**: Raw CSV artifacts and execution traces from our ablation studies. Proves the efficacy of the 3-layer engine against state-of-the-art prompt injection datasets.
-- **[Evaluation Metrics](evaluation_metrics.md)**: Standardized criteria used to grade the firewall's true-positive and false-positive rates.
-
-### Cryptography & Security
-- **[DB Encryption Verification](db_encryption_verification.md)**: Auditable proof and methodology for how the `configuration` table leverages PostgreSQL `pgcrypto`. Ensures that API keys and sensitive thresholds are unreadable at rest.
+Architecture references, evaluation methodology, cryptographic verification, and research rationale for the MalIntent firewall.
 
 ---
 
-## Project Structure
+## Contents
 
-```text
-malintent/docs/
-├── README.md                           # This index file
-├── system_architecture.md              # Core firewall architecture breakdown
-├── research_notes.md                   # Model selection & benchmarking rationale
-├── evaluation_metrics.md               # Standardized testing criteria
-├── db_encryption_verification.md       # pgcrypto implementation proof
-├── owasp_llm_risks.html                # OWASP Top 10 Reference Guide
-└── benchmark_logs/                     # Raw ablation study execution traces
+### System Design
+
+**[system_architecture.md](system_architecture.md)**  
+A 14-page technical breakdown of the full MalIntent stack — the three-layer detection pipeline, Unified Risk Scorer, Security Enforcement Layer modules (Tool Access Controller, Permission Validator, Dynamic Data Masking, Secret Protection Engine, Output Consistency Validator), FastAPI routing, and database schema.
+
+**[research_notes.md](research_notes.md)**  
+Design decisions and the reasoning behind them: why FAISS `IndexFlatIP` over raw cosine search, the tradeoffs in PromptGuard-86M vs. larger classifier alternatives, and how the 30/45/25 layer weighting was arrived at empirically.
+
+### Evaluation
+
+**[evaluation_metrics.md](evaluation_metrics.md)**  
+Standardised criteria for measuring the firewall's true-positive rate, false-negative rate, false-positive rate, and latency budget across the internal corpus and the three OOD benchmark datasets.
+
+**[benchmark_logs/](benchmark_logs/)**  
+Raw CSV artifacts and execution traces from the ablation studies: `ablation_results_corpus1.csv`, `ood_jailbreak.csv`, `ood_notinject.csv`, `ood_gandalf.csv`. The layer-by-layer progression (65.5% → 72.0% → 100.0% accuracy) is reproducible from these logs using `scripts/run_ablation_benchmark.py`.
+
+### Cryptography
+
+**[db_encryption_verification.md](db_encryption_verification.md)**  
+Auditable methodology for the dual-layer encryption on the `configuration` table — PostgreSQL `pgcrypto` field-level AES encryption layered with application-level Fernet. Includes correct-key and wrong-key decryption verification results, and the rationale for gating decryption on `PG_CRYPTO_KEY` rather than a hardcoded constant.
+
+---
+
+## File Tree
+
+```
+docs/
+├── README.md
+├── system_architecture.md
+├── research_notes.md
+├── evaluation_metrics.md
+├── db_encryption_verification.md
+├── owasp_llm_risks.html
+└── benchmark_logs/
+    ├── ablation_results_corpus1.csv
+    ├── ood_jailbreak.csv
+    ├── ood_notinject.csv
+    └── ood_gandalf.csv
 ```
 
 ---
 
-## Installation
-
-> [!NOTE]
-> The `docs/` directory contains purely static markdown and HTML documentation. **No installation is required.** 
-> For code setup, please refer to the installation instructions in the `frontend/`, `backend/`, or `sdk/` directories.
-
----
-
-> [!TIP]
-> If you are a developer looking to integrate MalIntent into your LLM pipeline, skip straight to the **[SDK Documentation](../sdk/README.md)**.
+For setup, see [`backend/`](../backend/), [`frontend/`](../frontend/), or [`sdk/`](../sdk/). For API reference, the live interactive docs are at `/docs` on any running instance.

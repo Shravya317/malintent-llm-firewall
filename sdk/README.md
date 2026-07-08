@@ -10,21 +10,29 @@
 <a href="#about">About</a> •
 <a href="#key-features">Key Features</a> •
 <a href="#architecture--data-flow">Architecture</a> •
-<a href="#quick-start">Quick Start</a> •
-<a href="#examples">Examples</a>
+<a href="#install">Install</a> •
+<a href="#quickstart">Quickstart</a> •
+<a href="#whats-covered">API Coverage</a> •
+<a href="#exception-based-flow">Exception Flow</a> •
+<a href="#development">Development</a>
 
 ---
 
 <img src="https://img.shields.io/badge/PYTHON-LANGUAGE-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
 <img src="https://img.shields.io/badge/REQUESTS-HTTP_CLIENT-009688?style=for-the-badge&logo=pypi&logoColor=white" alt="Requests" />
 <img src="https://img.shields.io/badge/STATUS-OPERATIONAL-22c55e?style=for-the-badge" alt="Status" />
+<img src="https://img.shields.io/badge/LICENSE-MIT-blue?style=for-the-badge" alt="MIT License" />
 
 </div>
 
 ---
 
 ## About
-The **MalIntent Python SDK** is the official, zero-dependency integration library for developers routing their LLM traffic through the MalIntent Firewall. It intercepts user inputs and scans them via our robust REST API before they ever reach the Language Model.
+
+The **MalIntent Python SDK** is the official, zero-dependency integration library for developers routing their LLM traffic through the MalIntent Firewall — an AI-powered LLM prompt injection firewall. It wraps every REST endpoint in a clean, strongly-typed client so prompts can be scanned before they ever reach the language model.
+
+- **Live API:** `https://malintent-backend-261681342014.asia-south1.run.app`
+- **Swagger Docs:** `https://malintent-backend-261681342014.asia-south1.run.app/docs`
 
 ---
 
@@ -58,37 +66,29 @@ The **MalIntent Python SDK** is the official, zero-dependency integration librar
 ```text
 malintent/sdk/
 ├── setup.py                    # Package configuration
-├── malintent/                  # Core SDK Module
-│   ├── __init__.py             
-│   ├── client.py               # The Client HTTP Wrapper (Handles JWT)
-│   ├── models.py               # Dataclass definitions (RiskResult)
+├── malintent/                  # Core SDK module
+│   ├── __init__.py
+│   ├── client.py               # The client HTTP wrapper (handles JWT)
+│   ├── models.py                # Dataclass definitions (RiskResult)
 │   └── exceptions.py           # BlockedPromptException
-├── examples/                   # Implementation Patterns
-│   ├── quickstart.py           # Basic integration script
-│   └── raise_on_block.py       # Exception-flow pattern
-└── tests/                      # Pytest Suite
-    └── test_client.py          # Client unit validation
+├── examples/                    # Implementation patterns
+│   ├── quickstart.py            # Basic integration script
+│   └── raise_on_block.py        # Exception-flow pattern
+└── tests/                       # Pytest suite
+    └── test_client.py            # Client unit validation
 ```
 
 ---
 
 ## Key Features
-- **Zero heavy dependencies** (only requires `requests`).
-- **Clean, strongly-typed interface** over the REST API.
+
+- **Zero heavy dependencies** — only requires `requests`.
+- **Clean, strongly-typed interface** over the full REST API.
 - **Native `BlockedPromptException`** for easy "fail-fast" integration.
-- **Full support for the unified `RiskResult` contract**.
-- **Authentication Ready:** Seamlessly passes your JWT tokens to the backend.
+- **Full support for the unified `RiskResult` contract**, matching the backend's OpenAPI schema.
+- **Authentication ready** — seamlessly passes your JWT tokens to the backend.
 
 ---
-
-## Architecture & Original Docs
-
-# malintent
-
-Official Python SDK for **MalIntent** — an AI-powered LLM prompt injection firewall.
-
-Live API: `https://malintent-backend-261681342014.asia-south1.run.app`
-Swagger docs: `https://malintent-backend-261681342014.asia-south1.run.app/docs`
 
 ## Install
 
@@ -96,7 +96,9 @@ Swagger docs: `https://malintent-backend-261681342014.asia-south1.run.app/docs`
 pip install malintent
 ```
 
-(Not yet on PyPI? Install from source — see **Development** below.)
+Not yet on PyPI? Install from source — see [Development](#development) below.
+
+---
 
 ## Quickstart
 
@@ -116,22 +118,26 @@ else:
     print("Prompt is safe to forward to your LLM")
 ```
 
-## What's covered
+---
 
-| Method                                             | Endpoint                                                                |
-| -------------------------------------------------- | ----------------------------------------------------------------------- |
-| `client.scan_input(prompt, ...)`                   | `POST /api/v1/scan/input`                                               |
-| `client.scan_output(llm_response, system_context)` | `POST /api/v1/scan/output`                                              |
-| `client.scan_document(...)`                        | `POST /api/v1/scan/document` _(stub — full implementation in progress)_ |
-| `client.get_logs(limit, offset, decision)`         | `GET /api/v1/logs`                                                      |
-| `client.get_stats()`                               | `GET /api/v1/stats`                                                     |
-| `client.set_config(key, value)`                    | `PUT /api/v1/config`                                                    |
-| `client.get_config(key)`                           | `GET /api/v1/config/{key}`                                              |
-| `client.health()`                                  | `GET /`                                                                 |
+## What's Covered
 
-> Note: there is currently no `PUT /api/v1/logs/{log_id}/decision` endpoint on the backend, so this SDK does not expose an `update_log_decision()` method. Health/status is served from `GET /`, not `/health`.
+| Method                                               | Endpoint                                                                 |
+| ----------------------------------------------------- | -------------------------------------------------------------------------- |
+| `client.scan_input(prompt, ...)`                       | `POST /api/v1/scan/input`                                                  |
+| `client.scan_output(llm_response, system_context)`     | `POST /api/v1/scan/output`                                                 |
+| `client.scan_document(...)`                            | `POST /api/v1/scan/document` *(stub — full implementation in progress)*    |
+| `client.get_logs(limit, offset, decision)`             | `GET /api/v1/logs`                                                         |
+| `client.get_stats()`                                   | `GET /api/v1/stats`                                                        |
+| `client.set_config(key, value)`                        | `PUT /api/v1/config`                                                       |
+| `client.get_config(key)`                               | `GET /api/v1/config/{key}`                                                 |
+| `client.health()`                                       | `GET /`                                                                    |
 
-## Exception-based flow
+> **Note:** There is currently no `PUT /api/v1/logs/{log_id}/decision` endpoint on the backend, so this SDK does not expose an `update_log_decision()` method. Health/status is served from `GET /`, not `/health`.
+
+---
+
+## Exception-Based Flow
 
 ```python
 from malintent import Client, BlockedPromptException
@@ -147,7 +153,16 @@ except BlockedPromptException as exc:
 forward_to_llm(user_message)
 ```
 
-More examples in [`examples/`](./examples), including `quickstart.py` (live demo against the deployed API) and `raise_on_block.py` (exception-based integration pattern).
+---
+
+## Examples
+
+More examples live in [`examples/`](./examples):
+
+- `quickstart.py` — live demo against the deployed API
+- `raise_on_block.py` — exception-based integration pattern
+
+---
 
 ## Development
 
@@ -162,6 +177,8 @@ python examples/quickstart.py
 ```
 
 The SDK has zero backend dependencies of its own — it only requires `requests`.
+
+---
 
 ## License
 

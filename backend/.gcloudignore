@@ -67,6 +67,16 @@ profiling/
 backend/docs/_.csv
 backend/docs/_.html
 
+# ── Assets ────────────────────────────────────────────────────────────────────
+
+../assets/
+assets/
+../assets/images/
+assets/images/
+../assets/videos/
+assets/videos/
+
 # ── Misc ──────────────────────────────────────────────────────────────────
 
 \*.pid
+

@@ -1,81 +1,92 @@
-# Python
+# ── Python ────────────────────────────────────────────────────────────────────
 
-**pycache**/
-_.py[cod]
-_.pyo
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+*.pyd
 
-# Virtual environments
+# ── Virtual Environments ──────────────────────────────────────────────────────
 
 venv/
 .venv/
 
-# Git
+# ── Git ───────────────────────────────────────────────────────────────────────
 
 .git
 .gitignore
 
-# VS Code
+# ── VS Code ───────────────────────────────────────────────────────────────────
 
 .vscode/
 
-# Environment variables
+# ── Environment Variables ─────────────────────────────────────────────────────
 
 .env
-.env.\*
+.env.*
 
-# Jupyter
+# ── Jupyter ───────────────────────────────────────────────────────────────────
 
 .ipynb_checkpoints/
 notebooks/
 
-# Tests
+# ── Tests ─────────────────────────────────────────────────────────────────────
 
 tests/
 
-# Logs
+# ── Logs ──────────────────────────────────────────────────────────────────────
 
-\*.log
+*.log
 logs/
 
-# Build artifacts
+# ── Build Artifacts ───────────────────────────────────────────────────────────
 
 build/
 dist/
-\*.egg-info/
+*.egg-info/
 
-# Cache
+# ── Cache ─────────────────────────────────────────────────────────────────────
 
 .pytest_cache/
 .mypy_cache/
 
-# OS
+# ── OS ────────────────────────────────────────────────────────────────────────
 
 .DS_Store
 Thumbs.db
 
-# SQLite databases
+# ── SQLite Databases ──────────────────────────────────────────────────────────
 
-_.db
-_.sqlite
-\*.sqlite3
+*.db
+*.sqlite
+*.sqlite3
 
-# Documentation
+# ── Documentation ─────────────────────────────────────────────────────────────
 
 docs/
 paper/
 
-# Profiling
+# ── Profiling ─────────────────────────────────────────────────────────────────
 
 profiling/
 
-# Docker Compose
+# ── Docker Compose ────────────────────────────────────────────────────────────
 
 docker-compose.yml
 
-# Local scripts
+# ── Local Scripts ─────────────────────────────────────────────────────────────
 
 scripts/
 
-# PowerShell
+# ── PowerShell ────────────────────────────────────────────────────────────────
 
-\*.ps1
+*.ps1
+
+# ── Assets ────────────────────────────────────────────────────────────────────
+
+../assets/
+assets/
+../assets/images/
+assets/images/
+../assets/videos/
+assets/videos/
