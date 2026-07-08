@@ -141,4 +141,5 @@ PyJWT>=2.8.0
 # Authentication & Validation
 # -----------------------------------------------------------------------------
 passlib[bcrypt]>=1.7.4
+bcrypt==4.0.1
 email-validator>=2.0.0
