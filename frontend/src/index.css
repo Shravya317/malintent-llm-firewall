@@ -3,76 +3,76 @@
 /* ── MalIntent · Editorial SaaS Design System ──────────────── */
 
 @theme {
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   /* Obsidian palette */
-  --color-obsidian-950: #0B0D14;
+  --color-obsidian-950: #0b0d14;
   --color-obsidian-900: #0e1018;
   --color-obsidian-800: #111524;
   --color-obsidian-700: #181d30;
   --color-obsidian-600: #1f2740;
 
   /* Accent: Crimson (threats) */
-  --color-crimson-500: #E53935;
-  --color-crimson-400: #EF5350;
-  --color-crimson-300: #F48484;
+  --color-crimson-500: #e53935;
+  --color-crimson-400: #ef5350;
+  --color-crimson-300: #f48484;
   --color-crimson-glow: rgba(229, 57, 53, 0.25);
 
   /* Accent: Cyber Cyan (secure) */
-  --color-cyan-500: #00E5FF;
-  --color-cyan-400: #4DEEFC;
-  --color-cyan-300: #80F2FD;
+  --color-cyan-500: #00e5ff;
+  --color-cyan-400: #4deefc;
+  --color-cyan-300: #80f2fd;
   --color-cyan-glow: rgba(0, 229, 255, 0.2);
 
   /* Accent: Amber (warnings) */
-  --color-amber-500: #FFB020;
-  --color-amber-400: #FFC04D;
+  --color-amber-500: #ffb020;
+  --color-amber-400: #ffc04d;
 
   /* Accent: Slate Blue (info) */
-  --color-slate-blue-500: #6366F1;
-  --color-slate-blue-400: #818CF8;
+  --color-slate-blue-500: #6366f1;
+  --color-slate-blue-400: #818cf8;
 }
 
 /* ── CSS Custom Properties ──────────────────────────────────── */
 
 :root {
-  --bg-base: #0B0D14;
+  --bg-base: #0b0d14;
   --bg-elevated: #111524;
   --bg-surface: rgba(255, 255, 255, 0.02);
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-faint: rgba(255, 255, 255, 0.04);
 
-  --text-primary: #F3F4F6;
-  --text-secondary: #9CA3AF;
-  --text-muted: #8B949E;
-  --text-faint: #5C6370;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #8b949e;
+  --text-faint: #5c6370;
 
-  --accent-threat: #E53935;
-  --accent-secure: #00E5FF;
-  --accent-warn: #FFB020;
+  --accent-threat: #e53935;
+  --accent-secure: #00e5ff;
+  --accent-warn: #ffb020;
 
-  --sidebar-bg: #0B0D14;
+  --sidebar-bg: #0b0d14;
 }
 
 [data-theme="light"] {
-  --bg-base: #F5F3EF;
-  --bg-elevated: #EDEAE4;
+  --bg-base: #f5f3ef;
+  --bg-elevated: #edeae4;
   --bg-surface: rgba(255, 255, 255, 0.7);
   --border-subtle: rgba(0, 0, 0, 0.08);
   --border-faint: rgba(0, 0, 0, 0.04);
 
-  --text-primary: #1A1A2E;
-  --text-secondary: #4A4A6A;
-  --text-muted: #6B7280;
-  --text-faint: #9CA3AF;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a6a;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
 
-  --accent-threat: #DC2626;
-  --accent-secure: #0891B2;
-  --accent-warn: #D97706;
+  --accent-threat: #dc2626;
+  --accent-secure: #0891b2;
+  --accent-warn: #d97706;
 
-  --sidebar-bg: #0F1117;
+  --sidebar-bg: #0f1117;
 }
 
 /* ── Base ────────────────────────────────────────────────────── */
@@ -89,7 +89,7 @@ html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'cv11', 'ss01';
+  font-feature-settings: "cv11", "ss01";
 }
 
 body {
@@ -104,28 +104,56 @@ body {
 /* ── Subtle Animations (restrained, editorial) ──────────────── */
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes countUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Utility Classes ─────────────────────────────────────────── */

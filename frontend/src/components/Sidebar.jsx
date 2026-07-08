@@ -1,59 +1,70 @@
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+/**
+ * frontend/src/components/Sidebar.jsx — Main navigation sidebar for the application.
+ */
+
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
-  { label: 'Dashboard', path: '/' },
-  { label: 'Threats', path: '/threats' },
-  { label: 'Comparison Mode', path: '/comparison' },
-  { label: 'Review Queue', path: '/queue' },
-  { label: 'Document Scanner', path: '/scanner' },
-  { label: 'Action Logs', path: '/action-logs' },
-  { label: 'Output Guard', path: '/output-guard' },
-  { label: 'Integration SDK', path: '/sdk' },
-  { label: 'System Settings', path: '/settings' },
-]
+  { label: "Dashboard", path: "/" },
+  { label: "Threats", path: "/threats" },
+  { label: "Comparison Mode", path: "/comparison" },
+  { label: "Review Queue", path: "/queue" },
+  { label: "Document Scanner", path: "/scanner" },
+  { label: "Action Logs", path: "/action-logs" },
+  { label: "Output Guard", path: "/output-guard" },
+  { label: "Integration SDK", path: "/sdk" },
+  { label: "System Settings", path: "/settings" },
+];
 
+/**
+ * Sidebar
+ *
+ * Main application sidebar containing navigation links, responsive layout toggles, and version information.
+ *
+ * @returns {JSX.Element} The rendered Sidebar component.
+ */
 export default function Sidebar() {
-  const location = useLocation()
-  const navigate = useNavigate()
+  const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <aside
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
         bottom: 0,
         width: 200,
         zIndex: 50,
-        background: 'var(--bg-base)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
+        background: "var(--bg-base)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }}
     >
       {/* Brand — just text, no container */}
-      <div style={{ padding: '40px 32px 0' }}>
+      <div style={{ padding: "40px 32px 0" }}>
         <h1
           style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '1.05rem',
+            fontFamily: "var(--font-display)",
+            fontSize: "1.05rem",
             fontWeight: 600,
-            color: 'var(--text-primary)',
+            color: "var(--text-primary)",
             margin: 0,
-            letterSpacing: '-0.03em',
+            letterSpacing: "-0.03em",
           }}
         >
-          Mal<span style={{ color: 'var(--accent-threat)' }}>Intent</span>
+          Mal<span style={{ color: "var(--accent-threat)" }}>Intent</span>
         </h1>
         <p
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.55rem',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: 'var(--text-faint)',
-            margin: '6px 0 0',
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.55rem",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "var(--text-faint)",
+            margin: "6px 0 0",
           }}
         >
           LLM Firewall
@@ -61,79 +72,81 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation — text links only, no backgrounds, no icons */}
-      <nav style={{ flex: 1, padding: '40px 32px' }}>
+      <nav style={{ flex: 1, padding: "40px 32px" }}>
         <p
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.5rem',
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.5rem",
             fontWeight: 500,
-            textTransform: 'uppercase',
-            letterSpacing: '0.14em',
-            color: 'var(--text-faint)',
-            margin: '0 0 16px',
+            textTransform: "uppercase",
+            letterSpacing: "0.14em",
+            color: "var(--text-faint)",
+            margin: "0 0 16px",
           }}
         >
           Navigation
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {navItems.map(({ label, path }) => {
-            const isActive = location.pathname === path
+            const isActive = location.pathname === path;
             return (
               <button
                 key={path}
                 onClick={() => navigate(path)}
                 style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '6px 0',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.82rem',
+                  display: "block",
+                  width: "100%",
+                  padding: "6px 0",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "0.82rem",
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                  background: 'none',
-                  textAlign: 'left',
-                  transition: 'color 0.15s ease',
-                  letterSpacing: '-0.01em',
-                  position: 'relative',
+                  color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                  background: "none",
+                  textAlign: "left",
+                  transition: "color 0.15s ease",
+                  letterSpacing: "-0.01em",
+                  position: "relative",
                 }}
-                onMouseEnter={e => {
-                  if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)'
+                onMouseEnter={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.color = "var(--text-secondary)";
                 }}
-                onMouseLeave={e => {
-                  if (!isActive) e.currentTarget.style.color = 'var(--text-muted)'
+                onMouseLeave={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.color = "var(--text-muted)";
                 }}
               >
                 {/* Active indicator — a tiny left dash, not a background box */}
                 {isActive && (
                   <span
                     style={{
-                      position: 'absolute',
+                      position: "absolute",
                       left: -16,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
+                      top: "50%",
+                      transform: "translateY(-50%)",
                       width: 6,
                       height: 1.5,
-                      background: 'var(--accent-threat)',
+                      background: "var(--accent-threat)",
                       borderRadius: 1,
                     }}
                   />
                 )}
                 {label}
               </button>
-            )
+            );
           })}
         </div>
       </nav>
 
       {/* Footer — minimal */}
-      <div style={{ padding: '0 32px 32px' }}>
+      <div style={{ padding: "0 32px 32px" }}>
         <p
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.55rem',
-            color: 'var(--text-faint)',
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.55rem",
+            color: "var(--text-faint)",
             margin: 0,
             lineHeight: 1.8,
           }}
@@ -142,9 +155,9 @@ export default function Sidebar() {
         </p>
         <p
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.55rem',
-            color: 'var(--text-faint)',
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.55rem",
+            color: "var(--text-faint)",
             margin: 0,
           }}
         >
@@ -152,5 +165,5 @@ export default function Sidebar() {
         </p>
       </div>
     </aside>
-  )
+  );
 }

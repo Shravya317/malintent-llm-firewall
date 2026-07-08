@@ -1,6 +1,6 @@
 /**
  * types.ts — TypeScript interface definitions for the MalIntent API contract.
- * 
+ *
  * Designed for the Sunday Sync (Jul 6) integration checkpoint.
  * These interfaces mirror Tushar's Pydantic schemas in backend/schemas.py exactly.
  */
@@ -27,11 +27,10 @@ export interface ScanInputResponse {
   log_id: number; // ThreatLog row ID for frontend to reference
 }
 
-
 // ── LOGS ──────────────────────────────────────────────────────────────────────
 
 export interface ThreatLogEntry {
-  /** 
+  /**
    * Single row from ThreatLog serialized for the frontend (GET /api/v1/logs).
    * Note: scrubbed_text is excluded — it is for forensic use only, never sent to
    * the frontend in the standard logs list.
@@ -50,7 +49,6 @@ export interface ThreatLogEntry {
   latency_ms: number | null;
   privacy_mode: string;
 }
-
 
 // ── STATS ─────────────────────────────────────────────────────────────────────
 
@@ -71,7 +69,6 @@ export interface StatsResponse {
   avg_latency_ms: number;
   hourly_trend: HourlyBucket[];
 }
-
 
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 
