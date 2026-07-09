@@ -56,11 +56,9 @@ export default function AuthPage() {
     setError(null);
     setLoading(true);
     try {
-      await verifyOTP(formData.email, otp);
-      setOtpStep(false);
-      setIsLogin(true);
-      setOtp('');
-      alert("Registration successful! You can now log in.");
+      const response = await verifyOTP(formData.email, otp);
+      localStorage.setItem('token', response.access_token);
+      navigate('/dashboard');
     } catch (err) {
       setError(extractError(err));
     } finally {
