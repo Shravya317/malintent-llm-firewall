@@ -59,9 +59,8 @@ export default function Registration() {
       };
 
       const baseURL = "https://malintent-backend-261681342014.asia-south1.run.app/api/v1";
-      // Adjust endpoint based on backend setup, authentication.py routes are typically mounted at /api/v1 or root depending on main.py
-      // Assuming they are mounted cleanly:
-      await axios.post(`${baseURL}/register`, payload);
+      // Adjust endpoint based on backend setup, authentication.py routes are typically mounted at /api/v1/auth
+      await axios.post(`${baseURL}/auth/register`, payload);
       setStep(2);
     } catch (err) {
       setError(
@@ -80,7 +79,7 @@ export default function Registration() {
 
     try {
       const baseURL = "https://malintent-backend-261681342014.asia-south1.run.app/api/v1";
-      const res = await axios.post(`${baseURL}/verify-otp`, {
+      const res = await axios.post(`${baseURL}/auth/verify-otp`, {
         email: formData.email,
         otp_code: otpCode,
       });
