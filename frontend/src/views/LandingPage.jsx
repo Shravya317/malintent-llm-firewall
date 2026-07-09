@@ -725,20 +725,69 @@ export default function LandingPage() {
               onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
             >Testimonials</a>
 
+            <a
+              href="https://malintent-backend-261681342014.asia-south1.run.app/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontFamily: 'var(--font-sidebar)',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                background: 'transparent',
+                border: '1px solid var(--accent-threat)',
+                borderRadius: 999,
+                padding: '8px 16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                textDecoration: 'none'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'var(--accent-threat)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(229, 9, 20, 0.4)'
+                e.currentTarget.style.color = '#fff'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.boxShadow = 'none'
+                e.currentTarget.style.color = 'var(--text-primary)'
+              }}
+            >
+              <Code2 size={14} /> API Docs
+            </a>
+
             <button
               onClick={() => navigate('/login')}
               style={{
                 fontFamily: 'var(--font-sidebar)',
                 fontSize: '0.85rem',
-                color: 'var(--text-secondary)',
-                background: 'none',
+                fontWeight: 600,
+                color: '#fff',
+                background: 'var(--accent-threat)',
                 border: 'none',
+                borderRadius: 999,
+                padding: '8px 24px',
                 cursor: 'pointer',
-                transition: 'color 0.2s',
+                transition: 'all 0.25s ease',
+                boxShadow: '0 4px 14px rgba(229, 9, 20, 0.3)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
               }}
-              onMouseEnter={e => e.target.style.color = 'var(--text-primary)'}
-              onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
-            >Log In</button>
+              onMouseEnter={e => {
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(229, 9, 20, 0.5)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(229, 9, 20, 0.3)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              Log In
+            </button>
           </div>
 
           {/* Mobile Hamburger */}
