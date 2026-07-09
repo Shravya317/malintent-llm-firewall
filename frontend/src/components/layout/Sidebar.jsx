@@ -23,6 +23,7 @@ import {
   FileSearch,
   ScrollText,
   Code,
+  Code2,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -193,6 +194,47 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
               </button>
             )
           })}
+        </div>
+
+        {/* API Docs Capsule */}
+        <div style={{ marginTop: 32, padding: collapsed ? '0' : '0 24px', display: 'flex', justifyContent: 'center' }}>
+          <a
+            href="https://malintent-backend-261681342014.asia-south1.run.app/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="API Docs"
+            style={{
+              fontFamily: 'var(--font-sidebar)',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              background: 'transparent',
+              border: '1px solid var(--accent-threat)',
+              borderRadius: 999,
+              padding: collapsed ? '8px' : '8px 16px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              textDecoration: 'none',
+              width: collapsed ? 36 : '100%',
+              boxSizing: 'border-box'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'var(--accent-threat)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(229, 9, 20, 0.4)'
+              e.currentTarget.style.color = '#fff'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.boxShadow = 'none'
+              e.currentTarget.style.color = 'var(--text-primary)'
+            }}
+          >
+            <Code2 size={16} /> {!collapsed && 'API Docs'}
+          </a>
         </div>
       </nav>
 

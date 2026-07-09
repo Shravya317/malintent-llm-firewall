@@ -725,40 +725,6 @@ export default function LandingPage() {
               onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
             >Testimonials</a>
 
-            <a
-              href="https://malintent-backend-261681342014.asia-south1.run.app/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                fontFamily: 'var(--font-sidebar)',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                background: 'transparent',
-                border: '1px solid var(--accent-threat)',
-                borderRadius: 999,
-                padding: '8px 16px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                textDecoration: 'none'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'var(--accent-threat)'
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(229, 9, 20, 0.4)'
-                e.currentTarget.style.color = '#fff'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent'
-                e.currentTarget.style.boxShadow = 'none'
-                e.currentTarget.style.color = 'var(--text-primary)'
-              }}
-            >
-              <Code2 size={14} /> API Docs
-            </a>
-
             <button
               onClick={() => navigate('/login')}
               style={{
