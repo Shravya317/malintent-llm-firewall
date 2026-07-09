@@ -119,10 +119,10 @@ export default function ComparisonMode() {
 
   // Component rendering
   return (
-    <div className="comparison-page" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'hidden' }}>
+    <div className="comparison-page page-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'hidden' }}>
       
       {/* Header */}
-      <header className="responsive-header" style={{ padding: '40px 56px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
+      <header className="page-header">
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>Comparison Mode</h1>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Live Split-Screen Demo · Protected vs Unprotected</p>
@@ -131,7 +131,7 @@ export default function ComparisonMode() {
         </header>
 
         {/* Input & Presets */}
-        <div style={{ padding: '0 56px', flexShrink: 0, marginBottom: 24 }}>
+        <div style={{ flexShrink: 0, marginBottom: 24 }}>
           <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
             {PRESETS.map(p => (
               <button 
@@ -148,7 +148,7 @@ export default function ComparisonMode() {
               </button>
             ))}
           </div>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 16 }}>
+          <form onSubmit={handleSubmit} className="flex-row-responsive" style={{ display: 'flex', gap: 16 }}>
             <input 
               type="text" 
               value={prompt}
@@ -167,7 +167,7 @@ export default function ComparisonMode() {
         </div>
 
         {/* Split Screen */}
-        <div style={{ display: 'flex', flex: 1, padding: '0 56px 40px', gap: 40, overflow: 'hidden' }}>
+        <div className="flex-row-responsive" style={{ display: 'flex', flex: 1, gap: 40, overflow: 'hidden' }}>
           
           {/* LEFT: Protected */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-base)', border: '1px solid var(--border-subtle)', borderRadius: 12, overflow: 'hidden' }}>

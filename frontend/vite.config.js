@@ -4,4 +4,12 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      '/api/v1': {
+        target: 'https://malintent-backend-261681342014.asia-south1.run.app',
+        changeOrigin: true,
+      }
+    }
+  }
 });
