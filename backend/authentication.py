@@ -184,7 +184,7 @@ async def verify_otp(request: VerifyOTPRequest, db: Session = Depends(get_db)):
     if not otp_entry:
         raise HTTPException(status_code=400, detail="Invalid OTP")
 
-    if datetime.datetime.utcnow() > otp_entry.expires_at:
+    if datetime.datetime.now(datetime.timezone.utc) > otp_entry.expires_at:
         raise HTTPException(status_code=400, detail="OTP has expired")
 
     # Activate user
