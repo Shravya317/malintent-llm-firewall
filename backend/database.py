@@ -24,7 +24,7 @@ import os
 import logging
 from contextlib import contextmanager
 
-from sqlalchemy import create_engine, text, event
+from sqlalchemy import create_engine, text, event, bindparam, LargeBinary
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 
 logger = logging.getLogger(__name__)
@@ -176,7 +176,9 @@ def decrypt_field(session: Session, ciphertext: bytes) -> str:
     >>> plaintext = decrypt_field(db, config_row.value_encrypted)
     """
     result = session.execute(
-        text("SELECT pgp_sym_decrypt(:val, :key)"),
+        text("SELECT pgp_sym_decrypt(:val, :key)").bindparams(
+            bindparam("val", type_=LargeBinary)
+        ),
         {"val": ciphertext, "key": PG_CRYPTO_KEY},
     )
     return result.scalar()
