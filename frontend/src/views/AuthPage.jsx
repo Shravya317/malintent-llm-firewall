@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/layout/Logo';
-import { registerUser, verifyOTP } from '../api/client';
+import { registerUser, verifyOTP, loginUser } from '../api/client';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function AuthPage() {
@@ -38,6 +38,8 @@ export default function AuthPage() {
     try {
       if (isLogin) {
         // Normal login flow
+        const response = await loginUser(formData.email, formData.password);
+        localStorage.setItem('token', response.access_token);
         navigate('/dashboard');
       } else {
         // Registration flow

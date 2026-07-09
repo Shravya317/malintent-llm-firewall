@@ -198,6 +198,16 @@ export async function updateLogDecision(logId, decision) {
 /**
  * AUTHENTICATION
  */
+export async function loginUser(email, password) {
+  try {
+    const response = await apiClient.post('/auth/login', { email, password })
+    return response.data
+  } catch (error) {
+    console.error('Error in loginUser:', error)
+    throw error
+  }
+}
+
 export async function registerUser(userData) {
   try {
     const response = await apiClient.post('/auth/register', userData)
