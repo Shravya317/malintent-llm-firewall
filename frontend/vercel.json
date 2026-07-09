@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/v1/:match*",
+      "destination": "https://malintent-backend-261681342014.asia-south1.run.app/api/v1/:match*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
