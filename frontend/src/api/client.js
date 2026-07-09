@@ -210,7 +210,7 @@ export async function registerUser(userData) {
 
 export async function verifyOTP(email, otp) {
   try {
-    const response = await apiClient.post('/auth/verify-otp', { email, otp })
+    const response = await apiClient.post('/auth/verify-otp', { email, otp_code: otp })
     return response.data
   } catch (error) {
     console.error('Error in verifyOTP:', error)
