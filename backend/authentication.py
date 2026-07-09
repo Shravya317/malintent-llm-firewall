@@ -1,5 +1,5 @@
 """
-authentication.py ?" Authentication middleware and routing using Supabase JWT and Postgres User Table.
+authentication.py — Authentication middleware and routing using Supabase JWT and Postgres User Table.
 """
 
 import os
@@ -89,11 +89,11 @@ def send_email_otp(recipient: str, otp: str):
     msg["To"] = recipient
 
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(smtp_email, smtp_password)
-        server.send_message(msg)
-        server.quit()
+        # BUG FIX #4: Use context manager so connection always closes, even on error
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(smtp_email, smtp_password)
+            server.send_message(msg)
         logger.info(f"OTP successfully sent to {recipient}")
     except Exception as e:
         logger.error(f"Failed to send email: {e}")
@@ -150,7 +150,9 @@ async def register(request: RegistrationRequest, db: Session = Depends(get_db)):
 
     # Generate 6-digit OTP
     otp_code = str(random.randint(100000, 999999))
-    expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
+
+    # BUG FIX #1: Use timezone-aware UTC datetime consistently to avoid naive/aware mismatch
+    expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=5)
 
     otp_entry = OTPVerification(
         email=request.email, otp_code=otp_code, expires_at=expires_at
@@ -184,6 +186,7 @@ async def verify_otp(request: VerifyOTPRequest, db: Session = Depends(get_db)):
     if not otp_entry:
         raise HTTPException(status_code=400, detail="Invalid OTP")
 
+    # BUG FIX #1: Compare naive UTC datetimes consistently (matches how expires_at is stored)
     if datetime.datetime.now(datetime.timezone.utc) > otp_entry.expires_at:
         raise HTTPException(status_code=400, detail="OTP has expired")
 
@@ -193,14 +196,21 @@ async def verify_otp(request: VerifyOTPRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
 
     user.is_active = True
+
+    # BUG FIX #3: Delete OTP after use to prevent replay attacks and DB confusion
+    db.delete(otp_entry)
+
     db.commit()
 
-    # Generate JWT
-    secret = os.environ.get("SUPABASE_JWT_SECRET", "super_secret_jwt_key_for_dev_only")
+    # BUG FIX #2: Raise explicitly if JWT secret is missing — no silent fallback
+    secret = os.environ.get("SUPABASE_JWT_SECRET")
+    if not secret:
+        raise HTTPException(status_code=500, detail="JWT secret not configured.")
+
     payload = {
         "sub": user.email,
-        "role": "customer",  # Defaults to customer, can be escalated via DB
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
+        "role": "customer",
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24),
     }
     token = jwt.encode(payload, secret, algorithm="HS256")
 
@@ -223,11 +233,15 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     if not verify_password(request.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    secret = os.environ.get("SUPABASE_JWT_SECRET", "super_secret_jwt_key_for_dev_only")
+    # BUG FIX #2: Raise explicitly if JWT secret is missing — no silent fallback
+    secret = os.environ.get("SUPABASE_JWT_SECRET")
+    if not secret:
+        raise HTTPException(status_code=500, detail="JWT secret not configured.")
+
     payload = {
         "sub": user.email,
-        "role": "customer",  # We can add a role field to User table if needed later
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
+        "role": "customer",
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24),
     }
 
     token = jwt.encode(payload, secret, algorithm="HS256")
