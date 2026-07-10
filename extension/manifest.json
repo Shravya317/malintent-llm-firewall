@@ -12,7 +12,8 @@
     "*://*.groq.com/*",
     "*://*.antigravity.dev/*",
     "*://malintent-firewall.vercel.app/*",
-    "*://localhost/*"
+    "*://localhost/*",
+    "*://malintent-backend-211874411068.asia-south1.run.app/*"
   ],
   "background": {
     "service_worker": "background.js"
