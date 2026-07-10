@@ -144,7 +144,9 @@ document.addEventListener('keydown', function(event) {
             if (response && response.error === "AUTH_REQUIRED") {
                 showAuthWarning();
             } else {
-                console.error("Firewall check failed: " + (response ? response.error : "Unknown error"));
+                const errMsg = response ? response.error : "Unknown connection error";
+                console.error("Firewall check failed: " + errMsg);
+                showErrorWarning(errMsg);
             }
         }
     });
@@ -171,6 +173,15 @@ function handleDecision(data, inputBox) {
 
 function forceSend(inputBox) {
     inputBox.dataset.firewallVerified = "true";
+    
+    // First attempt to click the send button for React apps like ChatGPT
+    const sendButton = document.querySelector('[data-testid="send-button"]');
+    if (sendButton && !sendButton.disabled) {
+        sendButton.click();
+        return;
+    }
+
+    // Fallback to dispatching KeyboardEvent
     const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter', keyCode: 13 });
     inputBox.dispatchEvent(enterEvent);
 }
@@ -231,6 +242,25 @@ function showAuthWarning() {
         <a href="https://malintent-firewall.vercel.app/" target="_blank" class="fw-dashboard-link" style="font-size: 14px; font-weight: bold; background: #3b82f6; color: white; padding: 6px 12px; border-radius: 4px; display: inline-block; margin-top: 12px; text-decoration: none;">
             Login to MalIntent Dashboard
         </a>
+    `;
+    document.body.appendChild(box);
+    setTimeout(() => { if(box.parentNode) box.remove(); }, 8000);
+}
+
+function showErrorWarning(errorMessage) {
+    const existing = document.getElementById('firewall-warning-box');
+    if (existing) existing.remove();
+
+    const box = document.createElement('div');
+    box.id = 'firewall-warning-box';
+    box.className = `firewall-box blocked`;
+    
+    box.innerHTML = `
+        <div class="fw-score-container" style="background: rgba(200, 100, 0, 0.2);">
+            <div class="fw-score-title" style="color: white; font-weight: bold;">CONNECTION ERROR</div>
+        </div>
+        <p class="fw-message" style="margin-top: 10px;">The MalIntent backend failed to process the request:</p>
+        <p style="margin-top: 10px; font-family: monospace; color: #ff9999; font-size: 12px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 4px;">${errorMessage}</p>
     `;
     document.body.appendChild(box);
     setTimeout(() => { if(box.parentNode) box.remove(); }, 8000);
