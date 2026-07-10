@@ -8,8 +8,16 @@ function getPromptText(el) {
 }
 
 function setPromptText(el, text) {
-    if (el.tagName.toLowerCase() === 'textarea' || el.tagName.toLowerCase() === 'input') el.value = text;
-    else if (el.isContentEditable) el.innerText = text;
+    if (el.tagName.toLowerCase() === 'textarea' || el.tagName.toLowerCase() === 'input') {
+        el.value = text;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    else if (el.isContentEditable) {
+        el.focus();
+        document.execCommand('selectAll', false, null);
+        document.execCommand('insertText', false, text);
+    }
 }
 
 // Initial Activation Toast on Focus
@@ -174,25 +182,25 @@ function handleDecision(data, inputBox) {
 
 function forceSend(inputBox) {
     const selectors = [
-        '[data-testid="send-button"]', // ChatGPT
-        'button[aria-label="Send Message"]', // Claude
-        'button[aria-label="Send message"]', // Claude/Gemini
-        'button[aria-label="Send"]', // Groq/Gemini
-        'button[title="Send message"]'
+        '[data-testid="send-button"]', 
+        'button[aria-label*="Send" i]', 
+        'button[title*="Send" i]'
     ];
 
     let sendButton = null;
     for (let sel of selectors) {
-        sendButton = document.querySelector(sel);
+        // Find all matching buttons and pick the one that isn't disabled
+        const btns = Array.from(document.querySelectorAll(sel));
+        sendButton = btns.find(b => !b.disabled);
         if (sendButton) break;
     }
 
     // Fallback heuristic: find a button with an SVG inside the same container
     if (!sendButton) {
         let parent = inputBox.parentElement;
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 6; i++) {
             if (!parent) break;
-            const btns = parent.querySelectorAll('button');
+            const btns = Array.from(parent.querySelectorAll('button')).filter(b => !b.disabled);
             if (btns.length > 0) {
                 // Usually the send button is the last button in the input area
                 sendButton = btns[btns.length - 1];
@@ -202,14 +210,21 @@ function forceSend(inputBox) {
         }
     }
 
-    if (sendButton && !sendButton.disabled) {
+    if (sendButton) {
+        const clickEvent = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+            buttons: 1
+        });
+        sendButton.dispatchEvent(clickEvent);
         sendButton.click();
         return;
     }
 
     // Last resort fallback
     inputBox.dataset.firewallVerified = "true";
-    const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter', keyCode: 13 });
+    const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter', code: 'Enter', keyCode: 13 });
     inputBox.dispatchEvent(enterEvent);
 }
 
