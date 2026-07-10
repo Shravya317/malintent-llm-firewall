@@ -141,7 +141,11 @@ document.addEventListener('keydown', function(event) {
         if (response && response.success) {
             handleDecision(response.data, editable);
         } else {
-            console.error("Firewall check failed: " + (response ? response.error : "Unknown error"));
+            if (response && response.error === "AUTH_REQUIRED") {
+                showAuthWarning();
+            } else {
+                console.error("Firewall check failed: " + (response ? response.error : "Unknown error"));
+            }
         }
     });
 }, true); 
@@ -209,4 +213,25 @@ function showWarning(score, message, type, isFlagged, inputBox) {
     } else {
         setTimeout(() => { if(box.parentNode) box.remove(); }, 6000); // Auto remove blocks after 6s
     }
+}
+
+function showAuthWarning() {
+    const existing = document.getElementById('firewall-warning-box');
+    if (existing) existing.remove();
+
+    const box = document.createElement('div');
+    box.id = 'firewall-warning-box';
+    box.className = `firewall-box blocked`;
+    
+    box.innerHTML = `
+        <div class="fw-score-container" style="background: rgba(220, 38, 38, 0.2);">
+            <div class="fw-score-title" style="color: white; font-weight: bold;">AUTHENTICATION REQUIRED</div>
+        </div>
+        <p class="fw-message" style="margin-top: 10px;">The MalIntent extension is disconnected.</p>
+        <a href="https://malintent-firewall.vercel.app/" target="_blank" class="fw-dashboard-link" style="font-size: 14px; font-weight: bold; background: #3b82f6; color: white; padding: 6px 12px; border-radius: 4px; display: inline-block; margin-top: 12px; text-decoration: none;">
+            Login to MalIntent Dashboard
+        </a>
+    `;
+    document.body.appendChild(box);
+    setTimeout(() => { if(box.parentNode) box.remove(); }, 8000);
 }
