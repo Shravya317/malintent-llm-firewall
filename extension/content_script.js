@@ -15,7 +15,11 @@ function setPromptText(el, text) {
     }
     else if (el.isContentEditable) {
         el.focus();
-        document.execCommand('selectAll', false, null);
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        selection.removeAllRanges();
+        selection.addRange(range);
         document.execCommand('insertText', false, text);
     }
 }
@@ -181,51 +185,49 @@ function handleDecision(data, inputBox) {
 }
 
 function forceSend(inputBox) {
-    const selectors = [
-        '[data-testid="send-button"]', 
-        'button[aria-label*="Send" i]', 
-        'button[title*="Send" i]'
-    ];
+    setTimeout(() => {
+        const selectors = [
+            '[data-testid="send-button"]', 
+            'button[aria-label*="Send" i]', 
+            'button[title*="Send" i]'
+        ];
 
-    let sendButton = null;
-    for (let sel of selectors) {
-        // Find all matching buttons and pick the one that isn't disabled
-        const btns = Array.from(document.querySelectorAll(sel));
-        sendButton = btns.find(b => !b.disabled);
-        if (sendButton) break;
-    }
-
-    // Fallback heuristic: find a button with an SVG inside the same container
-    if (!sendButton) {
-        let parent = inputBox.parentElement;
-        for (let i = 0; i < 6; i++) {
-            if (!parent) break;
-            const btns = Array.from(parent.querySelectorAll('button')).filter(b => !b.disabled);
-            if (btns.length > 0) {
-                // Usually the send button is the last button in the input area
-                sendButton = btns[btns.length - 1];
-                break;
-            }
-            parent = parent.parentElement;
+        let sendButton = null;
+        for (let sel of selectors) {
+            const btns = Array.from(document.querySelectorAll(sel));
+            sendButton = btns.find(b => !b.disabled);
+            if (sendButton) break;
         }
-    }
 
-    if (sendButton) {
-        const clickEvent = new MouseEvent('click', {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-            buttons: 1
-        });
-        sendButton.dispatchEvent(clickEvent);
-        sendButton.click();
-        return;
-    }
+        if (!sendButton) {
+            let parent = inputBox.parentElement;
+            for (let i = 0; i < 6; i++) {
+                if (!parent) break;
+                const btns = Array.from(parent.querySelectorAll('button')).filter(b => !b.disabled);
+                if (btns.length > 0) {
+                    sendButton = btns[btns.length - 1];
+                    break;
+                }
+                parent = parent.parentElement;
+            }
+        }
 
-    // Last resort fallback
-    inputBox.dataset.firewallVerified = "true";
-    const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter', code: 'Enter', keyCode: 13 });
-    inputBox.dispatchEvent(enterEvent);
+        if (sendButton) {
+            const clickEvent = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                buttons: 1
+            });
+            sendButton.dispatchEvent(clickEvent);
+            sendButton.click();
+            return;
+        }
+
+        inputBox.dataset.firewallVerified = "true";
+        const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter', code: 'Enter', keyCode: 13 });
+        inputBox.dispatchEvent(enterEvent);
+    }, 100); // 100ms delay to allow React to register the scrubbed text
 }
 
 function showWarning(score, message, type, isFlagged, inputBox) {
