@@ -199,7 +199,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
         {/* API Docs Capsule */}
         <div style={{ marginTop: 32, padding: collapsed ? '0' : '0 24px', display: 'flex', justifyContent: 'center' }}>
           <a
-            href="https://malintent-backend-261681342014.asia-south1.run.app/docs"
+            href="https://malintent-backend-211874411068.asia-south1.run.app/docs"
             target="_blank"
             rel="noopener noreferrer"
             title="API Docs"

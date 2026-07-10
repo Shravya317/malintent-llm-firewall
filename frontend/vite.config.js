@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/v1': {
-        target: 'https://malintent-backend-261681342014.asia-south1.run.app',
+        target: 'https://malintent-backend-211874411068.asia-south1.run.app',
         changeOrigin: true,
       }
     }
