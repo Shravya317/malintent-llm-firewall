@@ -1410,15 +1410,18 @@ export default function LandingPage() {
               <GithubIcon size={20} strokeWidth={1.5} />
             </a>
 
-            <span style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              letterSpacing: '0.05em',
-            }}>
-              shravyasharma2006@gmail.com
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)' }}>
+              <Mail size={20} strokeWidth={1.5} />
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                letterSpacing: '0.05em',
+              }}>
+                shravyasharma2006@gmail.com
+              </span>
+            </div>
           </div>
         </div>
       </footer>
