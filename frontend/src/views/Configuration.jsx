@@ -284,14 +284,14 @@ export default function Configuration() {
   }
 
   return (
-    <div className="configuration-page" style={{ paddingBottom: 64 }}>
+    <div className="configuration-page page-container">
       {/* Header */}
-      <header className="responsive-header" style={{ padding: '40px 56px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <header className="page-header">
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>System Configuration</h1>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Secure Settings Management · Fernet Encrypted Configuration Store</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div className="page-header-actions">
             {/* Test Connection Button */}
             <button
               onClick={handleTestConnection}
@@ -331,7 +331,7 @@ export default function Configuration() {
           </div>
         </header>
 
-        <div style={{ padding: '36px 56px 96px' }}>
+        <div>
           {/* CORS Connection Result Banner */}
           {connectionTest.tested && (
             <div

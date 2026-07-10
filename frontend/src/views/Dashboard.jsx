@@ -64,17 +64,9 @@ export default function Dashboard() {
   }, [])
 
   return (
-    <>
+    <div className="page-container">
       {/* Header */}
-      <header
-        className="responsive-header"
-        style={{
-          padding: '40px 56px 0',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-        }}
-      >
+      <header className="page-header">
           <div>
             <h1
               style={{
@@ -100,7 +92,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div className="page-header-actions">
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span
                 style={{
@@ -149,14 +141,14 @@ export default function Dashboard() {
         </header>
 
         {/* Content */}
-        <div style={{ padding: '48px 56px 72px' }}>
+        <div>
 
           {/* Metrics */}
           <section
             className="dashboard-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
               gap: 24,
               paddingBottom: 32,
             }}
@@ -201,7 +193,7 @@ export default function Dashboard() {
             className="dashboard-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
               gap: 32,
               paddingBottom: 32,
             }}
@@ -216,7 +208,7 @@ export default function Dashboard() {
             className="dashboard-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
               gap: 32,
               paddingBottom: 48,
               alignItems: 'stretch'
@@ -258,6 +250,6 @@ export default function Dashboard() {
             </div>
           </footer>
         </div>
-    </>
+    </div>
   )
 }

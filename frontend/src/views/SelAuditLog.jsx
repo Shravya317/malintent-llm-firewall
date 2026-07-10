@@ -84,10 +84,10 @@ export default function SelAuditLog() {
   }, [])
 
   return (
-    <div className="sel-audit-page" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', paddingBottom: 64 }}>
+    <div className="sel-audit-page page-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       
       {/* Header */}
-      <header className="responsive-header" style={{ padding: '40px 56px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <header className="page-header">
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>SEL Action Logs</h1>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Secure Execution Layer · Operational Forensics</p>
@@ -95,7 +95,7 @@ export default function SelAuditLog() {
           <button onClick={toggleTheme} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Theme Toggle</button>
         </header>
 
-        <div style={{ padding: '0 56px 40px' }}>
+        <div>
           <div style={{ background: 'color-mix(in srgb, var(--accent-secure) 10%, transparent)', border: '1px solid var(--accent-secure)', borderRadius: 12, padding: '20px 24px', marginBottom: 32 }}>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--accent-secure)', margin: '0 0 8px' }}>Dynamic Data Masking Active</h3>
             <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
@@ -105,8 +105,8 @@ export default function SelAuditLog() {
             </p>
           </div>
 
-          <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 12, overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
                   <th style={{ padding: '20px', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Timestamp</th>

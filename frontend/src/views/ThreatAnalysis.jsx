@@ -616,9 +616,9 @@ export default function ThreatAnalysis() {
   const decColor = (dec) => dec === 'BLOCK' ? 'var(--accent-threat)' : dec === 'FLAG' ? 'var(--accent-warn)' : 'var(--accent-secure)'
 
   return (
-    <div className="threat-analysis-page" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', paddingBottom: 64 }}>
+    <div className="threat-analysis-page page-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {/* Header */}
-        <header style={{ padding: '40px 56px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <header className="page-header">
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text-primary)', margin: 0 }}>Threat Analysis</h1>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', margin: '8px 0 0', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Advanced Forensics Dashboard · Locked Week 3 RiskResult Contract</p>
@@ -635,7 +635,7 @@ export default function ThreatAnalysis() {
           </div>
         </header>
 
-        <div style={{ padding: '48px 56px 96px' }}>
+        <div>
           {/* Filters Bar */}
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 28, padding: '24px 28px', background: 'var(--bg-elevated)', borderRadius: 12, border: '1px solid var(--border-subtle)', marginBottom: 40, boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

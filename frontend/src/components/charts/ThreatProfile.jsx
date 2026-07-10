@@ -89,7 +89,7 @@ export default function ThreatProfile() {
       </div>
       <div style={{ flex: 1, minHeight: 220, width: '100%', marginTop: 12, color: 'var(--text-primary)' }}>
         <ResponsiveContainer>
-          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
+          <RadarChart cx="50%" cy="50%" outerRadius="55%" data={data}>
             <PolarGrid stroke="var(--text-muted)" strokeOpacity={0.4} strokeWidth={1.5} />
             <PolarAngleAxis 
               dataKey="subject" 

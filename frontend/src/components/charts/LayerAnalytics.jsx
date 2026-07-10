@@ -47,13 +47,13 @@ export default function LayerAnalytics() {
   )
 
   const renderLegend = (data, columns) => (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: 16 }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
       {data.map(item => (
-        <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+        <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flex: '1 1 auto', minWidth: 120 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0, marginTop: 4 }} />
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.id}</div>
-            <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-faint)', textTransform: 'uppercase' }}>{item.id}</div>
+            <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 500, lineHeight: 1.2 }}>{item.name}</div>
           </div>
         </div>
       ))}
