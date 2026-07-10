@@ -18,7 +18,7 @@ import Logo from '../components/layout/Logo'
 import {
   Shield, Zap, Layers, Code2, Search, FileText, GitCompare,
   ArrowRight, Star, Users, Activity, Clock, ChevronRight,
-  Menu, X, ShieldCheck, AlertTriangle, Eye, Lock, Mail
+  Menu, X, ShieldCheck, AlertTriangle, Eye, Lock, Mail, Linkedin
 } from 'lucide-react'
 
 /* ── Custom Brand Icons (Lucide removed brand icons) ─────── */
@@ -1276,7 +1276,7 @@ export default function LandingPage() {
                 margin: '0 0 16px',
               }}>Product</h4>
               {['Features', 'Pricing', 'Documentation', 'SDK'].map(link => (
-                <a key={link} href="#" style={{
+                <span key={link} style={{
                   display: 'block',
                   fontFamily: 'var(--font-footer)',
                   fontSize: '0.8rem',
@@ -1284,10 +1284,11 @@ export default function LandingPage() {
                   textDecoration: 'none',
                   marginBottom: 10,
                   transition: 'color 0.2s',
+                  cursor: 'default',
                 }}
                 onMouseEnter={e => e.target.style.color = 'var(--text-primary)'}
                 onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
-                >{link}</a>
+                >{link}</span>
               ))}
             </div>
             <div>
@@ -1301,7 +1302,7 @@ export default function LandingPage() {
                 margin: '0 0 16px',
               }}>Company</h4>
               {['About', 'Blog', 'Contact', 'Careers'].map(link => (
-                <a key={link} href="#" style={{
+                <span key={link} style={{
                   display: 'block',
                   fontFamily: 'var(--font-footer)',
                   fontSize: '0.8rem',
@@ -1309,10 +1310,11 @@ export default function LandingPage() {
                   textDecoration: 'none',
                   marginBottom: 10,
                   transition: 'color 0.2s',
+                  cursor: 'default',
                 }}
                 onMouseEnter={e => e.target.style.color = 'var(--text-primary)'}
                 onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
-                >{link}</a>
+                >{link}</span>
               ))}
             </div>
             <div>
@@ -1326,7 +1328,7 @@ export default function LandingPage() {
                 margin: '0 0 16px',
               }}>Legal</h4>
               {['Terms of Service', 'Privacy Policy', 'Cookie Policy'].map(link => (
-                <a key={link} href="#" style={{
+                <span key={link} style={{
                   display: 'block',
                   fontFamily: 'var(--font-footer)',
                   fontSize: '0.8rem',
@@ -1334,10 +1336,11 @@ export default function LandingPage() {
                   textDecoration: 'none',
                   marginBottom: 10,
                   transition: 'color 0.2s',
+                  cursor: 'default',
                 }}
                 onMouseEnter={e => e.target.style.color = 'var(--text-primary)'}
                 onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
-                >{link}</a>
+                >{link}</span>
               ))}
             </div>
           </div>
@@ -1355,37 +1358,59 @@ export default function LandingPage() {
           flexWrap: 'wrap',
           gap: 12,
         }}>
-          <span style={{
-            fontFamily: 'var(--font-footer)',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-          }}>
-            © {new Date().getFullYear()} MalIntent. All rights reserved.
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{
+              fontFamily: 'var(--font-footer)',
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)',
+            }}>
+              © {new Date().getFullYear()} MalIntent. All rights reserved.
+            </span>
+            <span style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.85rem',
+              color: 'var(--text-secondary)',
+              fontWeight: 500,
+            }}>
+              Made By Tushar Mishra and Shravya Sharma
+            </span>
+          </div>
           <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-            {/* Social icons */}
-            {[
-              { id: 'instagram', icon: InstagramIcon },
-              { id: 'github', icon: GithubIcon },
-              { id: 'mail', icon: Mail }
-            ].map((item) => (
-              <a key={item.id} href="#" style={{
-                color: 'var(--text-muted)',
-                textDecoration: 'none',
-                transition: 'color 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.color = 'var(--accent-threat)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.color = 'var(--text-muted)'
-              }}
-              >
-                <item.icon size={20} strokeWidth={1.5} />
-              </a>
-            ))}
+            <a href="https://www.linkedin.com/in/tusharr-mishra" target="_blank" rel="noopener noreferrer" style={{
+              color: 'var(--text-muted)',
+              textDecoration: 'none',
+              transition: 'color 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent-threat)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}
+            >
+              <Linkedin size={20} strokeWidth={1.5} />
+            </a>
+
+            <a href="https://github.com/tusharr-mishra" target="_blank" rel="noopener noreferrer" style={{
+              color: 'var(--text-muted)',
+              textDecoration: 'none',
+              transition: 'color 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent-threat)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}
+            >
+              <GithubIcon size={20} strokeWidth={1.5} />
+            </a>
+
+            <span style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              color: '#ffffff',
+              letterSpacing: '0.05em',
+            }}>
+              shravyasharma2006@gmail.com
+            </span>
           </div>
         </div>
       </footer>
