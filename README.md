@@ -298,6 +298,17 @@ Interactive documentation is always available at `/docs`.
 
 ---
 
+## Browser Extension Integration
+
+MalIntent includes a powerful **Google Chrome Extension** (Manifest V3) that brings the firewall's protection directly to users on third-party LLM applications like ChatGPT, Claude, Gemini, and Groq.
+
+- **Real-Time Interception:** Captures user prompts on the webpage before they are sent to the AI.
+- **Dynamic PII Masking:** If the backend detects sensitive data in a safe prompt, the extension instantly masks the text (e.g., `<REDACTED EMAIL>`) directly in the chat box before submission.
+- **Visual Warnings:** Injects sleek, glassmorphism UI warnings for blocked or flagged prompts, allowing users to "Send Anyway" if permitted.
+- **Zero-Config Backend:** Works out-of-the-box with the live Cloud Run API endpoint.
+
+---
+
 ## Python SDK
 
 Zero-dependency typed client for integrating MalIntent into any Python application.

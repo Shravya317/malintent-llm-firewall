@@ -66,6 +66,7 @@ class ScanInputResponse(BaseModel):
     layer_c_top_matches: List[LayerCMatch]  # top 3 semantically similar phrases
     latency_ms: float  # total detection time in milliseconds
     log_id: int  # ThreatLog row ID for frontend to reference
+    scrubbed_prompt: Optional[str] = None
 
 
 # ── SCAN / OUTPUT ─────────────────────────────────────────────────────────────

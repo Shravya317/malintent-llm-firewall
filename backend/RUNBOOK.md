@@ -2206,4 +2206,12 @@ Verify that the Cloud Run backend is live and reachable at the production URL. C
 
 ---
 
+# Browser Extension Integration
+
+The MalIntent firewall includes support for a Chrome Extension that intercepts prompts directly on sites like ChatGPT and Claude.
+
+The backend fully supports the extension's PII masking feature. The `ScanInputResponse` model includes a `scrubbed_prompt` field, which the extension uses to replace sensitive information directly in the browser's input box before it is submitted to the AI.
+
+---
+
 **Last Updated:** Phase 7 Complete

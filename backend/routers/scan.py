@@ -556,6 +556,7 @@ async def scan_input(
         layer_c_top_matches = layer_c_matches,
         latency_ms          = round(total_latency_ms, 2),
         log_id              = log_entry.id,
+        scrubbed_prompt     = store_scrubbed,
     )
 
 

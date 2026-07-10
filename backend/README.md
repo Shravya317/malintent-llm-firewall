@@ -194,6 +194,19 @@ The production backend connects to Supabase via the Transaction Pooler, while ad
 
 ---
 
+## Browser Extension Integration
+
+MalIntent includes a native **Google Chrome Extension** that seamlessly integrates the firewall directly into popular third-party AI interfaces like ChatGPT, Claude, Gemini, and Groq. 
+
+The extension runs purely on the frontend (manifest V3) and intercepts prompts before they are submitted. It communicates directly with this Cloud Run backend API (via the `/api/v1/scan/input` endpoint) to:
+- **Block** malicious prompts (High Risk) from ever leaving the browser.
+- **Flag** suspicious prompts (Medium Risk) and provide a "Send Anyway" bypass or an option to edit.
+- **Mask PII** in safe prompts (Low Risk) by dynamically replacing sensitive data (like emails or AWS keys) with `<REDACTED>` tags on the screen before the prompt hits the LLM.
+
+*Note: The backend requires `scrubbed_prompt` to be returned in the `ScanInputResponse` to support the extension's PII masking feature.*
+
+---
+
 ## 🚀 Quick Start & Proxy Mode
 
 ### Local Setup
