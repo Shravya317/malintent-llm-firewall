@@ -173,14 +173,41 @@ function handleDecision(data, inputBox) {
 }
 
 function forceSend(inputBox) {
-    // First attempt to click the send button for React apps like ChatGPT
-    const sendButton = document.querySelector('[data-testid="send-button"]');
+    const selectors = [
+        '[data-testid="send-button"]', // ChatGPT
+        'button[aria-label="Send Message"]', // Claude
+        'button[aria-label="Send message"]', // Claude/Gemini
+        'button[aria-label="Send"]', // Groq/Gemini
+        'button[title="Send message"]'
+    ];
+
+    let sendButton = null;
+    for (let sel of selectors) {
+        sendButton = document.querySelector(sel);
+        if (sendButton) break;
+    }
+
+    // Fallback heuristic: find a button with an SVG inside the same container
+    if (!sendButton) {
+        let parent = inputBox.parentElement;
+        for (let i = 0; i < 4; i++) {
+            if (!parent) break;
+            const btns = parent.querySelectorAll('button');
+            if (btns.length > 0) {
+                // Usually the send button is the last button in the input area
+                sendButton = btns[btns.length - 1];
+                break;
+            }
+            parent = parent.parentElement;
+        }
+    }
+
     if (sendButton && !sendButton.disabled) {
         sendButton.click();
         return;
     }
 
-    // Fallback to dispatching KeyboardEvent
+    // Last resort fallback
     inputBox.dataset.firewallVerified = "true";
     const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter', keyCode: 13 });
     inputBox.dispatchEvent(enterEvent);
