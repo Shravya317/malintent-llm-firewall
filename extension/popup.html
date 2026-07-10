@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MalIntent Firewall</title>
+    <link rel="stylesheet" href="popup.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Syncopate:wght@700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="brand-header">
+        <div class="logo-text" id="logoContainer" style="display: flex; align-items: center;">
+            <span class="logo-red">MAL</span><span class="logo-white">INTENT</span>
+        </div>
+        <div class="power-control">
+            <button id="powerToggle" class="power-btn active">SHIELD ACTIVE</button>
+        </div>
+    </div>
+
+    <div class="main-dashboard">
+        <div class="scan-metrics">
+            <div class="metric-row block-row">
+                <span class="metric-label">THREATS BLOCKED</span>
+                <span class="metric-value" id="blockedCount">0</span>
+            </div>
+            <div class="metric-row warn-row">
+                <span class="metric-label">WARNINGS ISSUED</span>
+                <span class="metric-value" id="warningsCount">0</span>
+            </div>
+            <div class="metric-row safe-row">
+                <span class="metric-label">SAFE PROMPTS</span>
+                <span class="metric-value" id="safeCount">0</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-title">LATEST INTERCEPTION</div>
+        <div class="latest-log" id="lastScanCard">
+            <div class="log-status" id="lastScanBadge">AWAITING...</div>
+            <div class="log-text" id="lastScanText">No prompt intercepted yet.</div>
+        </div>
+
+        <div class="section-title">LIVE FEED</div>
+        <div class="terminal-feed" id="historyList">
+            <!-- Feed items injected here via JS -->
+        </div>
+    </div>
+
+    <div class="bottom-actions">
+        <button id="dashboardBtn" class="nav-btn">VIEW FULL DASHBOARD ↗</button>
+        <button id="clearBtn" class="text-btn">Clear Logs</button>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Syncopate:wght@700&display=swap');
+
+/* Activation Toast */
+.malintent-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateY(-20px) translateX(-50%);
+    opacity: 0;
+    padding: 12px 24px;
+    background: rgba(10, 10, 10, 0.9);
+    border: 1px solid rgba(229, 9, 20, 0.4);
+    border-radius: 999px;
+    color: #e5e5e5;
+    font-family: 'Montserrat', system-ui, sans-serif;
+    font-size: 14px;
+    z-index: 2147483647;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px rgba(229, 9, 20, 0.25);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Analyzing Toast */
+.malintent-analyzing-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: rgba(10, 10, 10, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    color: #e5e5e5;
+    font-family: 'Montserrat', system-ui, sans-serif;
+    font-size: 13px;
+    z-index: 2147483647;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+    0%, 100% { border-color: rgba(255,255,255,0.1); }
+    50% { border-color: rgba(255,255,255,0.5); }
+}
+
+/* Firewall Box */
+.firewall-box {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 24px 32px;
+    border-radius: 16px;
+    color: white;
+    z-index: 2147483647;
+    font-family: 'Montserrat', system-ui, sans-serif;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    animation: slideDownBox 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.firewall-box.blocked {
+    background: rgba(20, 0, 0, 0.95);
+    border: 1px solid rgba(229, 9, 20, 0.6);
+    box-shadow: 0 0 40px rgba(229, 9, 20, 0.25), 0 10px 15px -3px rgba(0,0,0,0.5);
+}
+
+.firewall-box.flagged {
+    background: rgba(20, 15, 0, 0.95);
+    border: 1px solid rgba(232, 182, 0, 0.6);
+    box-shadow: 0 0 40px rgba(232, 182, 0, 0.2), 0 10px 15px -3px rgba(0,0,0,0.5);
+}
+
+@keyframes slideDownBox {
+    from { top: -60px; opacity: 0; transform: translateX(-50%) scale(0.95); }
+    to { top: 80px; opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* Hover effects for buttons */
+#fw-edit-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+#fw-send-btn:hover {
+    background: rgba(255,255,255,0.1) !important;
+}
+
+/* CSP Safe Classes for Extension UI */
+.malintent-toast.show {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+}
+
+.malintent-logo-svg {
+    overflow: visible;
+    margin-right: 12px;
+}
+.malintent-toast-text {
+    font-family: 'Syncopate', sans-serif;
+}
+.malintent-toast-mal {
+    color: #E50914;
+    font-weight: 700;
+}
+.malintent-toast-intent {
+    color: #FFFFFF;
+    font-weight: 700;
+}
+.malintent-toast-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    margin-left: 10px;
+    letter-spacing: 0.5px;
+}
+.malintent-loading-input {
+    background-color: rgba(100, 116, 139, 0.2) !important;
+}
+
+.fw-buttons-container {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.fw-btn-edit {
+    background: #e8b600;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+}
+.fw-btn-send {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.fw-score-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.fw-score-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+.fw-score-val {
+    color: #fff;
+}
+.fw-message {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+.fw-dashboard-link {
+    color: #ff4d4d;
+    text-decoration: underline;
+    font-size: 12px;
+    display: block;
+    margin-top: 12px;
+    font-weight: 500;
+}

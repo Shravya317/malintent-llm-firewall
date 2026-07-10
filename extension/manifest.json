@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "MalIntent Firewall",
+  "version": "1.0",
+  "description": "Premium protection against malicious prompts and PII leaks.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "*://chatgpt.com/*",
+    "*://claude.ai/*",
+    "*://gemini.google.com/*",
+    "*://groq.com/*",
+    "*://*.groq.com/*",
+    "*://*.antigravity.dev/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://chatgpt.com/*",
+        "*://claude.ai/*",
+        "*://gemini.google.com/*",
+        "*://groq.com/*",
+        "*://*.groq.com/*",
+        "*://*.antigravity.dev/*"
+      ],
+      "css": ["content.css"],
+      "js": ["content_script.js"]
+    }
+  ],
+  "action": {
+    "default_title": "MalIntent Firewall",
+    "default_popup": "popup.html"
+  }
+}
