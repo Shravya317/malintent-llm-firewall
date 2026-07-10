@@ -30,7 +30,7 @@
 
 <br/>
 
-[**Live API**](https://malintent-backend-261681342014.asia-south1.run.app) · [**Interactive Docs**](https://malintent-backend-261681342014.asia-south1.run.app/docs) · [**OpenAPI Spec**](https://malintent-backend-261681342014.asia-south1.run.app/openapi.json)
+[**Live API**](https://malintent-backend-211874411068.asia-south1.run.app) · [**Interactive Docs**](https://malintent-backend-211874411068.asia-south1.run.app/docs) · [**OpenAPI Spec**](https://malintent-backend-211874411068.asia-south1.run.app/openapi.json)
 
 </div>
 
@@ -304,7 +304,7 @@ pip install -e .
 from malintent import Client
 
 client = Client(
-    base_url="https://malintent-backend-261681342014.asia-south1.run.app",
+    base_url="https://malintent-backend-211874411068.asia-south1.run.app",
     timeout=120.0
 )
 

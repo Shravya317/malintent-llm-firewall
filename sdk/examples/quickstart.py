@@ -9,7 +9,7 @@ from malintent import Client
 
 # Point this at your deployed backend.
 client = Client(
-    base_url="https://malintent-backend-261681342014.asia-south1.run.app",
+    base_url="https://malintent-backend-211874411068.asia-south1.run.app",
     timeout=120.0,  # 2 minutes — model loading on cold start is slow
 )
 
