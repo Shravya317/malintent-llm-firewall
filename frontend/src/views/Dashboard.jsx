@@ -29,11 +29,20 @@ import ScanAreaChart from '../components/charts/AreaChart'
 import HorizontalBarChart from '../components/charts/HorizontalBarChart'
 import ThreatProfile from '../components/charts/ThreatProfile'
 
+import { useNavigate } from 'react-router-dom'
+
 export default function Dashboard() {
   const { theme, toggleTheme } = useTheme()
+  const navigate = useNavigate()
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const handleLogout = () => {
+    localStorage.removeItem('malintent_token')
+    localStorage.removeItem('token')
+    navigate('/login')
+  }
 
   useEffect(() => {
     let isMounted = true
@@ -92,31 +101,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="page-header-actions">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  background: 'var(--accent-secure)',
-                  display: 'block',
-                  boxShadow: 'var(--glow-secure)',
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  color: 'var(--accent-secure)',
-                  letterSpacing: '0.06em',
-                }}
-              >
-                NOMINAL
-              </span>
-            </div>
-
+          <div className="page-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <button
               onClick={toggleTheme}
               style={{
@@ -136,6 +121,34 @@ export default function Dashboard() {
               onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-faint)' }}
             >
               {theme === 'dark' ? '◐ Light' : '◑ Dark'}
+            </button>
+
+            <button
+              onClick={handleLogout}
+              style={{
+                background: 'none',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                color: 'var(--accent-threat)',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                padding: '4px 12px',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={e => { 
+                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
+                e.currentTarget.style.borderColor = 'var(--accent-threat)'
+              }}
+              onMouseLeave={e => { 
+                e.currentTarget.style.background = 'none'
+                e.currentTarget.style.borderColor = 'var(--border-subtle)'
+              }}
+            >
+              Log Out
             </button>
           </div>
         </header>
