@@ -30,9 +30,16 @@
 
 <br/>
 
-[**Live API**](https://malintent-backend-211874411068.asia-south1.run.app) · [**Interactive Docs**](https://malintent-backend-211874411068.asia-south1.run.app/docs) · [**OpenAPI Spec**](https://malintent-backend-211874411068.asia-south1.run.app/openapi.json)
-
 </div>
+
+---
+
+## 🔗 Live Deployments
+
+- **Security Dashboard:** [malintent-firewall.vercel.app](https://malintent-firewall.vercel.app/)
+- **Backend API:** [Live Endpoint](https://malintent-backend-211874411068.asia-south1.run.app)
+- **API Documentation:** [Swagger UI](https://malintent-backend-211874411068.asia-south1.run.app/docs)
+- **OpenAPI Spec:** [openapi.json](https://malintent-backend-211874411068.asia-south1.run.app/openapi.json)
 
 ---
 

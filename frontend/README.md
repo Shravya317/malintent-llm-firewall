@@ -23,6 +23,13 @@
 
 ---
 
+## 🌐 Live Application
+
+Access the production deployment of the MalIntent Security Command Center here:
+👉 **[malintent-firewall.vercel.app](https://malintent-firewall.vercel.app/)**
+
+---
+
 <div align="center">
 
 <img src="assets/screenshots/dashboard-dark.png" alt="MalIntent Dashboard Dark Mode" width="48%" />
