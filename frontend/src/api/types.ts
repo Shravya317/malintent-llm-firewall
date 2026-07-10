@@ -25,6 +25,7 @@ export interface ScanInputResponse {
   layer_c_top_matches: LayerCMatch[]; // top 3 semantically similar phrases
   latency_ms: number; // total detection time in milliseconds
   log_id: number; // ThreatLog row ID for frontend to reference
+  scrubbed_prompt?: string;
 }
 
 // ── LOGS ──────────────────────────────────────────────────────────────────────
