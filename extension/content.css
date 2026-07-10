@@ -80,6 +80,12 @@
     box-shadow: 0 0 40px rgba(232, 182, 0, 0.2), 0 10px 15px -3px rgba(0,0,0,0.5);
 }
 
+.firewall-box.safe {
+    background: rgba(0, 20, 5, 0.95);
+    border: 1px solid rgba(16, 185, 129, 0.6);
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.2), 0 10px 15px -3px rgba(0,0,0,0.5);
+}
+
 @keyframes slideDownBox {
     from { top: -60px; opacity: 0; transform: translateX(-50%) scale(0.95); }
     to { top: 80px; opacity: 1; transform: translateX(-50%) scale(1); }

@@ -160,20 +160,19 @@ function handleDecision(data, inputBox) {
         showWarning(data.risk_score, "Critical threat detected. This prompt is blocked.", "blocked", false, inputBox);
     } 
     else if (data.decision === "FLAG") {
-        showWarning(data.risk_score, "Suspicious prompt detected.", "flagged", true, inputBox);
+        showWarning(data.risk_score, "Suspicious prompt detected. Please review and edit your prompt.", "flagged", true, inputBox);
     } 
     else {
         // SAFE: Mask PII if found, then send.
         if (data.scrubbed_prompt && data.scrubbed_prompt !== getPromptText(inputBox)) {
             setPromptText(inputBox, data.scrubbed_prompt);
         }
+        showWarning(data.risk_score, "Prompt is safe. Sending...", "safe", false, inputBox);
         forceSend(inputBox);
     }
 }
 
 function forceSend(inputBox) {
-    inputBox.dataset.firewallVerified = "true";
-    
     // First attempt to click the send button for React apps like ChatGPT
     const sendButton = document.querySelector('[data-testid="send-button"]');
     if (sendButton && !sendButton.disabled) {
@@ -182,6 +181,7 @@ function forceSend(inputBox) {
     }
 
     // Fallback to dispatching KeyboardEvent
+    inputBox.dataset.firewallVerified = "true";
     const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter', keyCode: 13 });
     inputBox.dispatchEvent(enterEvent);
 }
@@ -196,31 +196,30 @@ function showWarning(score, message, type, isFlagged, inputBox) {
         // [ENHANCEMENT] Option to Bypass a Flagged warning
         buttons = `
             <div class="fw-buttons-container">
-                <button id="fw-edit-btn" class="fw-btn-edit">Edit Prompt</button>
-                <button id="fw-send-btn" class="fw-btn-send">Send Anyway</button>
+                <button id="fw-edit-btn" class="fw-btn-edit">Dismiss & Edit</button>
             </div>
         `;
     }
 
     box.innerHTML = `
         <div class="fw-score-container">
-            <div class="fw-score-title">RISK SCORE: <span class="fw-score-val">${score.toFixed(1)}</span></div>
+            <div class="fw-score-title">RISK SCORE: <span class="fw-score-val">${(score || 0).toFixed(1)}</span></div>
         </div>
         <p class="fw-message">${message}</p>
-        ${type === 'blocked' ? `
         <a href="https://malintent-firewall.vercel.app/" target="_blank" class="fw-dashboard-link">
             Check details on MalIntent Dashboard ↗
-        </a>` : ''}
+        </a>
         ${buttons}
     `;
     document.body.appendChild(box);
 
     if (isFlagged) {
-        document.getElementById('fw-edit-btn').onclick = () => box.remove();
-        document.getElementById('fw-send-btn').onclick = () => {
+        document.getElementById('fw-edit-btn').onclick = () => {
             box.remove();
-            forceSend(inputBox);
+            inputBox.focus();
         };
+    } else if (type === 'safe') {
+        setTimeout(() => { if(box.parentNode) box.remove(); }, 2500);
     } else {
         setTimeout(() => { if(box.parentNode) box.remove(); }, 6000); // Auto remove blocks after 6s
     }
