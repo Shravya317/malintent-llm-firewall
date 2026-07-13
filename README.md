@@ -59,51 +59,93 @@ Beyond detection, MalIntent adds a complete **Security Enforcement Layer** that 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           Client Application                            │
-└────────────────────────────────┬────────────────────────────────────────┘
-                                 │
-                                 ▼
+│          Chrome Extension (NEW)              │    Client Application     │
+│   content_script.js · background.js         │    SDK · direct API       │
+└──────────────────────┬───────────────────────┴────────────┬─────────────┘
+                       └──────────────┬─────────────────────┘
+                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    FastAPI Reverse Proxy  (JWT Auth + Rate Limiting)     │
+│              FastAPI Reverse Proxy                                       │
+│         OTP + JWT Auth · slowapi Rate Limiting · token_bridge.js sync   │
 └────────────────────────────────┬────────────────────────────────────────┘
                                  │
               ┌──────────────────┼──────────────────┐
               ▼                  ▼                  ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
 │   LAYER A       │  │   LAYER B       │  │   LAYER C       │
-│   Pattern       │  │   ML Engine     │  │   Semantic      │
-│   47 Regex      │  │   PromptGuard   │  │   FAISS+        │
-│   7 OWASP cats  │  │   86M params    │  │   MiniLM-L6-v2  │
-│   ~2ms          │  │   ~50ms         │  │   206 phrases   │
-│   30% weight    │  │   45% weight    │  │   ~8ms          │
+│   Pattern       │  │   ML Classifier │  │   Semantic      │
+│   47 Regex      │  │   PromptGuard   │  │   FAISS +       │
+│   7 OWASP cats  │  │   86M (DeBERTa) │  │   sentence-     │
+│   ~2ms          │  │   ~50ms         │  │   transformer   │
+│   25% weight    │  │   45% weight    │  │   ~20ms         │
 └────────┬────────┘  └────────┬────────┘  └────────┬────────┘
          └──────────────────── ▼ ──────────────────┘
                                │
                   ┌────────────▼────────────┐
                   │    Unified Risk Scorer   │
+                  │   (risk_scorer.py)       │
                   │                         │
                   │  BLOCK  ≥ 70 risk score │
-                  │  FLAG   ≥ 25 risk score │
-                  │  ALLOW  <  25           │
+                  │  FLAG   30–70           │
+                  │  ALLOW  < 30            │
                   │                         │
                   │  Semantic override:      │
                   │  cosine ≥ 0.90 → BLOCK  │
-                  └────────────┬────────────┘
+                  └──────┬──────────┬───────┘
+                         │          │
+                    ALLOW │    BLOCK/FLAG
+                         │          ▼
+                         │   ┌─────────────┐
+                         │   │   Return    │
+                         │   │  blocked    │
+                         │   │  response   │
+                         │   └─────────────┘
+                         ▼
+                  ┌────────────────────────┐
+                  │   Permission Validator  │
+                  │  (permission_validator  │
+                  │        .py)             │
+                  │  Role checks · dynamic  │
+                  │  execution mode override│
+                  └────────────┬───────────┘
                                │
                   ┌────────────▼────────────┐
                   │  Security Enforcement   │
                   │  Layer (SEL)            │
                   │                         │
-                  │  • PII Dynamic Masking  │
-                  │  • Secret Redaction     │
-                  │  • Output Consistency   │
-                  │  • Action Audit Log     │
+                  │  • tool_access_         │
+                  │    controller.py        │
+                  │  • dynamic_data_        │
+                  │    masking.py           │
+                  │  • secret_protection_   │
+                  │    engine.py            │
+                  │  • action_audit_        │
+                  │    logger.py            │
+                  │  • pii_scrubber.py      │
                   └────────────┬────────────┘
                                │
                                ▼
                          ┌───────────┐
                          │  LLM API  │
-                         └───────────┘
+                         └─────┬─────┘
+                               │
+                  ┌────────────▼────────────┐
+                  │   Output Consistency    │
+                  │      Validator          │
+                  │  (output_validator.py)  │
+                  │                         │
+                  │  Cosine similarity ·    │
+                  │  semantic drift check · │
+                  │  withhold if high-risk  │
+                  └────────────┬────────────┘
+                               │
+                               ▼
+                  ┌────────────────────────┐
+                  │    Response to caller  │
+                  │  Client app · or ext.  │
+                  │  in-page banner        │
+                  │  (SAFE/FLAGGED/BLOCKED)│
+                  └────────────────────────┘
 ```
 
 The pipeline is **fail-closed**: any layer error results in a block, not a passthrough.
@@ -445,6 +487,17 @@ malintent/
 │   ├── authentication.py           # JWT session management
 │   ├── database.py                 # SQLAlchemy + PostgreSQL
 │   └── main.py
+├── extension/                      # Chrome Extension — Manifest V3 (NEW)
+│   ├── manifest.json               # Permissions, host_permissions, MV3 config
+│   ├── background.js               # Service worker — POST /api/v1/scan/input, chrome.storage writes
+│   ├── content_script.js           # DOM interceptor — ChatGPT, Claude, Gemini, Groq
+│   ├── content.css                 # In-page warning banner styles (red/amber/green)
+│   ├── token_bridge.js             # JWT sync from dashboard into extension storage
+│   ├── popup.html                  # Toolbar popup — mini-dashboard layout
+│   ├── popup.js                    # Reads chrome.storage — scan feed + BLOCKED/FLAGGED/SAFE counts
+│   ├── popup.css                   # Dark-theme popup styles
+│   ├── generate_logo.js            # SVG logo injection into protected sites
+│   └── README.md                   # Extension setup and usage guide
 ├── frontend/
 │   └── src/
 │       ├── components/             # Dashboard, ThreatFeed, Playground, Settings
