@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/PHASE_2-SDK-009688?style=for-the-badge" alt="Phase 2" />
+<img src="https://img.shields.io/badge/PHASE_4-SDK-009688?style=for-the-badge" alt="Phase 4" />
 
 # MalIntent: Python SDK
 
