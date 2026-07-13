@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/PHASE_2-BACKEND-ff2d55?style=for-the-badge" alt="Phase 2" />
+<img src="https://img.shields.io/badge/PHASE_2-BACKEND-ff2d55?style=for-the-badge" alt="Phase 1" />
 
 # MalIntent: Core Engine & API
 
