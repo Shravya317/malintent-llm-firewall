@@ -1,6 +1,7 @@
 <div align="center">
+<img src="https://img.shields.io/badge/PHASE_2-FRONTEND-ff2d55?style=for-the-badge" alt="Phase 2" />
 
-# <img src="https://img.icons8.com/fluency/48/shield.png" width="36" height="36" alt="shield"/> MalIntent — Security Dashboard
+# MalIntent — Security Dashboard
 
 ### *Next-generation LLM Firewall Interface. Engineered for secure AI.*
 
@@ -23,10 +24,9 @@
 
 ---
 
-## 🌐 Live Application
+## Live Application
 
-Access the production deployment of the MalIntent Security Command Center here:
-👉 **[malintent-firewall.vercel.app](https://malintent-firewall.vercel.app/)**
+Access the production deployment of the MalIntent Security Command Center here: **[malintent-firewall.vercel.app](https://malintent-firewall.vercel.app/)**
 
 ---
 
@@ -388,7 +388,5 @@ npm run preview
 <img src="https://img.shields.io/badge/Security-LLM_Firewall-ef4444?style=for-the-badge&labelColor=0a0f1e" />
 
 <br/><br/>
-
-<sub><i>All systems nominal. Prompt injection attempts will be prosecuted by Layer A.</i></sub>
 
 </div>
