@@ -19,6 +19,14 @@ export default function AuthPage() {
   });
   const [otp, setOtp] = useState('');
 
+  // Redirect to dashboard if already logged in
+  React.useEffect(() => {
+    const token = localStorage.getItem('token') || localStorage.getItem('malintent_token')
+    if (token) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [navigate])
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
