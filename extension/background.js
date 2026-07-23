@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 
     if (request.action === "checkPrompt") {
-        const apiUrl = "https://malintent-backend-211874411068.asia-south1.run.app/api/v1/scan/input"; 
+        const apiUrl = "https://malintent-backend-638595612528.asia-south1.run.app/api/v1/scan/input"; 
         
         // Retrieve the stored token before making the request
         chrome.storage.local.get("jwtToken", (result) => {

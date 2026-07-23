@@ -37,9 +37,9 @@
 ## 🔗 Live Deployments
 
 - **Security Dashboard:** [malintent-firewall.vercel.app](https://malintent-firewall.vercel.app/)
-- **Backend API:** [Live Endpoint](https://malintent-backend-211874411068.asia-south1.run.app)
-- **API Documentation:** [Swagger UI](https://malintent-backend-211874411068.asia-south1.run.app/docs)
-- **OpenAPI Spec:** [openapi.json](https://malintent-backend-211874411068.asia-south1.run.app/openapi.json)
+- **Backend API:** [Live Endpoint](https://malintent-backend-638595612528.asia-south1.run.app)
+- **API Documentation:** [Swagger UI](https://malintent-backend-638595612528.asia-south1.run.app/docs)
+- **OpenAPI Spec:** [openapi.json](https://malintent-backend-638595612528.asia-south1.run.app/openapi.json)
 
 ---
 
@@ -322,7 +322,7 @@ pip install -e .
 from malintent import Client
 
 client = Client(
-    base_url="https://malintent-backend-211874411068.asia-south1.run.app",
+    base_url="https://malintent-backend-638595612528.asia-south1.run.app",
     timeout=120.0
 )
 

@@ -31,8 +31,8 @@
 
 The **MalIntent Python SDK** is the official, zero-dependency integration library for developers routing their LLM traffic through the MalIntent Firewall — an AI-powered LLM prompt injection firewall. It wraps every REST endpoint in a clean, strongly-typed client so prompts can be scanned before they ever reach the language model.
 
-- **Live API:** `https://malintent-backend-211874411068.asia-south1.run.app`
-- **Swagger Docs:** `https://malintent-backend-211874411068.asia-south1.run.app/docs`
+- **Live API:** `https://malintent-backend-638595612528.asia-south1.run.app`
+- **Swagger Docs:** `https://malintent-backend-638595612528.asia-south1.run.app/docs`
 
 ---
 
@@ -106,7 +106,7 @@ Not yet on PyPI? Install from source — see [Development](#development) below.
 from malintent import Client
 
 client = Client(
-    base_url="https://malintent-backend-211874411068.asia-south1.run.app",
+    base_url="https://malintent-backend-638595612528.asia-south1.run.app",
     timeout=120.0  # allow time for cold start model loading
 )
 
@@ -142,7 +142,7 @@ else:
 ```python
 from malintent import Client, BlockedPromptException
 
-client = Client(base_url="https://malintent-backend-211874411068.asia-south1.run.app")
+client = Client(base_url="https://malintent-backend-638595612528.asia-south1.run.app")
 
 try:
     result = client.scan_input(user_message, raise_on_block=True)

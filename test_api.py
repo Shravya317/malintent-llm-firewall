@@ -1,6 +1,6 @@
 import requests
 
-url = "https://malintent-backend-211874411068.asia-south1.run.app/api/v1/auth/verify-otp"
+url = "https://malintent-backend-638595612528.asia-south1.run.app/api/v1/auth/verify-otp"
 payload = {
     "email": "shravyasharma2006@gmail.com",
     "otp_code": "402960"

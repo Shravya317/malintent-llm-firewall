@@ -13,7 +13,7 @@
     "*://*.antigravity.dev/*",
     "*://malintent-firewall.vercel.app/*",
     "*://localhost/*",
-    "*://malintent-backend-211874411068.asia-south1.run.app/*"
+    "*://malintent-backend-638595612528.asia-south1.run.app/*"
   ],
   "background": {
     "service_worker": "background.js"

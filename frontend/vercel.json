@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/v1/:match*",
-      "destination": "https://malintent-backend-211874411068.asia-south1.run.app/api/v1/:match*"
+      "destination": "https://malintent-backend-638595612528.asia-south1.run.app/api/v1/:match*"
     },
     {
       "source": "/(.*)",

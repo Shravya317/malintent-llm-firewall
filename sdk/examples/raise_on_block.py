@@ -6,7 +6,7 @@ a try/except instead of branching on `.decision` every time.
 
 from malintent import BlockedPromptException, Client
 
-client = Client(base_url="https://malintent-backend-211874411068.asia-south1.run.app")
+client = Client(base_url="https://malintent-backend-638595612528.asia-south1.run.app")
 
 
 def handle_user_message(prompt: str, session_role: str = "customer") -> str:

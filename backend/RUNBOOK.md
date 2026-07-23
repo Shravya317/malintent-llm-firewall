@@ -1172,23 +1172,23 @@ Exact counts may vary slightly depending on seed randomness, but the overall dis
 ### Production URL
 
 ```text
-https://malintent-backend-211874411068.asia-south1.run.app
+https://malintent-backend-638595612528.asia-south1.run.app
 ```
 
 ### Swagger UI
 
 ```text
-https://malintent-backend-211874411068.asia-south1.run.app/docs
+https://malintent-backend-638595612528.asia-south1.run.app/docs
 ```
 
 ### Interactive Custom Page integrated with Swagger UI for better UI
 
-https://malintent-backend-211874411068.asia-south1.run.app/docs
+https://malintent-backend-638595612528.asia-south1.run.app/docs
 
 ### OpenAPI JSON
 
 ```text
-https://malintent-backend-211874411068.asia-south1.run.app/openapi.json
+https://malintent-backend-638595612528.asia-south1.run.app/openapi.json
 ```
 
 Open Swagger UI and verify:
@@ -1438,23 +1438,23 @@ gcloud run deploy malintent-backend \
 ### Production URL
 
 ```text
-https://malintent-backend-211874411068.asia-south1.run.app
+https://malintent-backend-638595612528.asia-south1.run.app
 ```
 
 ### Swagger UI
 
 ```text
-https://malintent-backend-211874411068.asia-south1.run.app/docs
+https://malintent-backend-638595612528.asia-south1.run.app/docs
 ```
 
 ### Interactive Custom Page integrated with Swagger UI for better UI
 
-https://malintent-backend-211874411068.asia-south1.run.app/docs
+https://malintent-backend-638595612528.asia-south1.run.app/docs
 
 ### OpenAPI JSON
 
 ```text
-https://malintent-backend-211874411068.asia-south1.run.app/openapi.json
+https://malintent-backend-638595612528.asia-south1.run.app/openapi.json
 ```
 
 ---

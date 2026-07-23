@@ -235,9 +235,9 @@ A complete Docker development environment is included (Dockerfile + Docker Compo
 
 | Resource | URL |
 |---|---|
-| Production API | `https://malintent-backend-211874411068.asia-south1.run.app` |
-| Swagger UI | `https://malintent-backend-211874411068.asia-south1.run.app/docs` |
-| OpenAPI Spec | `https://malintent-backend-211874411068.asia-south1.run.app/openapi.json` |
+| Production API | `https://malintent-backend-638595612528.asia-south1.run.app` |
+| Swagger UI | `https://malintent-backend-638595612528.asia-south1.run.app/docs` |
+| OpenAPI Spec | `https://malintent-backend-638595612528.asia-south1.run.app/openapi.json` |
 
 ```text
                 Client
@@ -421,7 +421,7 @@ Mean 68.81ms · p95 69.49ms · Max 490.20ms — ✅ meets p95 < 100ms target.
 ### Week 7 – PostgreSQL Migration, Production Deployment & Benchmark Evaluation
 
 **Production Deployment (Google Cloud Run + Supabase):**
-- Production API: `https://malintent-backend-211874411068.asia-south1.run.app`
+- Production API: `https://malintent-backend-638595612528.asia-south1.run.app`
 - Swagger UI / custom docs page: `.../docs`
 - OpenAPI spec: `.../openapi.json`
 
@@ -459,7 +459,7 @@ pip install -e .
 from malintent import Client
 
 client = Client(
-    base_url="https://malintent-backend-211874411068.asia-south1.run.app",
+    base_url="https://malintent-backend-638595612528.asia-south1.run.app",
     timeout=120.0
 )
 
