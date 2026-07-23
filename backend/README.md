@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/PHASE_2-BACKEND-ff2d55?style=for-the-badge" alt="Phase 2" />
+<img src="https://img.shields.io/badge/PHASE_1-BACKEND-ff2d55?style=for-the-badge" alt="Phase 1" />
 
 # MalIntent: Core Engine & API
 
@@ -36,99 +36,99 @@ The **MalIntent Backend** is the central brain of an enterprise-grade LLM securi
 ## Architecture
 
 ```text
-                  MalIntent Firewall (Backend)
- ┌─────────────────────────────────────────────────────────────┐
- │                                                             │
- │  ┌─────────┐    ┌─────────────────┐    ┌───────────────┐    │
- │  │ Client  │───▶│ FastAPI Gateway │───▶│ LLM API       │    │
- │  │ App     │◀───│ (Reverse Proxy) │◀───│ (OpenAI/Groq) │    │
- │  └─────────┘    └────────┬────────┘    └───────────────┘    │
- │                          │                                  │
- │                 ┌────────▼────────┐                         │
- │                 │ Scan Middleware │                         │
- │                 ├─────────────────┤                         │
- │                 │ 1. JWT Auth     │                         │
- │                 │ 2. Extractor    │                         │
- │                 │ 3. Enforcement  │                         │
- │                 └────────┬────────┘                         │
- │                          │                                  │
- │                 ┌────────▼────────┐                         │
- │                 │ Unified Scorer  │                         │
- │                 │ (Aggregator)    │                         │
- │                 ├────────┬────────┴────────┐                │
- │                 │        │                 │                │
- │       ┌─────────▼─┐ ┌────▼────────┐ ┌──────▼──────┐         │
- │       │ Layer A   │ │ Layer B     │ │ Layer C     │         │
- │       │ Pattern   │ │ ML Engine   │ │ Semantic    │         │
- │       │ (Regex)   │ │ PromptGuard │ │ (FAISS)     │         │
- │       └───────────┘ └─────────────┘ └─────────────┘         │
- │                                                             │
- │                 ┌─────────────────┐                         │
- │                 │ Security (SEL)  │                         │
- │                 │ • PII Masking   │                         │
- │                 │ • Secret Filter │                         │
- │                 │ • RAG Engine    │                         │
- │                 └─────────────────┘                         │
- └─────────────────────────────────────────────────────────────┘
+                                MalIntent Firewall (Backend)
+               ┌─────────────────────────────────────────────────────────────┐
+               │                                                             │
+               │  ┌─────────┐    ┌─────────────────┐    ┌───────────────┐    │
+               │  │ Client  │───▶│ FastAPI Gateway │───▶│ LLM API       │    │
+               │  │ App     │◀───│ (Reverse Proxy) │◀───│ (OpenAI/Groq) │    │
+               │  └─────────┘    └────────┬────────┘    └───────────────┘    │
+               │                          │                                  │
+               │                 ┌────────▼────────┐                         │
+               │                 │ Scan Middleware │                         │
+               │                 ├─────────────────┤                         │
+               │                 │ 1. JWT Auth     │                         │
+               │                 │ 2. Extractor    │                         │
+               │                 │ 3. Enforcement  │                         │
+               │                 └────────┬────────┘                         │
+               │                          │                                  │
+               │                 ┌────────▼────────┐                         │
+               │                 │ Unified Scorer  │                         │
+               │                 │ (Aggregator)    │                         │
+               │                 ├────────┬────────┴────────┐                │
+               │                 │        │                 │                │
+               │       ┌─────────▼─┐ ┌────▼────────┐ ┌──────▼──────┐         │
+               │       │ Layer A   │ │ Layer B     │ │ Layer C     │         │
+               │       │ Pattern   │ │ ML Engine   │ │ Semantic    │         │
+               │       │ (Regex)   │ │ PromptGuard │ │ (FAISS)     │         │
+               │       └───────────┘ └─────────────┘ └─────────────┘         │
+               │                                                             │
+               │                 ┌─────────────────┐                         │
+               │                 │ Security (SEL)  │                         │
+               │                 │ • PII Masking   │                         │
+               │                 │ • Secret Filter │                         │
+               │                 │ • RAG Engine    │                         │
+               │                 └─────────────────┘                         │
+               └─────────────────────────────────────────────────────────────┘
 ```
 
 ### Package Structure
 
 ```text
-malintent/backend/
-├── main.py                       # FastAPI entry point & startup ML warm-up
-├── authentication.py             # User registration, OTP verification, JWT login
-├── pii_scrubber.py               # Basic PII extraction and scrubbing utilities
-├── database.py                   # SQLAlchemy session management and pooling
-├── models.py                     # PostgreSQL schema (User, OTP, ThreatLog, ActionLog)
-├── schemas.py                    # Pydantic validation contracts
-├── config_encryption.py          # Fernet AES encryption layer
-├── routers/                      # API endpoints
-│   ├── scan.py                   # Input/output scanning & RAG document integration
-│   ├── config.py                 # Encrypted configuration management
-│   ├── logs.py                   # Threat telemetry history
-│   ├── stats.py                  # Dashboard analytics
-│   └── llm.py                    # Raw LLM proxy logic for Comparison Mode
-├── malintent/                    # Core detection engine
-│   ├── pattern_engine.py         # Layer A: Regex (47 patterns)
-│   ├── ml_classifier.py          # Layer B: PromptGuard (328k corpus, singleton)
-│   ├── semantic_engine.py        # Layer C: FAISS semantic search (206 phrases)
-│   ├── risk_scorer.py            # Unified aggregation logic
-│   ├── output_validator.py       # Post-generation semantic checker
-│   └── data/
-│       ├── attack_phrases.json   # 206 phrases, v1.1
-│       └── attack_index.faiss    # Pre-built FAISS index (206 vectors, dim=384)
-├── sel/                           # Security Enforcement Layer
-│   ├── dynamic_data_masking.py   # PII anonymiser (Presidio)
-│   ├── secret_protection_engine.py # Credential/secret extraction
-│   ├── action_audit_logger.py    # Structured audit logging for SEL actions
-│   ├── permission_validator.py   # Validates API keys and RBAC rules
-│   └── tool_access_controller.py # Controls tool access based on user roles
-├── scripts/
-│   ├── profile_pipeline.py       # Latency/perf profiler
-│   ├── run_ablation_benchmark.py # Layer-by-layer + OOD benchmark runner
-│   └── seed_demo_events.py       # Production demo-data seeder
-├── sdk/                           # Official Python SDK
-├── notebooks/                     # Training & dataset-exploration notebooks
-└── tests/                         # 99+ unit/integration tests
+                      malintent/backend/
+                      ├── main.py                       # FastAPI entry point & startup ML warm-up
+                      ├── authentication.py             # User registration, OTP verification, JWT login
+                      ├── pii_scrubber.py               # Basic PII extraction and scrubbing utilities
+                      ├── database.py                   # SQLAlchemy session management and pooling
+                      ├── models.py                     # PostgreSQL schema (User, OTP, ThreatLog, ActionLog)
+                      ├── schemas.py                    # Pydantic validation contracts
+                      ├── config_encryption.py          # Fernet AES encryption layer
+                      ├── routers/                      # API endpoints
+                      │   ├── scan.py                   # Input/output scanning & RAG document integration
+                      │   ├── config.py                 # Encrypted configuration management
+                      │   ├── logs.py                   # Threat telemetry history
+                      │   ├── stats.py                  # Dashboard analytics
+                      │   └── llm.py                    # Raw LLM proxy logic for Comparison Mode
+                      ├── malintent/                    # Core detection engine
+                      │   ├── pattern_engine.py         # Layer A: Regex (47 patterns)
+                      │   ├── ml_classifier.py          # Layer B: PromptGuard (328k corpus, singleton)
+                      │   ├── semantic_engine.py        # Layer C: FAISS semantic search (206 phrases)
+                      │   ├── risk_scorer.py            # Unified aggregation logic
+                      │   ├── output_validator.py       # Post-generation semantic checker
+                      │   └── data/
+                      │       ├── attack_phrases.json   # 206 phrases, v1.1
+                      │       └── attack_index.faiss    # Pre-built FAISS index (206 vectors, dim=384)
+                      ├── sel/                           # Security Enforcement Layer
+                      │   ├── dynamic_data_masking.py   # PII anonymiser (Presidio)
+                      │   ├── secret_protection_engine.py # Credential/secret extraction
+                      │   ├── action_audit_logger.py    # Structured audit logging for SEL actions
+                      │   ├── permission_validator.py   # Validates API keys and RBAC rules
+                      │   └── tool_access_controller.py # Controls tool access based on user roles
+                      ├── scripts/
+                      │   ├── profile_pipeline.py       # Latency/perf profiler
+                      │   ├── run_ablation_benchmark.py # Layer-by-layer + OOD benchmark runner
+                      │   └── seed_demo_events.py       # Production demo-data seeder
+                      ├── sdk/                           # Official Python SDK
+                      ├── notebooks/                     # Training & dataset-exploration notebooks
+                      └── tests/                         # 99+ unit/integration tests
 ```
 
 ### Data Flow
 
 ```text
-1. Client Registration    ──▶ Registers user account with email/phone OTP verification
-2. Client Authentication  ──▶ Authenticates via JWT token to access secure endpoints
-3. Client sends request   ──▶ FastAPI receives POST /api/v1/scan/input
-4. Auth & Extraction      ──▶ Validates JWT permission and extracts prompt
-5. Detection Layers       ──▶ Scans via Layer A (Regex), B (ML), C (Semantic)
-6. Unified Risk Scorer    ──▶ Aggregates signals (A: 30%, B: 45%, C: 25%)
-7. Security Enforcement   ──▶ Masks PII (emails, phones, cards) and redacts secrets
-8. Action enforced:
-   ├── BLOCK ──▶ HTTP 403 + threat details
-   ├── FLAG  ──▶ Forward with warnings
-   └── ALLOW ──▶ Forward safely
-9. Output Validation      ──▶ (Post-generation) checks LLM response for leaks/drift
-10. Audit Logging         ──▶ Every SEL decision recorded to the ActionLog trail
+                      1. Client Registration    ──▶ Registers user account with email/phone OTP verification
+                      2. Client Authentication  ──▶ Authenticates via JWT token to access secure endpoints
+                      3. Client sends request   ──▶ FastAPI receives POST /api/v1/scan/input
+                      4. Auth & Extraction      ──▶ Validates JWT permission and extracts prompt
+                      5. Detection Layers       ──▶ Scans via Layer A (Regex), B (ML), C (Semantic)
+                      6. Unified Risk Scorer    ──▶ Aggregates signals (A: 30%, B: 45%, C: 25%)
+                      7. Security Enforcement   ──▶ Masks PII (emails, phones, cards) and redacts secrets
+                      8. Action enforced:
+                         ├── BLOCK ──▶ HTTP 403 + threat details
+                         ├── FLAG  ──▶ Forward with warnings
+                         └── ALLOW ──▶ Forward safely
+                      9. Output Validation      ──▶ (Post-generation) checks LLM response for leaks/drift
+                      10. Audit Logging         ──▶ Every SEL decision recorded to the ActionLog trail
 ```
 
 ---
@@ -150,19 +150,19 @@ malintent/backend/
 <div align="center">
 
 ```text
-Attack Categories               Regex Patterns (Layer A)
-────────────────────────────────────────────────────────
-Context Manipulation            ████████████████  8
-Harmful Elicitation             ██████████████    7
-Persona Override / Jailbreak    ██████████████    7
-Direct Injection                ██████████████    7
-Data Exfiltration               ████████████      6
-Encoding Obfuscation            ██████████        5
-Indirect / RAG Injection        ██████████        5
-────────────────────────────────────────────────────────
-Total Regex Patterns:           47
-
-* Layer C (Semantic FAISS) covers an additional 206 dense paraphrase variants.
+                Attack Categories               Regex Patterns (Layer A)
+                ────────────────────────────────────────────────────────
+                Context Manipulation            ████████████████  8
+                Harmful Elicitation             ██████████████    7
+                Persona Override / Jailbreak    ██████████████    7
+                Direct Injection                ██████████████    7
+                Data Exfiltration               ████████████      6
+                Encoding Obfuscation            ██████████        5
+                Indirect / RAG Injection        ██████████        5
+                ────────────────────────────────────────────────────────
+                Total Regex Patterns:           47
+                
+                * Layer C (Semantic FAISS) covers an additional 206 dense paraphrase variants.
 ```
 
 </div>
@@ -240,16 +240,16 @@ A complete Docker development environment is included (Dockerfile + Docker Compo
 | OpenAPI Spec | `https://malintent-backend-638595612528.asia-south1.run.app/openapi.json` |
 
 ```text
-                Client
-                   │
-                   ▼
-      Google Cloud Run (FastAPI)
-                   │
-                   ▼
-         Supabase PostgreSQL
-                   │
-                   ▼
- ThreatLog • Configuration • ActionLog
+                                Client
+                                   │
+                                   ▼
+                      Google Cloud Run (FastAPI)
+                                   │
+                                   ▼
+                         Supabase PostgreSQL
+                                   │
+                                   ▼
+                 ThreatLog • Configuration • ActionLog
 ```
 
 > **Developer Note:** This is the current production deployment of the MalIntent backend. If it is ever redeployed as a new Cloud Run service, update this URL throughout the project documentation before creating a release.

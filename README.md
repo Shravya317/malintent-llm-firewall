@@ -27,6 +27,7 @@
 [![Latency](https://img.shields.io/badge/p95_Latency-69ms-22c55e?style=flat-square)]()
 [![Tests](https://img.shields.io/badge/Test_Suite-99%2F99_Passed-22c55e?style=flat-square)]()
 [![Status](https://img.shields.io/badge/Production-Live_on_Cloud_Run-22c55e?style=flat-square)]()
+[![Extension](https://img.shields.io/badge/Browser_Extension-v1.0.0-22c55e?style=flat-square)]()
 
 <br/>
 
@@ -40,6 +41,7 @@
 - **Backend API:** [Live Endpoint](https://malintent-backend-638595612528.asia-south1.run.app)
 - **API Documentation:** [Swagger UI](https://malintent-backend-638595612528.asia-south1.run.app/docs)
 - **OpenAPI Spec:** [openapi.json](https://malintent-backend-638595612528.asia-south1.run.app/openapi.json)
+- **Browser Extension:** v1.0.0 — manual install via Chrome Developer Mode (see [Browser Extension Integration](#browser-extension-integration))
 
 ---
 
@@ -49,7 +51,7 @@ LLMs deployed in production are continuously targeted by jailbreaks, prompt inje
 
 **MalIntent is a defense-in-depth firewall** — a three-engine detection pipeline that sits inline between your application and your LLM. If a zero-day payload bypasses the ML classifier, the FAISS semantic engine catches it. If it slips past that, the pattern engine has already flagged it. All three must be beaten simultaneously.
 
-Beyond detection, MalIntent adds a complete **Security Enforcement Layer** that scrubs PII from tool responses, redacts secrets before they reach the model, validates LLM outputs for contextual drift, and encrypts everything at rest.
+Beyond detection, MalIntent adds a complete **Security Enforcement Layer** that scrubs PII from tool responses, redacts secrets before they reach the model, validates LLM outputs for contextual drift, and encrypts everything at rest. A companion **Chrome Extension** now extends this same protection directly into the browser, on top of third-party LLM chat interfaces.
 
 > **100% internal detection accuracy. Sub-100ms p95 latency. Zero false positives.**
 
@@ -59,51 +61,93 @@ Beyond detection, MalIntent adds a complete **Security Enforcement Layer** that 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           Client Application                            │
-└────────────────────────────────┬────────────────────────────────────────┘
-                                 │
-                                 ▼
+│          Chrome Extension (NEW)              │    Client Application     │
+│   content_script.js · background.js         │    SDK · direct API       │
+└──────────────────────┬───────────────────────┴────────────┬─────────────┘
+                       └──────────────┬─────────────────────┘
+                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    FastAPI Reverse Proxy  (JWT Auth + Rate Limiting)     │
+│              FastAPI Reverse Proxy                                       │
+│         OTP + JWT Auth · slowapi Rate Limiting · token_bridge.js sync   │
 └────────────────────────────────┬────────────────────────────────────────┘
                                  │
               ┌──────────────────┼──────────────────┐
               ▼                  ▼                  ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
 │   LAYER A       │  │   LAYER B       │  │   LAYER C       │
-│   Pattern       │  │   ML Engine     │  │   Semantic      │
-│   47 Regex      │  │   PromptGuard   │  │   FAISS+        │
-│   7 OWASP cats  │  │   86M params    │  │   MiniLM-L6-v2  │
-│   ~2ms          │  │   ~50ms         │  │   206 phrases   │
-│   30% weight    │  │   45% weight    │  │   ~8ms          │
+│   Pattern       │  │   ML Classifier │  │   Semantic      │
+│   47 Regex      │  │   PromptGuard   │  │   FAISS +       │
+│   7 OWASP cats  │  │   86M (DeBERTa) │  │   sentence-     │
+│   ~2ms          │  │   ~50ms         │  │   transformer   │
+│   25% weight    │  │   45% weight    │  │   ~20ms         │
 └────────┬────────┘  └────────┬────────┘  └────────┬────────┘
          └──────────────────── ▼ ──────────────────┘
                                │
                   ┌────────────▼────────────┐
                   │    Unified Risk Scorer   │
+                  │   (risk_scorer.py)       │
                   │                         │
                   │  BLOCK  ≥ 70 risk score │
-                  │  FLAG   ≥ 25 risk score │
-                  │  ALLOW  <  25           │
+                  │  FLAG   30–70           │
+                  │  ALLOW  < 30            │
                   │                         │
                   │  Semantic override:      │
                   │  cosine ≥ 0.90 → BLOCK  │
-                  └────────────┬────────────┘
+                  └──────┬──────────┬───────┘
+                         │          │
+                    ALLOW │    BLOCK/FLAG
+                         │          ▼
+                         │   ┌─────────────┐
+                         │   │   Return    │
+                         │   │  blocked    │
+                         │   │  response   │
+                         │   └─────────────┘
+                         ▼
+                  ┌────────────────────────┐
+                  │   Permission Validator  │
+                  │  (permission_validator  │
+                  │        .py)             │
+                  │  Role checks · dynamic  │
+                  │  execution mode override│
+                  └────────────┬───────────┘
                                │
                   ┌────────────▼────────────┐
                   │  Security Enforcement   │
                   │  Layer (SEL)            │
                   │                         │
-                  │  • PII Dynamic Masking  │
-                  │  • Secret Redaction     │
-                  │  • Output Consistency   │
-                  │  • Action Audit Log     │
+                  │  • tool_access_         │
+                  │    controller.py        │
+                  │  • dynamic_data_        │
+                  │    masking.py           │
+                  │  • secret_protection_   │
+                  │    engine.py            │
+                  │  • action_audit_        │
+                  │    logger.py            │
+                  │  • pii_scrubber.py      │
                   └────────────┬────────────┘
                                │
                                ▼
                          ┌───────────┐
                          │  LLM API  │
-                         └───────────┘
+                         └─────┬─────┘
+                               │
+                  ┌────────────▼────────────┐
+                  │   Output Consistency    │
+                  │      Validator          │
+                  │  (output_validator.py)  │
+                  │                         │
+                  │  Cosine similarity ·    │
+                  │  semantic drift check · │
+                  │  withhold if high-risk  │
+                  └────────────┬────────────┘
+                               │
+                               ▼
+                  ┌────────────────────────┐
+                  │    Response to caller  │
+                  │  Client app · or ext.  │
+                  │  in-page banner        │
+                  │  (SAFE/FLAGGED/BLOCKED)│
+                  └────────────────────────┘
 ```
 
 The pipeline is **fail-closed**: any layer error results in a block, not a passthrough.
@@ -261,6 +305,7 @@ ThreatLog · Configuration · ActionLog
 - **Docker Compose** — local development parity with PostgreSQL 16 + pgcrypto auto-init
 - **Benchmark framework** — reproducible ablation runs against 4 corpora, CSV report output
 - **Demo seeding** — 200 realistic threat events seeded across a 7-day window for dashboard demonstration
+- **Browser Extension (v1.0.0)** — Manifest V3 Chrome extension, manual install, syncing live to the production dashboard
 
 ### Production Environment Variables
 
@@ -277,14 +322,14 @@ ThreatLog · Configuration · ActionLog
 | `SMTP_EMAIL`                     | Email OTP sender address                   |
 | `SMTP_PASSWORD`                  | Email OTP sender app password              |
 
-> **Redeployment note:** If the backend is redeployed as a new Cloud Run service, update the base URL throughout the project before creating a release.
+> **Redeployment note:** If the backend is redeployed as a new Cloud Run service, update the base URL throughout the project — including the Browser Extension's backend endpoint — before creating a release.
 
 ---
 
 ## API Endpoints
 
 | Method | Endpoint                | Description                                                                            |
-|:-------|:------------------------|:---------------------------------------------------------------------------------------|
+|:-------|:------------------------|:-----------------------------------------------------------------------------------------|
 | `POST` | `/api/v1/scan/input`    | Full firewall — all three layers, PII scrubbing, SHA-256 hashing, threat logging       |
 | `POST` | `/api/v1/scan/output`   | Output Consistency Validator — validates LLM responses before delivery                 |
 | `POST` | `/api/v1/scan/document` | RAG Document Pre-Scanner *(stub — full implementation in Weeks 8–9)*                   |
@@ -300,12 +345,47 @@ Interactive documentation is always available at `/docs`.
 
 ## Browser Extension Integration
 
-MalIntent includes a powerful **Google Chrome Extension** (Manifest V3) that brings the firewall's protection directly to users on third-party LLM applications like ChatGPT, Claude, Gemini, and Groq.
+MalIntent includes a **Google Chrome Extension** (Manifest V3, currently **v1.0.0**) that brings the firewall's protection directly to users on third-party LLM applications like ChatGPT, Claude, Gemini, and Groq.
 
-- **Real-Time Interception:** Captures user prompts on the webpage before they are sent to the AI.
-- **Dynamic PII Masking:** If the backend detects sensitive data in a safe prompt, the extension instantly masks the text (e.g., `<REDACTED EMAIL>`) directly in the chat box before submission.
-- **Visual Warnings:** Injects sleek, glassmorphism UI warnings for blocked or flagged prompts, allowing users to "Send Anyway" if permitted.
-- **Zero-Config Backend:** Works out-of-the-box with the live Cloud Run API endpoint.
+### Key Features
+
+- **Seamless Integration** — works automatically in the background on ChatGPT, Claude, Gemini, and Groq. No configuration needed.
+- **Silent PII Protection (SAFE)** — automatically scrubs and masks sensitive data (API keys, phone numbers, etc.) before it ever reaches the AI.
+- **Smart Interception (FLAGGED)** — medium-risk prompts are paused with a warning banner; edit your prompt or dismiss to proceed.
+- **Absolute Blocking (BLOCKED)** — high-risk prompts (e.g. jailbreak attempts) are hard-blocked before they're ever sent, no exceptions.
+- **Live Dashboard Sync** — securely syncs with your MalIntent web dashboard for real-time analytics on every scan.
+
+### Requirements
+
+- A free MalIntent account — sign up on the [Security Dashboard](https://malintent-firewall.vercel.app/) if you don't have one yet.
+- Stay signed in to the MalIntent dashboard in one browser tab — the extension automatically syncs your session from there.
+- Google Chrome (or any Chromium-based browser — Edge, Brave, etc.)
+
+### Permissions the Extension Requests
+
+- Access to `chatgpt.com`, `claude.ai`, `gemini.google.com`, and `groq.com` — required to detect and intercept prompts on these sites before they're sent.
+- **Storage** — used locally to keep your scan history and Blocked/Flagged/Safe counts for the popup dashboard. Nothing beyond what's needed to scan a prompt for risk is collected or transmitted.
+
+### Installation
+
+1. Download `malintent_extension.zip` from the Assets section of the [latest release](#).
+2. Extract the `.zip` folder anywhere on your computer.
+3. Open Chrome and go to `chrome://extensions/`.
+4. Turn on **Developer mode** (top-right toggle).
+5. Click **Load unpacked** and select the extracted folder.
+6. Sign in to your MalIntent dashboard in another tab — the extension will sync automatically.
+
+### Known Limitations (v1.0.0)
+
+- Supported platforms: ChatGPT, Claude, Gemini, and Groq only (for now).
+- Document/file upload scanning is not yet active in this version.
+- Not yet published to the Chrome Web Store — manual installation via Developer mode is required.
+
+### Roadmap
+
+- Chrome Web Store submission
+- Support for additional LLM platforms
+- Document pre-scanning (PDF/DOCX prompt injection detection)
 
 ---
 
@@ -347,7 +427,7 @@ except BlockedPromptException as e:
 ### SDK Coverage
 
 | Method                 | Endpoint                   |
-|:-----------------------|:---------------------------|
+|:-----------------------|:----------------------------|
 | `client.scan_input()`  | `POST /api/v1/scan/input`  |
 | `client.scan_output()` | `POST /api/v1/scan/output` |
 | `client.get_logs()`    | `GET /api/v1/logs`         |
@@ -403,7 +483,11 @@ docker compose up --build
 
 Spins up the FastAPI backend and a PostgreSQL 16 container with pgcrypto pre-initialised.
 
-### 4. Run Benchmarks
+### 4. Browser Extension
+
+See [Browser Extension Integration](#browser-extension-integration) above for full installation instructions (manual load-unpacked install via `chrome://extensions/`).
+
+### 5. Run Benchmarks
 
 ```bash
 python scripts/run_ablation_benchmark.py
@@ -411,7 +495,7 @@ python scripts/run_ablation_benchmark.py
 
 Generates `ablation_results_corpus1.csv`, `ood_jailbreak.csv`, `ood_notinject.csv`, `ood_gandalf.csv`.
 
-### 5. Profile the Pipeline
+### 6. Profile the Pipeline
 
 ```bash
 python scripts/profile_pipeline.py
@@ -423,12 +507,13 @@ Reports Layer A/B/C latency, permission validation latency, end-to-end mean, p95
 
 ## Project Structure
 
-```
+```text
 malintent/
+├── assets/                         # Project images and assets
 ├── backend/
 │   ├── malintent/                  # Three-layer detection engine
 │   │   ├── pattern_engine.py       # Layer A — 47 regex patterns
-│   │   ├── ml_engine.py            # Layer B — PromptGuard-86M
+│   │   ├── ml_classifier.py        # Layer B — PromptGuard-86M
 │   │   ├── semantic_engine.py      # Layer C — FAISS + MiniLM
 │   │   ├── risk_scorer.py          # Unified Risk Scorer + RiskResult
 │   │   └── output_validator.py     # Output Consistency Validator
@@ -439,16 +524,26 @@ malintent/
 │   │   ├── secret_protection_engine.py
 │   │   └── action_audit_logger.py
 │   ├── routers/
+│   │   ├── config.py               # Encrypted config endpoints
+│   │   ├── llm.py                  # LLM integration endpoints
+│   │   ├── logs.py                 # Threat log retrieval
 │   │   ├── scan.py                 # /scan/input, /scan/output, /scan/document
-│   │   ├── auth.py                 # Registration, Email OTP, JWT login
-│   │   └── config.py               # Encrypted config endpoints
-│   ├── authentication.py           # JWT session management
+│   │   └── stats.py                # Dashboard statistics
+│   ├── scripts/
+│   │   ├── download_ood_datasets.py
+│   │   ├── profile_pipeline.py     # Runtime latency profiler
+│   │   ├── run_ablation_benchmark.py # Reproducible benchmark framework
+│   │   └── seed_demo_events.py     # Production database seeding
+│   ├── authentication.py           # Registration, Email OTP, JWT session management
 │   ├── database.py                 # SQLAlchemy + PostgreSQL
 │   └── main.py
 ├── frontend/
 │   └── src/
-│       ├── components/             # Dashboard, ThreatFeed, Playground, Settings
-│       └── context/                # AuthContext (protected JWT routes)
+│       ├── api/                    # API integration
+│       ├── assets/                 # Frontend assets
+│       ├── components/             # Reusable UI components
+│       ├── data/                   # Mock data and state
+│       └── views/                  # Dashboard, ThreatFeed, Playground, Settings
 ├── sdk/
 │   ├── malintent/
 │   │   ├── client.py               # Typed HTTP client
@@ -457,13 +552,13 @@ malintent/
 │   └── examples/
 │       ├── quickstart.py           # End-to-end live demo
 │       └── raise_on_block.py       # Exception-based integration pattern
-├── scripts/
-│   ├── run_ablation_benchmark.py   # Reproducible benchmark framework
-│   ├── seed_demo_events.py         # Production database seeding
-│   └── profile_pipeline.py        # Runtime latency profiler
 └── docs/
-    ├── system_architecture.md      # 14-page technical breakdown
-    └── benchmark_logs/             # Raw ablation execution traces
+    ├── benchmark_logs/             # Raw ablation execution traces
+    ├── db_encryption_verification.md
+    ├── evaluation_metrics.md
+    ├── owasp_llm_risks.html
+    ├── research_notes.md
+    └── system_architecture.md      # 14-page technical breakdown
 ```
 
 ---
@@ -475,23 +570,29 @@ malintent/
 pytest tests/
 
 # Individual suites
-pytest tests/test_week4.py                  # 5/5
-pytest tests/test_secret_protection.py      # 10/10
-pytest tests/test_dynamic_data_masking.py   # 9/9
-pytest tests/test_output_validator.py       # 12/12
-pytest tests/test_sel_end_to_end.py         # 5/5
-pytest sdk/tests/test_client.py             # 4/4
+pytest tests/test_core.py
+pytest tests/test_database.py
+pytest tests/test_dynamic_data_masking.py
+pytest tests/test_output_validator.py
+pytest tests/test_pattern_engine.py
+pytest tests/test_pipeline.py
+pytest tests/test_secret_protection.py
+pytest tests/test_sel_end_to_end.py
+pytest ../sdk/tests/test_client.py
 ```
 
 | Test Suite                          | Result           |
-|:------------------------------------|:-----------------|
-| `tests/test_week4.py`               | **5/5 Passed**   |
-| `tests/test_secret_protection.py`   | **10/10 Passed** |
-| `tests/test_dynamic_data_masking.py`| **9/9 Passed**   |
-| `tests/test_output_validator.py`    | **12/12 Passed** |
-| `tests/test_sel_end_to_end.py`      | **5/5 Passed**   |
-| `sdk/tests/test_client.py`          | **4/4 Passed**   |
-| **Full suite (`pytest tests/`)**    | **99/99 Passed** |
+|:-------------------------------------|:-----------------|
+| `tests/test_core.py`                | **Passed**       |
+| `tests/test_database.py`            | **Passed**       |
+| `tests/test_dynamic_data_masking.py`| **Passed**       |
+| `tests/test_output_validator.py`    | **Passed**       |
+| `tests/test_pattern_engine.py`      | **Passed**       |
+| `tests/test_pipeline.py`            | **Passed**       |
+| `tests/test_secret_protection.py`   | **Passed**       |
+| `tests/test_sel_end_to_end.py`      | **Passed**       |
+| `../sdk/tests/test_client.py`       | **Passed**       |
+| **Full suite (`pytest tests/`)**    | **Passed**       |
 
 ---
 
@@ -521,7 +622,7 @@ Two-corpus architecture:
 Drawing from the taxonomy established by [HackAPrompt (arXiv:2311.16119)](https://arxiv.org/abs/2311.16119) and informed by vulnerabilities including **EchoLeak (CVE-2025-32711)**:
 
 | Attack Type             | Mitigation                                                       |
-|:------------------------|:-----------------------------------------------------------------|
+|:-------------------------|:-------------------------------------------------------------------|
 | Payload splitting       | Layer A pattern matching across multi-token sequences            |
 | Persona adoption        | Layer B ML classification + Layer C semantic similarity          |
 | Format obfuscation      | Layer A base64/unicode/homoglyph patterns + Layer C embeddings   |
@@ -532,19 +633,30 @@ Drawing from the taxonomy established by [HackAPrompt (arXiv:2311.16119)](https:
 
 ---
 
-## Roadmap
+## Release Notes
 
-| Week | Status | Deliverable                                               |
-|:-----|:-------|:--------------------------------------------------------  |
-| 1    | ✅     | Pattern Detection Engine (Layer A)                        |
-| 2    | ✅     | ML Detection Engine (Layer B) — PromptGuard fine-tuning   |
-| 3    | ✅     | Semantic Engine (Layer C) + Unified Risk Scorer           |
-| 4    | ✅     | FastAPI Backend + SEL Skeleton + Breach-Resilient Storage  |
-| 5    | ✅     | Dynamic Data Masking + Secret Protection + Pipeline Opt.  |
-| 6    | ✅     | Output Consistency Validation + Action Audit Logging      |
-| 7    | ✅     | PostgreSQL Migration + Supabase + Cloud Run + Docker + SDK|
-| 8    | ✅     | RAG Document Pre-Scanner + Dashboard and Other Backend Integrations (Authorization/Authentication) + `/scan/document` full impl.    |
-| 9    | ✅     | A research paper written for the entire project    |
+### Browser Extension v1.0.0 — Initial Release
+
+The MalIntent Browser Extension brings the backend middleware firewall directly into the browser — real-time protection against prompt injection, jailbreaks, and PII leaks on the AI platforms you already use.
+
+**Key Features**
+- Seamless integration with ChatGPT, Claude, Gemini, and Groq — no configuration needed
+- Silent PII protection (SAFE) — scrubs and masks sensitive data before it reaches the AI
+- Smart interception (FLAGGED) — medium-risk prompts paused with a warning banner
+- Absolute blocking (BLOCKED) — high-risk prompts hard-blocked before they're sent
+- Live dashboard sync — real-time analytics for every scan
+
+**Known Limitations**
+- Supported platforms: ChatGPT, Claude, Gemini, and Groq only (for now)
+- Document/file upload scanning not yet active
+- Not yet published to the Chrome Web Store — manual Developer Mode install required
+
+**Upcoming**
+- Chrome Web Store submission
+- Support for additional LLM platforms
+- Document pre-scanning (PDF/DOCX prompt injection detection)
+
+Full changelog: initial release.
 
 ---
 
