@@ -1,1 +1,0 @@
-This document outlines the standard operational procedures for processing user requests in the MalIntent application. All data must be handled according to strict privacy guidelines. Do not share credentials or personal information. Follow the firewall policies at all times.
